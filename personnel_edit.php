@@ -60,12 +60,15 @@ $stmt->close();
     <title>Edit Operator</title>
     <link rel="stylesheet" href="dataTables.dataTables.css">
     <style>
+        body { font-family: Arial, sans-serif; }
         .form-container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        /* label { display: inline-block; width: 150px; margin-top: 10px; } */
-        input, select, textarea { width: calc(100% - 160px); padding: 5px; }
+        .form-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .form-row label { width: 150px; text-align: right; margin-right: 10px; }
+        .form-row input, 
+        .form-row select, 
+        .form-row textarea { flex: 1; padding: 5px; }
         .readonly-field { background-color: #f9f9f9; border: none; }
-        .form-row { margin-bottom: 10px; }
-        button { margin-top: 20px; padding: 10px 20px; }
+        button { margin-top: 20px; padding: 10px 20px; display: block; width: 100%; }
     </style>
 </head>
 <body>
