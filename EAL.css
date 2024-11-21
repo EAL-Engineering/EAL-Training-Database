@@ -1,0 +1,26 @@
+table thead {
+    /* background-color: gray; */
+    background-color: rgb(0,104,72);
+    color: #fff;
+    font-weight: bold;
+}
+
+table.dataTable.eal-cell-border-compact > tbody > tr > * {
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    border-right: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 4px;
+  }
+  table.dataTable.eal-cell-border-compact > tbody > tr > *:first-child {
+    border-left: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 4px;
+  }
+  table.dataTable.eal-cell-border-compact > tbody > tr:first-child > * {
+    border-top: 1px solid rgba(0, 0, 0, 0.3);
+    padding: 4px;
+  }
+
+  table.dataTable th.dt-type-numeric, table.dataTable th.dt-type-date,
+table.dataTable td.dt-type-numeric,
+table.dataTable td.dt-type-date {
+  text-align: left;
+}
