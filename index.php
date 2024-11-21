@@ -1,7 +1,8 @@
 <html>
 <head>	
 	<title>OUAL Operator Training Information</title>
-	<link rel="stylesheet" href="styles.css" />
+	<link rel="stylesheet" href="dataTables.dataTables.css">
+	<!-- <link rel="stylesheet" href="styles.css" /> -->
 </head>
 <body>
 	<H1>OUAL Training Information</h1>
