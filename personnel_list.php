@@ -67,7 +67,8 @@ $opertor_list = $mysqli->query("
             // DataTable initialization
 			new DataTable('#personnel', {
 				scrollX: true,
-				// pageLength: 20
+				pageLength: 15,
+				lengthMenu: [10, 15, 25, 50, 75, 100]
 			});
 
             // Populate email links
