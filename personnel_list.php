@@ -6,7 +6,6 @@ include_once("config.php");
 $opertor_list = $mysqli->query("
     SELECT 
         o.name AS OperatorName, 
-        o.status AS OperatorStatus, 
         o.email AS OperatorEmail, 
         c.certification AS HighestCertification 
     FROM operators o 
@@ -37,7 +36,6 @@ $opertor_list = $mysqli->query("
 		<thead>
 			<tr>
 				<td>Full Name</td>
-				<td>Status</td>
 				<td>Email</td>
 				<td>Certification</td>
 				<td>User</td>
@@ -53,7 +51,6 @@ $opertor_list = $mysqli->query("
 			$rowId = "email-" . $rowCounter++; // Generate a unique ID
 			echo "<tr>";
 			echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
-			echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
 			echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
 			echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
 			echo "<td><a href=\"edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
