@@ -22,16 +22,6 @@ $opertor_list = $mysqli->query("
     ) 
     ORDER BY o.name
 ");
-
-function obfuscateEmail($email) {
-    $parts = explode('@', $email);
-    if (count($parts) === 2) {
-        $localPart = substr($parts[0], 0, 2) . str_repeat('*', max(0, strlen($parts[0]) - 2));
-        $domain = $parts[1];
-        return $localPart . '@' . $domain;
-    }
-    return $email; // Return unmodified if not a valid email format
-}
 ?>
 <!doctype html>
 <html lang="en">
@@ -55,34 +45,41 @@ function obfuscateEmail($email) {
 		</thead>
 		<tbody>
 		<?php
-		while($res = mysqli_fetch_array($opertor_list)) {
+		$rowCounter = 0; // Unique ID for each row's email
+		while ($res = mysqli_fetch_array($opertor_list)) {
 			$email = explode('@', $res['OperatorEmail']);
-            $user = $email[0];
-            $domain = $email[1];
+			$user = $email[0];
+			$domain = $email[1];
+			$rowId = "email-" . $rowCounter++; // Generate a unique ID
 			echo "<tr>";
-			echo "<td>".$res['OperatorName']."</td>";
-			echo "<td>".$res['OperatorStatus']."</td>";
-			// Apply the obfuscateEmail function for visible text, full email in the mailto link
-			// $obfuscatedEmail = obfuscateEmail($res['OperatorEmail']);
-			// echo "<td><a href=\"mailto:".$res['OperatorEmail']."\">".$obfuscatedEmail."</a></td>";
-			echo "<td>
-					<script>
-						let user = '" . addslashes($user) . "';
-						let site = '" . addslashes($domain) . "';
-						document.write('<a href=\"mailto:' + user + '@' + site + '\">' + user + '@' + site + '</a>');
-					</script>
-				</td>\n";
-			echo "<td>".$res['HighestCertification']."</td>\n";			
-			echo "<td><a href=\"edit.php?id=$res[id]\">Edit</a> </td></tr>\n";
+			echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
+			echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
+			echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
+			echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
+			echo "<td><a href=\"edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
+			echo "</tr>";
 		}
 		?>
 		</tbody>
 	</table>
     <script>
         $(document).ready(function() {
+            // DataTable initialization
 			new DataTable('#personnel', {
-				scrollX: true
+				scrollX: true,
+				// pageLength: 20
 			});
+
+            // Populate email links
+            document.querySelectorAll('td[id^="email-"]').forEach(cell => {
+                const user = cell.getAttribute('data-user');
+                const domain = cell.getAttribute('data-domain');
+                const email = `${user}@${domain}`;
+                const link = document.createElement('a');
+                link.href = `mailto:${email}`;
+                link.textContent = email;
+                cell.appendChild(link);
+            });
         });
     </script>
 </body>
