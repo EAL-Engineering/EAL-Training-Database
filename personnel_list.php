@@ -7,6 +7,7 @@ $opertor_list = $mysqli->query("
     SELECT 
         o.name AS OperatorName, 
         o.email AS OperatorEmail, 
+		o.seq_nmbr as id,
         c.certification AS HighestCertification 
     FROM operators o 
     JOIN optraining ot ON o.seq_nmbr = ot.operator 
@@ -53,7 +54,7 @@ $opertor_list = $mysqli->query("
 			echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
 			echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
 			echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
-			echo "<td><a href=\"edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
+			echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
 			echo "</tr>";
 		}
 		?>
