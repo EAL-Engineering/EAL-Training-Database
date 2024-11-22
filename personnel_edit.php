@@ -74,10 +74,11 @@ $stmt->close();
 <body>
     <div class="form-container">
         <h1>Edit Operator Details</h1>
-        <form method="post" action="save_operator.php">
+        <form method="post" action="personnel_save.php">
             <div class="form-row">
                 <label>Seq Number:</label>
                 <input type="text" class="readonly-field" value="<?php echo htmlspecialchars($operator['seq_nmbr']); ?>" readonly>
+                <input type="hidden" name="seq_nmbr" value="<?php echo htmlspecialchars($operator['seq_nmbr']); ?>">
             </div>
             <div class="form-row">
                 <label>Name:</label>
