@@ -16,21 +16,21 @@ $id = intval($_GET['id']); // Sanitize the ID
 
 // Prepare the SQL statement to fetch operator details
 $query = "SELECT * FROM operators WHERE seq_nmbr = ?";
-$stmt = $mysqli->prepare($query);
+$operator_stmt = $mysqli->prepare($query);
 
-if (!$stmt) {
+if (!$operator_stmt) {
     die("Database error: " . $mysqli->error); // Debugging helper
 }
 
 // Bind the parameter and execute the statement
-$stmt->bind_param("i", $id);
-$stmt->execute();
+$operator_stmt->bind_param("i", $id);
+$operator_stmt->execute();
 
 // Bind the result fields to variables
-$stmt->bind_result($seq_nmbr, $name, $fname, $email, $altemail, $phones, $status, $office, $home, $updated, $comments, $entered, $addedby);
+$operator_stmt->bind_result($seq_nmbr, $name, $fname, $email, $altemail, $phones, $status, $office, $home, $updated, $comments, $entered, $addedby);
 
 // Fetch the result
-if ($stmt->fetch()) {
+if ($operator_stmt->fetch()) {
     $operator = [
         'seq_nmbr' => $seq_nmbr,
         'name' => $name,
@@ -51,8 +51,36 @@ if ($stmt->fetch()) {
 }
 
 // Close the statement
-$stmt->close();
+$operator_stmt->close();
+
+// Fetch certifications for the operator
+$certifications_query = "
+    SELECT c.certification 
+    FROM optraining ot
+    JOIN certifications c ON ot.certification = c.seq_nmbr
+    WHERE ot.operator = ?
+";
+$certifications_stmt = $mysqli->prepare($certifications_query);
+
+if (!$certifications_stmt) {
+    die("Database error: " . $mysqli->error);
+}
+
+$certifications_stmt->bind_param("i", $id);
+$certifications_stmt->execute();
+
+// Bind results to variables
+$certifications_stmt->bind_result($certification);
+
+// Retrieve the certifications
+$certifications = [];
+while ($certifications_stmt->fetch()) {
+    $certifications[] = $certification;
+}
+
+$certifications_stmt->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,6 +97,7 @@ $stmt->close();
         .form-row textarea { flex: 1; padding: 5px; }
         .readonly-field { background-color: #f9f9f9; border: none; }
         button { margin-top: 20px; padding: 10px 20px; display: block; width: 100%; }
+        .certifications { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -134,6 +163,18 @@ $stmt->close();
             </div>
             <button type="submit">Save Changes</button>
         </form>
+        <div class="certifications">
+            <h2>Certifications</h2>
+            <?php if (count($certifications) > 0): ?>
+                <ul>
+                    <?php foreach ($certifications as $cert): ?>
+                        <li><?php echo htmlspecialchars($cert); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <p>No certifications found for this operator.</p>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 </html>
