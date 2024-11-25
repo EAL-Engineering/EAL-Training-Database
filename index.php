@@ -36,6 +36,9 @@
 		<a href="certification_add.php">certification_add.php</a>, FIXME but I need to link this from 
 		somewhere else, because adding ?id=somenumber is dumb.
 	</p>
+	<p>New personnel can be added at :
+		<a href="personnel_add.php">personnel_add.php</a>
+	</p>
  
 	<p>This information is recorded in a database table named <b>optraining</b> and kept on the 
 	localhost system using MySQL.  The optraining table links an operator and a certification, and 
