@@ -82,6 +82,34 @@ while ($stmt->fetch()) {
     ];
 }
 $stmt->close();
+
+// Fetch trainers for the available certifications
+$query = "SELECT DISTINCT t.seq_nmbr, o.fname
+          FROM trainers t
+          JOIN operators o ON t.optbl_ptr = o.seq_nmbr
+          JOIN can_certify cc ON t.seq_nmbr = cc.trainer_ptr
+          WHERE cc.cert_ptr IN (
+              SELECT c.seq_nmbr FROM certifications c
+              WHERE c.seq_nmbr NOT IN (
+                  SELECT ot.certification FROM optraining ot WHERE ot.operator = ?
+              )
+          )";
+$stmt = $mysqli->prepare($query);
+if (!$stmt) {
+    die("Database error: " . $mysqli->error);
+}
+$stmt->bind_param("i", $operator_id);
+$stmt->execute();
+$stmt->bind_result($trainer_id, $trainer_fname);
+
+$trainers = [];
+while ($stmt->fetch()) {
+    $trainers[] = [
+        'trainer_id' => $trainer_id,
+        'trainer_fname' => $trainer_fname
+    ];
+}
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -102,28 +130,40 @@ $stmt->close();
         button:hover { background-color: #0056b3; }
     </style>
     <script>
+        // Define global object with certification-trainer mappings
+        const certificationsWithTrainers = <?php echo json_encode($certifications_with_trainers); ?>;
+
+        // Function to update the trainers' dropdown based on selected certification
         function updateTrainers() {
             const certSelect = document.getElementById('cert_id');
             const trainerSelect = document.getElementById('completed_by');
-            const selectedOption = certSelect.options[certSelect.selectedIndex];
-            const trainers = JSON.parse(selectedOption.dataset.trainers || '[]');
+            const certId = certSelect.value;
 
-            trainerSelect.innerHTML = '';
-            if (trainers.length > 0) {
+            trainerSelect.innerHTML = ''; // Clear current trainer options
+
+            if (certificationsWithTrainers[certId]) {
+                const trainers = certificationsWithTrainers[certId].trainers;
                 trainers.forEach(trainer => {
-                    const [trainerName, trainerId] = trainer.split(' ');
                     const option = document.createElement('option');
-                    option.value = trainerId;
-                    option.textContent = trainerName;
+                    option.value = trainer.trainer_id;
+                    option.textContent = trainer.trainer_fname;
                     trainerSelect.appendChild(option);
                 });
             } else {
+                // If no trainers are available for the selected certification
                 const option = document.createElement('option');
                 option.textContent = 'No trainers available';
                 option.disabled = true;
                 trainerSelect.appendChild(option);
             }
         }
+
+        // Attach event listener to the certification dropdown
+        document.getElementById('cert_id').addEventListener('change', () => {
+            const trainerSelect = document.getElementById('completed_by');
+            trainerSelect.disabled = false; // Enable trainer dropdown
+            updateTrainers(); // Call updateTrainers when certification changes
+        });
     </script>
 </head>
 <body>
@@ -176,8 +216,13 @@ $stmt->close();
             </div>
             <div class="form-row">
                 <label for="completed_by">Completed By:</label>
-                <select name="completed_by" id="completed_by" required>
+                <select name="completed_by" id="completed_by" required disabled>
                     <option value="">Select a Trainer</option>
+                    <?php foreach ($trainers as $trainer): ?>
+                        <option value="<?php echo htmlspecialchars($trainer['trainer_id']); ?>">
+                            <?php echo htmlspecialchars($trainer['trainer_fname']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
