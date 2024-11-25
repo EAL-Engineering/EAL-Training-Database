@@ -9,11 +9,21 @@
 	<H2>Operator Training Information Database</H2>
 	<p>This is a complete green field re-write of the operators databased that was created by John 
 		O'Donnel and maintained by Donald Carter.</p>
-	<p>This version was started in November of 2024 by Gregory Leblanc</p>
+	<p>This version was started in November of 2024 by Gregory Leblanc.  It was developed using 
+		ChatGPT, among other resources.
+	</p>
 
 	<p>The basic function of the operator training information database and related web pages 
 		is to record an association between a person (operator) and a certification, indicating 
-		that the person has completed all the training required to obtain the certification.</p>
+		that the person has completed all the training required to obtain the certification.
+	</p>
+		
+	<p>The main list of current EAL personnel can be found at:
+		<a href="personnel_list.php">personnel_list.php</a>
+	</p>
+	<p>The list of all personnel including folks who are no longer active at EAL can be found at:
+		<a href="personnel_list_all.php">personnel_list_all.php</a>
+	</p>
  
 	<p>This information is recorded in a database table named <b>optraining</b> and kept on the 
 	localhost system using MySQL.  The optraining table links an operator and a certification, and 
