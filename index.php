@@ -26,7 +26,7 @@
 	<p>The list of all personnel including folks who are no longer active at EAL can be found at:
 		<a href="personnel_list_all.php">personnel_list_all.php</a>
 	</p>
-	<p>The list of personnel who can give each certification cab be found at:
+	<p>The list of personnel who can give each certification can be found at:
 		<a href="trainer_list.php">trainer_list.php</a>
 	</p>
  
