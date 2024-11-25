@@ -83,33 +83,27 @@ while ($stmt->fetch()) {
 }
 $stmt->close();
 
-// Fetch trainers for the available certifications
-$query = "SELECT DISTINCT t.seq_nmbr, o.fname
-          FROM trainers t
-          JOIN operators o ON t.optbl_ptr = o.seq_nmbr
-          JOIN can_certify cc ON t.seq_nmbr = cc.trainer_ptr
-          WHERE cc.cert_ptr IN (
-              SELECT c.seq_nmbr FROM certifications c
-              WHERE c.seq_nmbr NOT IN (
-                  SELECT ot.certification FROM optraining ot WHERE ot.operator = ?
-              )
-          )";
-$stmt = $mysqli->prepare($query);
-if (!$stmt) {
-    die("Database error: " . $mysqli->error);
-}
-$stmt->bind_param("i", $operator_id);
-$stmt->execute();
-$stmt->bind_result($trainer_id, $trainer_fname);
-
-$trainers = [];
-while ($stmt->fetch()) {
-    $trainers[] = [
-        'trainer_id' => $trainer_id,
-        'trainer_fname' => $trainer_fname
+// Build the certifications_with_trainers mapping
+$certifications_with_trainers = [];
+foreach ($available_certifications as $cert) {
+    $certifications_with_trainers[$cert['cert_id']] = [
+        'cert_name' => $cert['cert_name'],
+        'trainers' => []
     ];
+
+    $trainers = explode(",", $cert['trainers']);
+    foreach ($trainers as $trainer_data) {
+        $trainer_parts = explode(" ", $trainer_data);
+        $trainer_id = trim($trainer_parts[1]); // The ID should be the second part
+        $trainer_fname = trim($trainer_parts[0]); // The name should be the first part
+
+        // Store trainer data
+        $certifications_with_trainers[$cert['cert_id']]['trainers'][] = [
+            'trainer_id' => $trainer_id,
+            'trainer_fname' => $trainer_fname
+        ];
+    }
 }
-$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -129,42 +123,6 @@ $stmt->close();
         button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
     </style>
-    <script>
-        // Define global object with certification-trainer mappings
-        const certificationsWithTrainers = <?php echo json_encode($certifications_with_trainers); ?>;
-
-        // Function to update the trainers' dropdown based on selected certification
-        function updateTrainers() {
-            const certSelect = document.getElementById('cert_id');
-            const trainerSelect = document.getElementById('completed_by');
-            const certId = certSelect.value;
-
-            trainerSelect.innerHTML = ''; // Clear current trainer options
-
-            if (certificationsWithTrainers[certId]) {
-                const trainers = certificationsWithTrainers[certId].trainers;
-                trainers.forEach(trainer => {
-                    const option = document.createElement('option');
-                    option.value = trainer.trainer_id;
-                    option.textContent = trainer.trainer_fname;
-                    trainerSelect.appendChild(option);
-                });
-            } else {
-                // If no trainers are available for the selected certification
-                const option = document.createElement('option');
-                option.textContent = 'No trainers available';
-                option.disabled = true;
-                trainerSelect.appendChild(option);
-            }
-        }
-
-        // Attach event listener to the certification dropdown
-        document.getElementById('cert_id').addEventListener('change', () => {
-            const trainerSelect = document.getElementById('completed_by');
-            trainerSelect.disabled = false; // Enable trainer dropdown
-            updateTrainers(); // Call updateTrainers when certification changes
-        });
-    </script>
 </head>
 <body>
     <div class="container">
@@ -207,8 +165,7 @@ $stmt->close();
                 <select name="cert_id" id="cert_id" required onchange="updateTrainers()">
                     <option value="">Select a Certification</option>
                     <?php foreach ($available_certifications as $cert): ?>
-                        <option value="<?php echo htmlspecialchars($cert['cert_id']); ?>" 
-                                data-trainers='<?php echo htmlspecialchars(json_encode(explode(",", $cert["trainers"]))); ?>'>
+                        <option value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
                             <?php echo htmlspecialchars($cert['cert_name']); ?>
                         </option>
                     <?php endforeach; ?>
@@ -218,16 +175,47 @@ $stmt->close();
                 <label for="completed_by">Completed By:</label>
                 <select name="completed_by" id="completed_by" required disabled>
                     <option value="">Select a Trainer</option>
-                    <?php foreach ($trainers as $trainer): ?>
-                        <option value="<?php echo htmlspecialchars($trainer['trainer_id']); ?>">
-                            <?php echo htmlspecialchars($trainer['trainer_fname']); ?>
-                        </option>
-                    <?php endforeach; ?>
                 </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
             <button type="submit">Add Certification</button>
         </form>
     </div>
+    <script>
+        // Define global object with certification-trainer mappings
+        const certificationsWithTrainers = <?php echo json_encode($certifications_with_trainers); ?>;
+
+        // Function to update the trainers' dropdown based on selected certification
+        function updateTrainers() {
+            const certSelect = document.getElementById('cert_id');
+            const trainerSelect = document.getElementById('completed_by');
+            const certId = certSelect.value;
+
+            trainerSelect.innerHTML = ''; // Clear current trainer options
+
+            if (certificationsWithTrainers[certId]) {
+                const trainers = certificationsWithTrainers[certId].trainers;
+                trainers.forEach(trainer => {
+                    const option = document.createElement('option');
+                    option.value = trainer.trainer_id;
+                    option.textContent = trainer.trainer_fname;
+                    trainerSelect.appendChild(option);
+                });
+            } else {
+                // If no trainers are available for the selected certification
+                const option = document.createElement('option');
+                option.textContent = 'No trainers available';
+                option.disabled = true;
+                trainerSelect.appendChild(option);
+            }
+        }
+
+        // Attach event listener to the certification dropdown
+        document.getElementById('cert_id').addEventListener('change', () => {
+            const trainerSelect = document.getElementById('completed_by');
+            trainerSelect.disabled = false; // Enable trainer dropdown
+            updateTrainers(); // Call updateTrainers when certification changes
+        });
+    </script>
 </body>
 </html>
