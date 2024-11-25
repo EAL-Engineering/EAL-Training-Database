@@ -3,6 +3,8 @@
 	<title>OUAL Operator Training Information</title>
 	<link rel="stylesheet" href="dataTables.dataTables.css">
 	<!-- <link rel="stylesheet" href="styles.css" /> -->
+	<link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
 	<H1>OUAL Training Information</h1>
@@ -23,6 +25,9 @@
 	</p>
 	<p>The list of all personnel including folks who are no longer active at EAL can be found at:
 		<a href="personnel_list_all.php">personnel_list_all.php</a>
+	</p>
+	<p>The list of personnel who can give each certification cab be found at:
+		<a href="trainer_list.php">trainer_list.php</a>
 	</p>
  
 	<p>This information is recorded in a database table named <b>optraining</b> and kept on the 

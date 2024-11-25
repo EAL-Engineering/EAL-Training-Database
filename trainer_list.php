@@ -25,6 +25,8 @@ $trainer_list = $mysqli->query("
 	<meta charset="UTF-8">
 	<title>Trainer List</title>
 	<link rel="stylesheet" href="dataTables.dataTables.css">
+	<link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
   	<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
 </head>

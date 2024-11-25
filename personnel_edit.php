@@ -87,6 +87,8 @@ $certifications_stmt->close();
     <meta charset="UTF-8">
     <title>Edit Operator</title>
     <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body { font-family: Arial, sans-serif; }
         .form-container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
