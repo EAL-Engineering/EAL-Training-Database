@@ -26,8 +26,11 @@
 	<p>The list of all personnel including folks who are no longer active at EAL can be found at:
 		<a href="personnel_list_all.php">personnel_list_all.php</a>
 	</p>
-	<p>The list of personnel who can give each certification can be found at:
+	<p>The list of personnel who can give each certification sorted by trainer can be found at:
 		<a href="trainer_list.php">trainer_list.php</a>
+	</p>
+	<p>The list of personnel who can give each certification sorted by certification can be found at:
+		<a href="trainer_list_by_cert.php">trainer_list_by_cert.php</a>
 	</p>
  
 	<p>This information is recorded in a database table named <b>optraining</b> and kept on the 
