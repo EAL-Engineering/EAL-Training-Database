@@ -56,7 +56,7 @@ $opertor_list = $mysqli->query("
 			echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
 			echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
 			echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
-			echo "<td><a href=\"edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
+			echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
 			echo "</tr>";
 		}
 		?>
