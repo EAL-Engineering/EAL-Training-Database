@@ -113,17 +113,20 @@ foreach ($available_certifications as $cert) {
         'trainers' => []
     ];
 
-    $trainers = explode(",", $cert['trainers']);
-    foreach ($trainers as $trainer_data) {
-        $trainer_parts = explode(" ", $trainer_data);
-        $trainer_id = trim($trainer_parts[1]); // The ID should be the second part
-        $trainer_fname = trim($trainer_parts[0]); // The name should be the first part
+    $trainer_list = explode(",", $cert['trainers']); // Split trainer data by comma
+    foreach ($trainer_list as $trainer_data) {
+        $trainer_data = trim($trainer_data); // Remove extra whitespace
 
-        // Store trainer data
-        $certifications_with_trainers[$cert['cert_id']]['trainers'][] = [
-            'trainer_id' => $trainer_id,
-            'trainer_fname' => $trainer_fname
-        ];
+        if (preg_match('/^(.*?) (\d+)$/', $trainer_data, $matches)) {
+            $trainer_fname = $matches[1]; // Trainer name
+            $trainer_id = $matches[2];    // Trainer ID
+
+            // Add structured trainer data to the array
+            $certifications_with_trainers[$cert['cert_id']]['trainers'][] = [
+                'trainer_id' => $trainer_id,
+                'trainer_fname' => $trainer_fname
+            ];
+        }
     }
 }
 ?>
@@ -182,35 +185,24 @@ foreach ($available_certifications as $cert) {
         <!-- Add New Certification -->
         <h2>Add New Certification</h2>
         <form method="post" action="certification_save.php">
+            <!-- Certification Dropdown -->
             <div class="form-row">
                 <label for="cert_id">Certification:</label>
                 <select name="cert_id" id="cert_id" required onchange="updateTrainers()">
                     <option value="">Select a Certification</option>
-                    <?php foreach ($available_certifications as $cert): ?>
-                        <option value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
-                            <?php echo htmlspecialchars($cert['cert_name']); ?>
+                    <?php foreach ($certifications_with_trainers as $cert_id => $data): ?>
+                        <option value="<?php echo htmlspecialchars($cert_id); ?>">
+                            <?php echo htmlspecialchars($data['cert_name']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
+
+            <!-- Trainers Dropdown -->
             <div class="form-row">
                 <label for="completed_by">Completed By:</label>
                 <select name="completed_by" id="completed_by" required disabled>
                     <option value="">Select a Trainer</option>
-                    <?php if (!empty($trainers)): ?>
-                        <?php foreach ($trainers as $trainer): ?>
-                            <?php
-                            $parts = explode(" ", $trainer);
-                            $trainer_fname = $parts[0];
-                            $trainer_id = end($parts);
-                            ?>
-                            <option value="<?php echo htmlspecialchars($trainer_id); ?>">
-                                <?php echo htmlspecialchars($trainer_fname); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <option value="" disabled>No trainers available</option>
-                    <?php endif; ?>
                 </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
@@ -223,28 +215,40 @@ foreach ($available_certifications as $cert) {
 
         // Function to update the trainers' dropdown based on selected certification
         function updateTrainers() {
-            const certSelect = document.getElementById('cert_id');
-            const trainerSelect = document.getElementById('completed_by');
-            const certId = certSelect.value;
+            const certSelect = document.getElementById('cert_id'); // Certification dropdown
+            const trainerSelect = document.getElementById('completed_by'); // Trainers dropdown
+            const certId = certSelect.value; // Get selected certification ID
 
-            trainerSelect.innerHTML = ''; // Clear current trainer options
+            trainerSelect.innerHTML = ''; // Clear existing trainer options
 
             if (certificationsWithTrainers[certId]) {
-                const trainers = certificationsWithTrainers[certId].trainers;
-                trainers.forEach(trainer => {
-                    const option = document.createElement('option');
-                    option.value = trainer.trainer_id;
-                    option.textContent = trainer.trainer_fname;
-                    trainerSelect.appendChild(option);
-                });
+                // Fetch trainers for the selected certification
+                const trainerList = certificationsWithTrainers[certId].trainers;
+
+                if (trainerList.length > 0) {
+                    trainerList.forEach(trainer => {
+                        const option = document.createElement('option');
+                        option.value = trainer.trainer_id;
+                        option.textContent = trainer.trainer_fname;
+                        trainerSelect.appendChild(option);
+                    });
+                    trainerSelect.disabled = false; // Enable dropdown if trainers are available
+                } else {
+                    trainerSelect.disabled = true; // Disable dropdown if no trainers
+                    const noTrainersOption = document.createElement('option');
+                    noTrainersOption.textContent = 'No trainers available';
+                    noTrainersOption.disabled = true;
+                    trainerSelect.appendChild(noTrainersOption);
+                }
             } else {
-                // If no trainers are available for the selected certification
-                const option = document.createElement('option');
-                option.textContent = 'No trainers available';
-                option.disabled = true;
-                trainerSelect.appendChild(option);
+                trainerSelect.disabled = true; // Disable dropdown if certification is invalid
+                const defaultOption = document.createElement('option');
+                defaultOption.textContent = 'Select a certification first';
+                defaultOption.disabled = true;
+                trainerSelect.appendChild(defaultOption);
             }
         }
+
 
         // Attach event listener to the certification dropdown
         document.getElementById('cert_id').addEventListener('change', () => {
