@@ -98,10 +98,25 @@ $certifications_stmt->close();
         .readonly-field { background-color: #f9f9f9; border: none; }
         button { margin-top: 20px; padding: 10px 20px; display: block; width: 100%; }
         .certifications { margin-top: 20px; }
+        .back-button-container { margin-bottom: 20px; text-align: center; }
+        .back-button-container a { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            color: white; 
+            background-color: #007bff; 
+            border-radius: 4px; 
+            transition: background-color 0.2s ease; 
+        }
+        .back-button-container a:hover { background-color: #0056b3; }
+        .certifications { margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="form-container">
+        <div class="back-button-container">
+            <a href="personnel_list.php">Back to Personnel List</a>
+        </div>
         <h1>Edit Operator Details</h1>
         <form method="post" action="personnel_save.php">
             <div class="form-row">
