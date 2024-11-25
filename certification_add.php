@@ -29,11 +29,19 @@ if (!$stmt->fetch()) {
 $stmt->close();
 
 // Fetch operator's existing certifications
-$query = "SELECT c.certification, ot.status, ot.entered, ot.expires, o.fname AS completed_by_name
-          FROM optraining ot
-          JOIN certifications c ON ot.certification = c.seq_nmbr
-          LEFT JOIN operators o ON ot.trainer = o.seq_nmbr
-          WHERE ot.operator = ?";
+$query = "SELECT 
+	c.certification, 
+	ot.status, 
+	ot.entered, 
+	ot.expires, 
+	o.fname AS completed_by_name 
+FROM 
+	optraining ot 
+	JOIN certifications c ON ot.certification = c.seq_nmbr 
+	LEFT JOIN operators o ON ot.trainer = o.seq_nmbr 
+WHERE 
+	ot.operator = ?
+";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
@@ -55,16 +63,30 @@ while ($stmt->fetch()) {
 $stmt->close();
 
 // Fetch certifications not yet completed by the operator and their trainers
-$query = "SELECT c.seq_nmbr AS cert_id, c.certification AS cert_name, 
-          GROUP_CONCAT(CONCAT(o.fname, ' ', o.seq_nmbr)) AS trainers
-          FROM certifications c
-          LEFT JOIN can_certify cc ON c.seq_nmbr = cc.cert_ptr
-          LEFT JOIN trainers t ON cc.trainer_ptr = t.seq_nmbr
-          LEFT JOIN operators o ON t.optbl_ptr = o.seq_nmbr
-          WHERE c.seq_nmbr NOT IN (
-              SELECT ot.certification FROM optraining ot WHERE ot.operator = ?
-          )
-          GROUP BY c.seq_nmbr";
+$query = "
+SELECT 
+	c.seq_nmbr AS cert_id, 
+	c.certification AS cert_name, 
+	GROUP_CONCAT(
+		CONCAT(o.fname, ' ', o.seq_nmbr)
+	) AS trainers 
+FROM 
+	certifications c 
+	LEFT JOIN can_certify cc ON c.seq_nmbr = cc.cert_ptr 
+	LEFT JOIN operators o ON cc.trainer_ptr = o.seq_nmbr 
+WHERE 
+	o.status = 'Active'
+	AND c.seq_nmbr NOT IN (
+		SELECT 
+			ot.certification 
+		FROM 
+			optraining ot 
+		WHERE 
+			ot.operator = ?
+	) 
+GROUP BY 
+	c.seq_nmbr
+";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
@@ -175,6 +197,20 @@ foreach ($available_certifications as $cert) {
                 <label for="completed_by">Completed By:</label>
                 <select name="completed_by" id="completed_by" required disabled>
                     <option value="">Select a Trainer</option>
+                    <?php if (!empty($trainers)): ?>
+                        <?php foreach ($trainers as $trainer): ?>
+                            <?php
+                            $parts = explode(" ", $trainer);
+                            $trainer_fname = $parts[0];
+                            $trainer_id = end($parts);
+                            ?>
+                            <option value="<?php echo htmlspecialchars($trainer_id); ?>">
+                                <?php echo htmlspecialchars($trainer_fname); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option value="" disabled>No trainers available</option>
+                    <?php endif; ?>
                 </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
