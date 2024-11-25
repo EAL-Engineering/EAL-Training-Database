@@ -14,20 +14,33 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $operator_id = intval($_GET['id']); // Sanitize the ID
 
-// Fetch operator's existing certifications
-$query = "SELECT c.certification, ot.status, ot.entered, ot.expires, ot.trainer
-          FROM optraining ot
-          JOIN certifications c ON ot.certification = c.seq_nmbr
-          WHERE ot.operator = ?";
+// Fetch operator details
+$query = "SELECT fname FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
-
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
 }
-
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
-$stmt->bind_result($cert_name, $status, $date_entered, $expiration_date, $completed_by);
+$stmt->bind_result($fname);
+if (!$stmt->fetch()) {
+    die("Operator not found.");
+}
+$stmt->close();
+
+// Fetch operator's existing certifications
+$query = "SELECT c.certification, ot.status, ot.entered, ot.expires, o.fname AS completed_by_name
+          FROM optraining ot
+          JOIN certifications c ON ot.certification = c.seq_nmbr
+          LEFT JOIN operators o ON ot.trainer = o.seq_nmbr
+          WHERE ot.operator = ?";
+$stmt = $mysqli->prepare($query);
+if (!$stmt) {
+    die("Database error: " . $mysqli->error);
+}
+$stmt->bind_param("i", $operator_id);
+$stmt->execute();
+$stmt->bind_result($cert_name, $status, $date_entered, $expiration_date, $completed_by_name);
 
 $certifications = [];
 while ($stmt->fetch()) {
@@ -36,32 +49,36 @@ while ($stmt->fetch()) {
         'status' => $status,
         'date_entered' => $date_entered,
         'expiration_date' => $expiration_date,
-        'completed_by' => $completed_by
+        'completed_by_name' => $completed_by_name
     ];
 }
 $stmt->close();
 
-// Fetch certifications not yet completed by the operator
-$query = "SELECT c.seq_nmbr, c.certification
+// Fetch certifications not yet completed by the operator and their trainers
+$query = "SELECT c.seq_nmbr AS cert_id, c.certification AS cert_name, 
+          GROUP_CONCAT(CONCAT(o.fname, ' ', o.seq_nmbr)) AS trainers
           FROM certifications c
-          WHERE c.certification NOT IN (
+          LEFT JOIN can_certify cc ON c.seq_nmbr = cc.cert_ptr
+          LEFT JOIN trainers t ON cc.trainer_ptr = t.seq_nmbr
+          LEFT JOIN operators o ON t.optbl_ptr = o.seq_nmbr
+          WHERE c.seq_nmbr NOT IN (
               SELECT ot.certification FROM optraining ot WHERE ot.operator = ?
-          )";
+          )
+          GROUP BY c.seq_nmbr";
 $stmt = $mysqli->prepare($query);
-
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
 }
-
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
-$stmt->bind_result($cert_id, $cert_name);
+$stmt->bind_result($cert_id, $cert_name, $trainers);
 
 $available_certifications = [];
 while ($stmt->fetch()) {
     $available_certifications[] = [
         'cert_id' => $cert_id,
-        'cert_name' => $cert_name
+        'cert_name' => $cert_name,
+        'trainers' => $trainers
     ];
 }
 $stmt->close();
@@ -84,10 +101,34 @@ $stmt->close();
         button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
     </style>
+    <script>
+        function updateTrainers() {
+            const certSelect = document.getElementById('cert_id');
+            const trainerSelect = document.getElementById('completed_by');
+            const selectedOption = certSelect.options[certSelect.selectedIndex];
+            const trainers = JSON.parse(selectedOption.dataset.trainers || '[]');
+
+            trainerSelect.innerHTML = '';
+            if (trainers.length > 0) {
+                trainers.forEach(trainer => {
+                    const [trainerName, trainerId] = trainer.split(' ');
+                    const option = document.createElement('option');
+                    option.value = trainerId;
+                    option.textContent = trainerName;
+                    trainerSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.textContent = 'No trainers available';
+                option.disabled = true;
+                trainerSelect.appendChild(option);
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>Add Certification for Operator <?php echo htmlspecialchars($operator_id); ?></h1>
+        <h1>Add Certification for <?php echo htmlspecialchars($fname); ?></h1>
 
         <!-- Display Existing Certifications -->
         <h2>Existing Certifications</h2>
@@ -109,7 +150,7 @@ $stmt->close();
                             <td><?php echo htmlspecialchars($cert['status']); ?></td>
                             <td><?php echo htmlspecialchars($cert['date_entered']); ?></td>
                             <td><?php echo htmlspecialchars($cert['expiration_date']); ?></td>
-                            <td><?php echo htmlspecialchars($cert['completed_by']); ?></td>
+                            <td><?php echo htmlspecialchars($cert['completed_by_name'] ?: 'Unknown'); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -123,10 +164,11 @@ $stmt->close();
         <form method="post" action="certification_save.php">
             <div class="form-row">
                 <label for="cert_id">Certification:</label>
-                <select name="cert_id" id="cert_id" required>
+                <select name="cert_id" id="cert_id" required onchange="updateTrainers()">
                     <option value="">Select a Certification</option>
                     <?php foreach ($available_certifications as $cert): ?>
-                        <option value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                        <option value="<?php echo htmlspecialchars($cert['cert_id']); ?>" 
+                                data-trainers='<?php echo htmlspecialchars(json_encode(explode(",", $cert["trainers"]))); ?>'>
                             <?php echo htmlspecialchars($cert['cert_name']); ?>
                         </option>
                     <?php endforeach; ?>
@@ -134,7 +176,9 @@ $stmt->close();
             </div>
             <div class="form-row">
                 <label for="completed_by">Completed By:</label>
-                <input type="text" name="completed_by" id="completed_by" required>
+                <select name="completed_by" id="completed_by" required>
+                    <option value="">Select a Trainer</option>
+                </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
             <button type="submit">Add Certification</button>
