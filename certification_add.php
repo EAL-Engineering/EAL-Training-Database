@@ -149,7 +149,7 @@ foreach ($available_certifications as $cert) {
         select, input { width: 100%; padding: 8px; margin-bottom: 10px; }
         button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
-        .form-container { max-width: 600px; margin: 5px auto; padding: 5px;}
+        .form-container { max-width: 800px; margin: 5px auto; padding: 5px;}
         .back-button-container { margin-top: 5px; margin-bottom: 5px; text-align: center; }
         .back-button-container a { 
             display: inline-block; 
@@ -162,11 +162,38 @@ foreach ($available_certifications as $cert) {
             margin-left: 20px;
             margin-right: 20px; 
         }
-    </style></head>
+        .button-container {
+            display: flex;
+            gap: 10px; /* Adds space between the buttons */
+            justify-content: flex-start; /* Aligns buttons to the left */
+            margin-top: 20px;
+        }
+
+        .button-container button, .button-container .back-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+            font-size: 16px; 
+        }
+
+        .button-container button:hover, .button-container .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
 <body>
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list.php">To Personnel List</a>
+            <a href="personnel_edit.php?id=<?php echo htmlspecialchars($operator_id); ?>" class="back-button">
+                Back to Edit Operator
+            </a>
             <a href="index.php">To main page</a>
         </div>
     </div>
@@ -226,7 +253,13 @@ foreach ($available_certifications as $cert) {
                 </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
-            <button type="submit">Add Certification</button>
+
+            <div class="button-container">
+                <!-- Add Certification Button -->
+                <button type="submit">Add Certification</button>
+                <!-- Back to Edit Operator Button -->
+                <a href="personnel_edit.php?id=<?php echo htmlspecialchars($operator_id); ?>" class="back-button">Back to Edit Operator</a>
+            </div>
         </form>
     </div>
     <script>
