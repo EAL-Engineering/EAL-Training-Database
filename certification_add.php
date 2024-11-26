@@ -149,9 +149,27 @@ foreach ($available_certifications as $cert) {
         select, input { width: 100%; padding: 8px; margin-bottom: 10px; }
         button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
-    </style>
-</head>
+        .form-container { max-width: 600px; margin: 5px auto; padding: 5px;}
+        .back-button-container { margin-top: 5px; margin-bottom: 5px; text-align: center; }
+        .back-button-container a { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            color: white; 
+            background-color: #007bff; 
+            border-radius: 4px; 
+            transition: background-color 0.2s ease; 
+            margin-left: 20px;
+            margin-right: 20px; 
+        }
+    </style></head>
 <body>
+    <div class="form-container">
+        <div class="back-button-container">
+            <a href="personnel_list.php">To Personnel List</a>
+            <a href="index.php">To main page</a>
+        </div>
+    </div>
     <div class="container">
         <h1>Add Certification for <?php echo htmlspecialchars($fname); ?></h1>
 

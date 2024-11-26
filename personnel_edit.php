@@ -109,6 +109,8 @@ $certifications_stmt->close();
             background-color: #007bff; 
             border-radius: 4px; 
             transition: background-color 0.2s ease; 
+            margin-left: 20px;
+            margin-right: 20px; 
         }
         .back-button-container a:hover { background-color: #0056b3; }
         .certifications { margin-top: 20px; }
@@ -118,6 +120,7 @@ $certifications_stmt->close();
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list.php">Back to Personnel List</a>
+            <a href="index.php">Back to main page</a>
         </div>
         <h1>Edit Operator Details</h1>
         <form method="post" action="personnel_save.php">

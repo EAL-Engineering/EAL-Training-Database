@@ -74,19 +74,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 50px auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px; }
-        h1 { margin-bottom: 20px; }
+        .container { max-width: 650px; margin: 20px auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px; }
+        h1 { margin-bottom: 10px; margin-top: 1px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; }
-        input, select, textarea, button { width: 100%; padding: 10px; font-size: 16px; }
+        input,  textarea, button { width: 96.5%; padding: 10px; font-size: 16px; }
+        select { width: 100%; padding: 10px; font-size: 16px; }
         button { background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
         .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
         .alert-danger { background-color: #f8d7da; color: #721c24; }
         .alert-success { background-color: #d4edda; color: #155724; }
+        .form-container { max-width: 600px; margin: 5px auto; padding: 5px;}
+        .back-button-container { margin-top: 5px; text-align: center; }
+        .back-button-container a { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            color: white; 
+            background-color: #007bff; 
+            border-radius: 4px; 
+            transition: background-color 0.2s ease; 
+            margin-left: 20px;
+            margin-right: 20px; 
+        }
+        textarea {
+            min-height: 20px; /* Initial height */
+            padding: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none; /* Prevent manual resizing */
+            overflow: hidden; /* Hide overflow when resizing */
+        }
     </style>
 </head>
 <body>
+    <div class="form-container">
+        <div class="back-button-container">
+            <a href="personnel_list.php">To Personnel List</a>
+            <a href="index.php">To main page</a>
+        </div>
+    </div>
     <div class="container">
         <h1>Add New Personnel</h1>
         <p>Note: New personnel will automatically be added with <b>key holder</b> Training</p>
@@ -101,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form method="post" action="">
+        <form method="post" action="personnel_add.php">
             <div class="form-group">
                 <label for="fname">Full Name:</label>
                 <input type="text" name="fname" id="fname" required>
@@ -128,8 +156,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label for="comments">Comments:</label>
-                <textarea name="comments" id="comments" rows="3"></textarea>
+                <textarea name="comments" id="comments" rows="1"></textarea>
             </div>
+            <script>
+                // Target the textarea with id 'comments'
+                const commentsTextarea = document.getElementById('comments');
+
+                if (commentsTextarea) {
+                    commentsTextarea.addEventListener('input', function () {
+                        // Reset height to recalculate based on scrollHeight
+                        this.style.height = 'auto';
+                        this.style.height = this.scrollHeight + 'px';
+                    });
+                }
+            </script>
             <div class="form-group">
                 <label for="status">Status:</label>
                 <select name="status" id="status">

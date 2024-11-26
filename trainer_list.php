@@ -29,9 +29,28 @@ $trainer_list = $mysqli->query("
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
   	<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-</head>
+	<style>
+        .form-container { max-width: 600px; margin: 5px auto; padding: 5px;}
+        .back-button-container { margin-top: 5px; margin-bottom: 5px; text-align: center; }
+        .back-button-container a { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            color: white; 
+            background-color: #007bff; 
+            border-radius: 4px; 
+            transition: background-color 0.2s ease; 
+            margin-left: 20px;
+            margin-right: 20px; 
+        }
+    </style></head>
 <body>
-	<h1>Trainer List</h1>
+	<div class="form-container">
+        <div class="back-button-container">
+        <a href="trainer_list_by_cert.php">To Trainers by Certification</a>
+        <a href="index.php">To main page</a>
+        </div>
+    </div>	<h1>Trainer List</h1>
 	<table id="trainer" class="display">
 		<thead>
 			<tr>
