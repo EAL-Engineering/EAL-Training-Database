@@ -70,6 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Add New Personnel</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 50px auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px; }
@@ -87,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <h1>Add New Personnel</h1>
+        <p>Note: New personnel will automatically be added with <b>key holder</b> Training</p>
 
         <?php if (!empty($error_message)): ?>
             <div class="alert alert-danger">

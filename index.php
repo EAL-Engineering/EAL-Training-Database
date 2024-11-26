@@ -5,6 +5,19 @@
 	<!-- <link rel="stylesheet" href="styles.css" /> -->
 	<link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	<style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px; }
+        h1 { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select, textarea, button { width: 100%; padding: 10px; font-size: 16px; }
+        button { background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+    </style>
 </head>
 <body>
 	<H1>OUAL Training Information</h1>
