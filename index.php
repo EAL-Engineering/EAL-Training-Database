@@ -45,12 +45,11 @@
 	<p>The list of personnel who can give each certification sorted by certification can be found at:
 		<a href="trainer_list_by_cert.php">trainer_list_by_cert.php</a>
 	</p>
-	<p>New trainings can be registed using :
-		<a href="certification_add.php">certification_add.php</a>, FIXME but I need to link this from 
-		somewhere else, because adding ?id=somenumber is dumb.
-	</p>
 	<p>New personnel can be added at :
 		<a href="personnel_add.php">personnel_add.php</a>
+	</p>
+	<p>New trainings can be registed using: certification_add.php, but don't access that page directly.  
+		Instead, go to edit a user and add a certification from there.
 	</p>
  
 	<p>This information is recorded in a database table named <b>optraining</b> and kept on the 
