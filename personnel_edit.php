@@ -196,5 +196,8 @@ $certifications_stmt->close();
             <?php endif; ?>
         </div>
     </div>
+    <div class="back-button-container">
+        <a href="certification_add.php?id=<?php echo urlencode($operator['seq_nmbr']); ?>">Add Certification</a>
+    </div>
 </body>
 </html>
