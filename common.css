@@ -121,3 +121,9 @@ button:hover {
 .certifications-list button { 
     margin-right: 10px; 
 }
+.full-width-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    display: block;
+    width: 100%;
+}

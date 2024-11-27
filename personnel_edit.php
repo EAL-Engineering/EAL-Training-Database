@@ -1,11 +1,17 @@
 <?php
+// Start session to access success/error messages
+session_start();
 // Include the database connection file
 include_once("config.php");
 
-// Enable error reporting for debugging (remove in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Check if the user is logged in and has the required access level (1 or 2)
+if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
+    // Redirect to login page if not authorized
+    header("Location: login.php");
+    exit();
+}
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Check if 'id' is provided in the URL
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -87,36 +93,27 @@ $certifications_stmt->close();
     <meta charset="UTF-8">
     <title>Edit Operator</title>
     <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .form-container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        .form-row { display: flex; align-items: center; margin-bottom: 10px; }
-        .form-row label { width: 150px; text-align: right; margin-right: 10px; }
-        .form-row input, 
-        .form-row select, 
-        .form-row textarea { flex: 1; padding: 5px; }
-        .readonly-field { background-color: #f9f9f9; border: none; }
-        button { margin-top: 20px; padding: 10px 20px; display: block; width: 100%; }
-        .certifications { margin-top: 20px; }
-        .back-button-container { margin-bottom: 20px; text-align: center; }
-        .back-button-container a { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            text-decoration: none; 
-            color: white; 
-            background-color: #007bff; 
-            border-radius: 4px; 
-            transition: background-color 0.2s ease; 
-            margin-left: 20px;
-            margin-right: 20px; 
-        }
-        .back-button-container a:hover { background-color: #0056b3; }
-        .certifications { margin-top: 20px; }
-    </style>
+    <script src="common.js" defer></script>
+    <script>
+        // Pass the session expiration time to the JavaScript function
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
+    <div class="header">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
+            <span>Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" class="logout-button">Logout</a>
+        <?php else: ?>
+            <span>Welcome to the OUAL Training Information Portal</span>
+        <?php endif; ?>
+    </div>
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list.php">Back to Personnel List</a>
@@ -181,7 +178,7 @@ $certifications_stmt->close();
                 <label>Comments:</label>
                 <textarea name="comments"><?php echo htmlspecialchars($operator['comments']); ?></textarea>
             </div>
-            <button type="submit">Save Changes</button>
+            <button type="submit" class="full-width-button">Save Changes</button>
         </form>
         <div class="certifications">
             <h2>Certifications</h2>
