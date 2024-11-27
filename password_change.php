@@ -1,6 +1,11 @@
 <?php
+// Start the session
+session_start();
+
 include("auth.php");
 include("config.php");
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $current_password = $_POST['current_password'];
@@ -39,10 +44,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Change Password</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="common.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the countdown with the session expiration time from PHP
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
+    <?php include 'header.php'; ?>
     <h1>Change Password</h1>
-    <form method="post">
+    <form method="post" class="pw_change">
         <label for="current_password">Current Password:</label>
         <input type="password" id="current_password" name="current_password" required><br>
         <label for="new_password">New Password:</label>
