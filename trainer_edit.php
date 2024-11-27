@@ -1,9 +1,18 @@
 <?php
+// Start session to access success/error messages
+session_start();
+
 // Include the database connection file
 include_once("config.php");
 
-// Start session to access success/error messages
-session_start();
+// Check if the user is logged in and has the required access level (1 or 2)
+if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
+    // Redirect to login page if not authorized
+    header("Location: login.php");
+    exit();
+}
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
@@ -99,37 +108,25 @@ if (isset($_SESSION['message'])) {
     <title>Edit Trainer Certifications</title>
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .form-container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        .form-row { display: flex; align-items: center; margin-bottom: 8px; }
-        .form-row label { width: 150px; text-align: right; margin-right: 10px; }
-        .form-row input, 
-        .form-row select, 
-        .form-row textarea { flex: 1; padding: 5px; }
-        button { padding: 8px 16px; margin-top: 8px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
-        button:hover { background-color: #0056b3; }
-        .readonly-field { background-color: #f9f9f9; border: none; }
-        .certifications-list { margin-top: 10px; }
-        .certifications-list ul { list-style: none; padding: 0; margin: 0; }
-        .certifications-list li { display: flex; justify-content: space-between; margin-bottom: 6px; }
-        .certifications-list button { margin-left: 10px; }
-        .back-button-container { margin-bottom: 15px; text-align: center; }
-        .back-button-container a { 
-            display: inline-block; 
-            padding: 8px 16px; 
-            text-decoration: none; 
-            color: white; 
-            background-color: #007bff; 
-            border-radius: 4px; 
-            transition: background-color 0.2s ease; 
-            margin-left: 15px;
-            margin-right: 15px;
-        }
-        .back-button-container a:hover { background-color: #0056b3; }
-    </style>
+    <link rel="stylesheet" href="common.css">
+    <script src="common.js" defer></script>
+    <script>
+        // Pass the session expiration time to the JavaScript function
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
+    <div class="header">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
+            <span>Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" class="logout-button">Logout</a>
+        <?php else: ?>
+            <span>Welcome to the OUAL Training Information Portal</span>
+        <?php endif; ?>
+    </div>
     <div class="form-container">
         <div class="back-button-container">
             <a href="trainer_list.php">Back to Trainer List</a>

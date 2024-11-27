@@ -42,6 +42,8 @@ body {
     max-width: 600px;
     margin: 5px auto;
     padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
 }
 .back-button-container {
     margin-top: 5px;
@@ -74,4 +76,48 @@ h1 {
 .alert-success {
     background-color: #d4edda;
     color: #155724;
+}
+.form-row {
+    display: flex;
+    align-items: center; 
+    margin-bottom: 8px;
+}
+.form-row label { 
+    width: 150px; 
+    text-align: right; 
+    margin-right: 10px; 
+}
+.form-row input, .form-row select, .form-row textarea { 
+    flex: 1; 
+    padding: 5px; 
+}
+button { 
+    padding: 8px 16px; 
+    margin-top: 8px; 
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 14px; 
+}
+button:hover { 
+    background-color: #0056b3; 
+}
+.readonly-field { 
+    background-color: #f9f9f9; 
+    border: none; 
+}
+.certifications-list ul { 
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
+}
+.certifications-list li { 
+    display: flex; 
+    justify-content: space-between; 
+    margin-bottom: 6px; 
+}
+.certifications-list button { 
+    margin-right: 10px; 
 }
