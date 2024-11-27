@@ -1,6 +1,20 @@
 <?php
+// Start the session at the beginning of the page
+session_start();
+
 // Include the database connection file
 include_once("config.php");
+
+// Function to calculate time until session expiry (mimicking the logic from index.php)
+function getTimeUntilSessionExpires() {
+    if (isset($_SESSION['last_activity'])) {
+        $remaining = (2 * 60 * 60) - (time() - $_SESSION['last_activity']);
+        return max($remaining, 0); // Ensure no negative time is returned
+    }
+    return 0;
+}
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Fetch operator list
 $opertor_list = $mysqli->query("
@@ -21,48 +35,52 @@ $opertor_list = $mysqli->query("
         AND inner_c.seq_nmbr <= 3 
     ) 
     ORDER BY o.name
-");
+    ");
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EAL Stuff</title>
+    <title>Personnel List</title>
     <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <style>
-        .form-container { max-width: 600px; margin: 5px auto; padding: 5px;}
-        .back-button-container { margin-top: 5px; margin-bottom: 5px; text-align: center; }
-        .back-button-container a { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            text-decoration: none; 
-            color: white; 
-            background-color: #007bff; 
-            border-radius: 4px; 
-            transition: background-color 0.2s ease; 
-            margin-left: 20px;
-            margin-right: 20px; 
-        }
-    </style>
+    <script src="common.js" defer></script>
+    <script>
+        // Pass the session expiration time to the JavaScript function
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
+    <div class="header">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
+            <span>Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" class="logout-button">Logout</a>
+        <?php else: ?>
+            <span>Welcome to the OUAL Training Information Portal</span>
+        <?php endif; ?>
+    </div>
+
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list_all.php">To ALL Personnel List</a>
             <a href="index.php">To main page</a>
         </div>
     </div>
+
     <table id="personnel" class="display">
         <thead>
             <tr>
-                <td>Full Name</td>
-                <td>Email</td>
-                <td>Certification</td>
-                <td>User</td>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Certification</th>
+                <th>User</th>
             </tr>
         </thead>
         <tbody>
