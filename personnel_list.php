@@ -48,16 +48,7 @@ $opertor_list = $mysqli->query("
     </script>
 </head>
 <body>
-    <div class="header">
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
-            <span>Session expires in: <span id="countdown"></span></span>
-            <a href="logout.php" class="logout-button">Logout</a>
-        <?php else: ?>
-            <span>Welcome to the OUAL Training Information Portal</span>
-        <?php endif; ?>
-    </div>
-
+    <?php include 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list_all.php">To ALL Personnel List</a>
@@ -66,30 +57,36 @@ $opertor_list = $mysqli->query("
     </div>
 
     <table id="personnel" class="display">
-        <thead>
+            <thead>
             <tr>
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Certification</th>
-                <th>User</th>
+                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2): ?>
+                    <th>User</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
-        <?php
-        $rowCounter = 0; // Unique ID for each row's email
-        while ($res = mysqli_fetch_array($opertor_list)) {
-            $email = explode('@', $res['OperatorEmail']);
-            $user = $email[0];
-            $domain = $email[1];
-            $rowId = "email-" . $rowCounter++; // Generate a unique ID
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
-            echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
-            echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
-            echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
-            echo "</tr>";
-        }
-        ?>
+            <?php
+            $rowCounter = 0; // Unique ID for each row's email
+            while ($res = mysqli_fetch_array($opertor_list)) {
+                $email = explode('@', $res['OperatorEmail']);
+                $user = $email[0];
+                $domain = $email[1];
+                $rowId = "email-" . $rowCounter++; // Generate a unique ID
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
+                echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
+                echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
+
+                // Conditionally display "User" column
+                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {
+                    echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
+                }
+                echo "</tr>";
+            }
+            ?>
         </tbody>
     </table>
 
