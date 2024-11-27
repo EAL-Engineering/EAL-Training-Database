@@ -1,7 +1,27 @@
 <?php
 // Include database connection
 include_once("config.php");
-session_start();  // Make sure this is called before any output
+session_start();
+
+// Session timeout duration in seconds (2 hours)
+define('SESSION_TIMEOUT', 2 * 60 * 60); // 7200 seconds
+
+// Check if the user is already logged in
+if (isset($_SESSION['user_id'])) {
+    // Check if session has expired
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
+        // Destroy the session and redirect to login page
+        session_unset();
+        session_destroy();
+        $error = "Your session has expired. Please log in again.";
+        header("Location: login.php");
+        exit;
+    }
+    // Update last activity timestamp
+    $_SESSION['last_activity'] = time();
+    header("Location: index.php");
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
@@ -13,8 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->bind_result($id, $fname, $password_hash, $role_id);
-
-    // Check if the username exists in the database
+    
     if ($stmt->fetch()) {
         // Verify the password by comparing the stored hash with the password provided
         if (crypt($password, $password_hash) === $password_hash) {
@@ -22,13 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['user_id'] = $id;
             $_SESSION['fname'] = $fname;
             $_SESSION['role_id'] = $role_id;
-    
-            header("Location: trainer_list.php");
+            $_SESSION['last_activity'] = time(); // Record the login time
+
+            header("Location: index.php");
             exit;
         }
     }
-    // If username or password is invalid, show a generic error message
-    $error = "Invalid username or password.";    
+
+    // Always return the same error message
+    $error = "Invalid username or password.";
     $stmt->close();
 }
 ?>
