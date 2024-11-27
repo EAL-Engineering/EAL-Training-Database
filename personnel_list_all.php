@@ -1,6 +1,10 @@
 <?php
 // Include the database connection file
 include_once("config.php");
+// Start the session
+session_start();
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Fetch operator list
 $opertor_list = $mysqli->query("
@@ -27,42 +31,45 @@ $opertor_list = $mysqli->query("
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>EAL Stuff</title>
+    <title>Personnel List (All)</title>
 	<link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
 	<link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
   	<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-	<style>
-        .form-container { margin: 5px auto; padding: 5px;}
-        .back-button-container { margin-top: 5px; margin-bottom: 5px; text-align: center; }
-        .back-button-container a { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            text-decoration: none; 
-            color: white; 
-            background-color: #007bff; 
-            border-radius: 4px; 
-            transition: background-color 0.2s ease; 
-            margin-left: 20px;
-            margin-right: 20px; 
-        }
-    </style>
+    <script src="common.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the countdown with the session expiration time from PHP
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
-<div class="form-container">
+    <div class="header">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
+            <span>Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" class="logout-button">Logout</a>
+        <?php else: ?>
+            <span>Welcome to the OUAL Training Information Portal</span>
+        <?php endif; ?>
+    </div>
+    <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list.php">To Personnel List</a>
             <a href="index.php">To main page</a>
         </div>
-    </div>	<table id="personnel" class="display">
+    </div>	
+    <table id="personnel" class="display">
 		<thead>
 			<tr>
-				<td>Full Name</td>
-				<td>Status</td>
-				<td>Email</td>
-				<td>Certification</td>
-				<td>User</td>
+				<th>Full Name</th>
+				<th>Status</th>
+				<th>Email</th>
+				<th>Certification</th>
+				<th>User</th>
 			</tr>
 		</thead>
 		<tbody>
