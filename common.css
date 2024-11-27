@@ -96,7 +96,7 @@ h1 {
 .form-group { 
     margin-bottom: 15px; 
 }
-button { 
+/* button { 
     padding: 8px 16px; 
     margin-top: 8px; 
     background-color: #007bff; 
@@ -107,8 +107,8 @@ button {
     font-size: 14px; 
 }
 button:hover { 
-    background-color: #0056b3; 
-}
+    background-color: #0056b3;  
+} */
 .readonly-field { 
     background-color: #f9f9f9; 
     border: none; 
@@ -136,11 +136,11 @@ label {
     display: block; 
     margin-bottom: 5px; 
 }
-input,  textarea, button { 
+/* input,  textarea, button { 
     width: 96.5%; 
     padding: 10px; 
     font-size: 16px; 
-}
+} */
 select { 
     width: 100%; 
     padding: 10px; 
@@ -166,19 +166,7 @@ textarea {
     border: 1px solid #ccc; 
     border-radius: 8px; 
 }
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-bottom: 20px; 
-}
-table th, table td { 
-    border: 1px solid #ccc; 
-    padding: 8px; 
-    text-align: left; 
-}
-table th { 
-    background-color: #f4f4f4; 
-}
+
 .button-container {
     display: flex;
     gap: 10px; /* Adds space between the buttons */
