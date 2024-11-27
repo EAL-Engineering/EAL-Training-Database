@@ -132,20 +132,20 @@ button:hover {
     display: block;
     width: 100%;
 }
-label { 
+/* label { 
     display: block; 
     margin-bottom: 5px; 
 }
-/* input,  textarea, button { 
+input,  textarea, button { 
     width: 96.5%; 
     padding: 10px; 
     font-size: 16px; 
-} */
+} 
 select { 
     width: 100%; 
     padding: 10px; 
     font-size: 16px; 
-}
+} */
 textarea {
     min-height: 20px; /* Initial height */
     padding: 10px;
