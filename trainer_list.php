@@ -1,6 +1,11 @@
 <?php
+// Start the session at the beginning of the page
+session_start();
+
 // Include the database connection file
 include_once("config.php");
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Fetch trainer list and their certifications
 $trainer_list = $mysqli->query("
