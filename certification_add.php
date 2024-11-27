@@ -1,6 +1,11 @@
 <?php
+// Start the session
+session_start();
+
 // Include the database connection file
 include_once("config.php");
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
@@ -136,59 +141,23 @@ foreach ($available_certifications as $cert) {
 <head>
     <meta charset="UTF-8">
     <title>Add Certification</title>
+    <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        table th, table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        table th { background-color: #f4f4f4; }
-        .form-row { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; }
-        select, input { width: 100%; padding: 8px; margin-bottom: 10px; }
-        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .form-container { max-width: 800px; margin: 5px auto; padding: 5px;}
-        .back-button-container { margin-top: 5px; margin-bottom: 5px; text-align: center; }
-        .back-button-container a { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            text-decoration: none; 
-            color: white; 
-            background-color: #007bff; 
-            border-radius: 4px; 
-            transition: background-color 0.2s ease; 
-            margin-left: 20px;
-            margin-right: 20px; 
-        }
-        .button-container {
-            display: flex;
-            gap: 10px; /* Adds space between the buttons */
-            justify-content: flex-start; /* Aligns buttons to the left */
-            margin-top: 20px;
-        }
-
-        .button-container button, .button-container .back-button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.2s ease;
-            font-size: 16px; 
-        }
-
-        .button-container button:hover, .button-container .back-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="common.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the countdown with the session expiration time from PHP
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
-    <div class="form-container">
+    <?php include 'header.php'; ?>
+    <div>
         <div class="back-button-container">
             <a href="personnel_list.php">To Personnel List</a>
             <a href="personnel_edit.php?id=<?php echo htmlspecialchars($operator_id); ?>" class="back-button">
@@ -197,7 +166,7 @@ foreach ($available_certifications as $cert) {
             <a href="index.php">To main page</a>
         </div>
     </div>
-    <div class="container">
+    <div class="certification-container">
         <h1>Add Certification for <?php echo htmlspecialchars($fname); ?></h1>
 
         <!-- Display Existing Certifications -->
