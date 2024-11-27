@@ -1,6 +1,11 @@
 <?php
+// Start the session
+session_start();
+
 // Include the database connection file
 include_once("config.php");
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Initialize variables for error handling
 $error_message = "";
@@ -69,46 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Add New Personnel</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
-        .container { max-width: 650px; margin: 20px auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px; }
-        h1 { margin-bottom: 10px; margin-top: 1px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input,  textarea, button { width: 96.5%; padding: 10px; font-size: 16px; }
-        select { width: 100%; padding: 10px; font-size: 16px; }
-        button { background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; }
-        .alert-success { background-color: #d4edda; color: #155724; }
-        .form-container { max-width: 600px; margin: 5px auto; padding: 5px;}
-        .back-button-container { margin-top: 5px; text-align: center; }
-        .back-button-container a { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            text-decoration: none; 
-            color: white; 
-            background-color: #007bff; 
-            border-radius: 4px; 
-            transition: background-color 0.2s ease; 
-            margin-left: 20px;
-            margin-right: 20px; 
-        }
-        textarea {
-            min-height: 20px; /* Initial height */
-            padding: 10px;
-            font-size: 16px;
-            line-height: 1.5;
-            resize: none; /* Prevent manual resizing */
-            overflow: hidden; /* Hide overflow when resizing */
-        }
-    </style>
+    <script src="common.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the countdown with the session expiration time from PHP
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
+    <?php include 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list.php">To Personnel List</a>

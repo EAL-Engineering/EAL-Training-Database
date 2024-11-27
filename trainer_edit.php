@@ -118,15 +118,7 @@ if (isset($_SESSION['message'])) {
     </script>
 </head>
 <body>
-    <div class="header">
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
-            <span>Session expires in: <span id="countdown"></span></span>
-            <a href="logout.php" class="logout-button">Logout</a>
-        <?php else: ?>
-            <span>Welcome to the OUAL Training Information Portal</span>
-        <?php endif; ?>
-    </div>
+    <?php include 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
             <a href="trainer_list.php">Back to Trainer List</a>
