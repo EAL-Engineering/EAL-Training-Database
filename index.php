@@ -8,67 +8,35 @@ function getTimeUntilSessionExpires() {
     }
     return 0;
 }
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
 ?>
-<html>
-<head>	
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OUAL Operator Training Information</title>
-    <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
-        .header { background: #007bff; color: white; padding: 10px; text-align: center; position: relative; }
-        .header span { display: inline-block; margin-right: 10px; }
-        .logout-button {
-            display: inline-block;
-            background-color: white;
-            color: #007bff;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .logout-button:hover {
-            background-color: #0056b3;
-            color: white;
-        }
-        .container { max-width: 600px; margin: 50px auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px; }
-        h1 { margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input, select, textarea, button { width: 100%; padding: 10px; font-size: 16px; }
-        button { background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; }
-        .alert-success { background-color: #d4edda; color: #155724; }
-    </style>
+    <script src="common.js" defer></script>
     <script>
-        let timeLeft = <?php echo getTimeUntilSessionExpires(); ?>;
-        function updateCountdown() {
-            if (timeLeft > 0) {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                document.getElementById('countdown').textContent = `${minutes}m ${seconds}s`;
-                timeLeft--;
-            } else {
-                document.getElementById('countdown').textContent = "Session expired";
-            }
-        }
-        setInterval(updateCountdown, 1000);
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
     </script>
 </head>
 <body>
-    <?php if (isset($_SESSION['user_id'])): ?>
-        <div class="header">
-            Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?> |
-            Session expires in: <span id="countdown"></span>
-			<a href="logout.php" class="logout-button">Logout</a>
-		</div>
-    <?php endif; ?>
+    <div class="header">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span>
+            <span>Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" class="logout-button">Logout</a>
+        <?php else: ?>
+            <span>Welcome to the OUAL Training Information Portal</span>
+        <?php endif; ?>
+    </div>
     <div class="container">
         <h1>OUAL Training Information</h1>
         <h2>Operator Training Information Database</h2>
