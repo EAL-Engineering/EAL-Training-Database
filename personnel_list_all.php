@@ -12,7 +12,8 @@ $opertor_list = $mysqli->query("
         o.name AS OperatorName, 
         o.status AS OperatorStatus, 
         o.email AS OperatorEmail, 
-        c.certification AS HighestCertification 
+        c.certification AS HighestCertification,
+        o.seq_nmbr as id
     FROM operators o 
     JOIN optraining ot ON o.seq_nmbr = ot.operator 
     JOIN certifications c ON ot.certification = c.seq_nmbr 
