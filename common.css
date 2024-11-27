@@ -1,5 +1,4 @@
 body {
-    font-family: Arial, sans-serif;
     background-color: #f9f9f9;
     margin: 0;
     padding: 0;
@@ -38,6 +37,27 @@ body {
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
+}
+.form-container {
+    max-width: 600px;
+    margin: 5px auto;
+    padding: 5px;
+}
+.back-button-container {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+.back-button-container a {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: white;
+    background-color: #007bff;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 h1 {
     margin-bottom: 20px;
