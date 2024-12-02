@@ -2,6 +2,9 @@
 // Start the session at the beginning of the page
 session_start();
 
+// Capture the current page URL
+$currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
+
 // Include the database connection file
 include_once("config.php");
 
