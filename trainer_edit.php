@@ -5,19 +5,17 @@ session_start();
 // Include the database connection file
 include_once("config.php");
 
+// Capture the current page URL
+$currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
+
 // Check if the user is logged in and has the required access level (1 or 2)
 if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
-    // Redirect to login page if not authorized
-    header("Location: login.php");
+    // Redirect to login page with a return parameter
+    header("Location: login.php?return=$currentUrl");
     exit();
 }
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
-
-// Enable error reporting for debugging (remove in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 // Check if 'id' is provided in the URL
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {

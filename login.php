@@ -3,6 +3,10 @@
 include_once("config.php");
 session_start();
 
+if (isset($_GET['return'])) {
+    $_SESSION['return_url'] = $_GET['return'];
+}
+
 // Session timeout duration in seconds (2 hours)
 define('SESSION_TIMEOUT', 2 * 60 * 60); // 7200 seconds
 
@@ -42,9 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['fname'] = $fname;
             $_SESSION['role_id'] = $role_id;
             $_SESSION['last_activity'] = time(); // Record the login time
-
-            header("Location: index.php");
-            exit;
+            $redirectUrl = isset($_GET['return']) ? urldecode($_GET['return']) : 'index.php';
+            header("Location: $redirectUrl");
         }
     }
 
@@ -59,8 +62,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
+    <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="common.js" defer></script>
+    <script>
+        // Pass the session expiration time to the JavaScript function
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
+    <?php include 'header.php'; ?>
     <h1>Login</h1>
     <?php if (isset($error)): ?>
         <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
