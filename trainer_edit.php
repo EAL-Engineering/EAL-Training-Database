@@ -135,11 +135,13 @@ if (isset($_SESSION['message'])) {
                     <?php foreach ($current_certifications as $cert): ?>
                         <li>
                             <span><?php echo htmlspecialchars($cert['certification']); ?></span>
-                            <form method="post" action="trainer_certification_remove.php" style="display:inline;">
-                                <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
-                                <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
-                                <button type="submit">Remove Certification</button>
-                            </form>
+                            <div class="button-container">
+                                <form method="post" action="trainer_certification_remove.php" style="display:inline;">
+                                    <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
+                                    <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                                    <button type="submit">Remove Certification</button>
+                                </form>
+                            </div>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -156,11 +158,13 @@ if (isset($_SESSION['message'])) {
                     <?php foreach ($available_certifications as $cert): ?>
                         <li>
                             <span><?php echo htmlspecialchars($cert['certification']); ?></span>
-                            <form method="post" action="trainer_certification_add.php" style="display:inline;">
-                                <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
-                                <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
-                                <button type="submit">Add Certification</button>
-                            </form>
+                            <div class="button-container">
+                                <form method="post" action="trainer_certification_add.php" style="display:inline;">
+                                    <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
+                                    <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                                    <button type="submit">Add Certification</button>
+                                </form>
+                            </div>
                         </li>
                     <?php endforeach; ?>
                 </ul>
