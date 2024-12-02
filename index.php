@@ -53,7 +53,7 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
         <p>New personnel can be added at:
             <a href="personnel_add.php">personnel_add.php</a></p>
         <p>New trainers can be added at:
-            <a href="trainer_add.php">personnel_add.php</a></p>
+            <a href="trainer_add.php">trainer_add.php</a></p>
 		<p>Login at:
             <a href="login.php">login.php</a></p>
 		<p>Logout at:
