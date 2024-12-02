@@ -15,28 +15,23 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OUAL Operator Training Information</title>
+    <link rel="stylesheet" href="dataTables.dataTables.css">
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="common.js" defer></script>
     <script>
+        // Pass the session expiration time to the JavaScript function
         document.addEventListener('DOMContentLoaded', () => {
             setCountdown(<?php echo $timeUntilSessionExpires; ?>);
         });
     </script>
 </head>
 <body>
-    <div class="header">
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span>
-            <span>Session expires in: <span id="countdown"></span></span>
-            <a href="logout.php" class="logout-button">Logout</a>
-        <?php else: ?>
-            <span>Welcome to the OUAL Training Information Portal</span>
-        <?php endif; ?>
-    </div>
+    <?php include 'header.php'; ?>
     <div class="container">
         <h1>OUAL Training Information</h1>
         <h2>Operator Training Information Database</h2>
