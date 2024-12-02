@@ -63,38 +63,37 @@ $opertor_list = $mysqli->query("
 				<th>Status</th>
 				<th>Email</th>
 				<th>Certification</th>
-				<th>User</th>
+                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2): ?>
+				    <th>User</th>
+                <?php endif; ?>
 			</tr>
 		</thead>
 		<tbody>
-		<?php
-		$rowCounter = 0; // Unique ID for each row's email
-		while ($res = mysqli_fetch_array($opertor_list)) {
-			$email = explode('@', $res['OperatorEmail']);
-			$user = $email[0];
-			$domain = $email[1];
-			$rowId = "email-" . $rowCounter++; // Generate a unique ID
-			echo "<tr>";
-			echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
-			echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
-			echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
-			echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
-			echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
-			echo "</tr>";
-		}
-		?>
+            <?php
+            $rowCounter = 0; // Unique ID for each row's email
+            while ($res = mysqli_fetch_array($opertor_list)) {
+                $email = explode('@', $res['OperatorEmail']);
+                $user = $email[0];
+                $domain = $email[1];
+                $rowId = "email-" . $rowCounter++; // Generate a unique ID
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
+                echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
+                echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
+                echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
+
+                // Conditionally display "User" column
+                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {			
+                    echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
+                }
+                echo "</tr>";
+            }
+            ?>
 		</tbody>
 	</table>
     <script>
         $(document).ready(function() {
-            // DataTable initialization
-			new DataTable('#personnel', {
-				scrollX: true,
-				pageLength: 15,
-				lengthMenu: [10, 15, 25, 50, 75, 100]
-			});
-
-            // Populate email links
+            // Populate email links first
             document.querySelectorAll('td[id^="email-"]').forEach(cell => {
                 const user = cell.getAttribute('data-user');
                 const domain = cell.getAttribute('data-domain');
@@ -103,6 +102,13 @@ $opertor_list = $mysqli->query("
                 link.href = `mailto:${email}`;
                 link.textContent = email;
                 cell.appendChild(link);
+            });
+
+            // Now initialize the DataTable after the content is populated
+            new DataTable('#personnel', {
+                scrollX: true,
+                pageLength: 15,
+                lengthMenu: [10, 15, 25, 50, 75, 100]
             });
         });
     </script>
