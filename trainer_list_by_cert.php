@@ -57,7 +57,6 @@ $certification_list = $mysqli->query("
 			<tr>
 				<td>Certification</td>
 				<td>Trainers</td>
-				<td>Actions</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -66,7 +65,6 @@ $certification_list = $mysqli->query("
 			echo "<tr>";
 			echo "<td>" . htmlspecialchars($res['CertificationName']) . "</td>\n";
 			echo "<td>" . htmlspecialchars($res['Trainers'] ?: 'No active trainers') . "</td>\n";
-			echo "<td><a href=\"certification_edit.php?id=" . htmlspecialchars($res['CertID']) . "\">Edit Certification</a></td>\n";
 			echo "</tr>";
 		}
 		?>
