@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($selectedOperators as $operator) {
             $operator = (int)$operator; // Ensure the ID is numeric
-            $stmt = $mysqli->prepare("INSERT INTO optraining (operator, certification, date_completed) VALUES (?, 18, ?)");
+            $stmt = $mysqli->prepare("INSERT INTO optraining (operator, certification, entered) VALUES (?, 18, ?) ON DUPLICATE KEY UPDATE entered = VALUES(entered)");
             $stmt->bind_param("is", $operator, $date);
             if ($stmt->execute()) {
                 $successCount++;
@@ -49,11 +49,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch operators eligible for training
+// Fetch operators eligible for training and their most recent training date
 $operatorsResult = $mysqli->query("
-    SELECT o.seq_nmbr AS id, o.name AS name
-    FROM operators o
-    WHERE o.status = 'Active'
+    SELECT 
+        o.seq_nmbr AS id, 
+        o.name AS name, 
+        MAX(t.entered) AS last_training 
+    FROM 
+        operators o
+    LEFT JOIN 
+        optraining t ON o.seq_nmbr = t.operator AND t.certification = 18
+    WHERE 
+        o.status = 'Active'
+    GROUP BY 
+        o.seq_nmbr
 ");
 
 if (!$operatorsResult) {
@@ -96,12 +105,25 @@ function checkCertification($trainerId, $certificationId)
     return $count > 0;
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Register Radiation Safety Training</title>
+    <link rel="stylesheet" href="dataTables.dataTables.css">
     <link rel="stylesheet" href="common.css">
+    <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="common.js" defer></script>
+    <script>
+        // Pass the session expiration time to the JavaScript function
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
+    </script>
 </head>
 <body>
     <?php include 'header.php'; ?>
@@ -115,18 +137,41 @@ function checkCertification($trainerId, $certificationId)
     <form method="post" action="">
         <div>
             <label for="date_of_training">Date of Training:</label>
-            <input type="date" id="date_of_training" name="date_of_training" required>
+            <input type="date" id="date_of_training" name="date_of_training" value="<?php echo date('Y-m-d'); ?>" required>
         </div>
 
         <div>
-            <label for="operators">Select Operators:</label>
-            <select id="operators" name="operators[]" multiple required>
-                <?php foreach ($operators as $operator): ?>
-                    <option value="<?php echo htmlspecialchars($operator['id']); ?>">
-                        <?php echo htmlspecialchars($operator['name']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Operator Name</th>
+                        <th>Last Training Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($operators as $operator): ?>
+                        <tr>
+                            <td>
+                                <input 
+                                    type="checkbox" 
+                                    id="operator_<?php echo htmlspecialchars($operator['id']); ?>" 
+                                    name="operators[]" 
+                                    value="<?php echo htmlspecialchars($operator['id']); ?>"
+                                >
+                            </td>
+                            <td>
+                                <label for="operator_<?php echo htmlspecialchars($operator['id']); ?>">
+                                    <?php echo htmlspecialchars($operator['name']); ?>
+                                </label>
+                            </td>
+                            <td>
+                                <?php echo htmlspecialchars($operator['last_training'] ?: 'Never'); ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
 
         <button type="submit">Register Training</button>
