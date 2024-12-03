@@ -35,9 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($selectedOperators as $operator) {
             $operator = (int)$operator; // Ensure the ID is numeric
-            if (!$stmt = $mysqli->prepare("INSERT INTO optraining (operator, certification, date_completed) VALUES (?, 18, ?)")) {
-                die("Prepare failed: " . $mysqli->error);
-            }
+            $stmt = $mysqli->prepare("INSERT INTO optraining (operator, certification, date_completed) VALUES (?, 18, ?)");
             $stmt->bind_param("is", $operator, $date);
             if ($stmt->execute()) {
                 $successCount++;
@@ -81,7 +79,6 @@ function checkCertification($trainerId, $certificationId)
     $stmt->close();
 
     if (!$operatorId || $operatorId == -1) {
-        echo "No valid operator associated with trainer ID $trainerId.";
         return false;
     }
 
@@ -96,45 +93,43 @@ function checkCertification($trainerId, $certificationId)
     $stmt->fetch();
     $stmt->close();
 
-    // echo "Authorization check: operator ID $operatorId, cert count $count.";
     return $count > 0;
 }
 ?>
-
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Radiation Safety Training</title>
+    <title>Register Radiation Safety Training</title>
     <link rel="stylesheet" href="common.css">
 </head>
 <body>
     <?php include 'header.php'; ?>
-    <div class="form-container">
-        <h1>Register Radiation Safety Training</h1>
-        
-        <?php if (!empty($message)): ?>
-            <p class="success-message"><?php echo htmlspecialchars($message); ?></p>
-        <?php endif; ?>
-        <?php if (!empty($error)): ?>
-            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
-        <?php endif; ?>
 
-        <form method="POST">
+    <h1>Register Radiation Safety Training</h1>
+
+    <?php if (!empty($message)): ?>
+        <p class="message"><?php echo htmlspecialchars($message); ?></p>
+    <?php endif; ?>
+
+    <form method="post" action="">
+        <div>
+            <label for="date_of_training">Date of Training:</label>
+            <input type="date" id="date_of_training" name="date_of_training" required>
+        </div>
+
+        <div>
             <label for="operators">Select Operators:</label>
-            <select id="operators" name="operators[]" multiple>
+            <select id="operators" name="operators[]" multiple required>
                 <?php foreach ($operators as $operator): ?>
-                    <option value="<?php echo htmlspecialchars($operator['seq_nmbr']); ?>">
-                        <?php echo htmlspecialchars($operator['fname'] . " " . $operator['lname']); ?>
+                    <option value="<?php echo htmlspecialchars($operator['id']); ?>">
+                        <?php echo htmlspecialchars($operator['name']); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
+        </div>
 
-            <label for="training_date">Training Date:</label>
-            <input type="date" id="training_date" name="training_date" required>
-
-            <button type="submit">Register Training</button>
-        </form>
-    </div>
+        <button type="submit">Register Training</button>
+    </form>
 </body>
 </html>
