@@ -142,7 +142,7 @@ function checkCertification($trainerId, $certificationId)
             </div>
 
             <div>
-                <table border="1" cellpadding="5" cellspacing="0">
+                <table id="personnel" class="display">
                     <thead>
                         <tr>
                             <th>Select</th>
@@ -177,5 +177,12 @@ function checkCertification($trainerId, $certificationId)
             <button type="submit">Register Training</button>
         </form>
     </div>
+    <script>
+        new DataTable('#personnel', {
+            scrollX: true,
+            pageLength: 50,
+            lengthMenu: [10, 15, 25, 50, 75, 100]
+        });
+    </script>        
 </body>
 </html>
