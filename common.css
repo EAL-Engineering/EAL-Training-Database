@@ -5,7 +5,7 @@ body {
     padding: 0;
 }
 .header {
-    background: #007bff;
+    background: #00694E;  /* OHIO Cutler Green - Primary Color */
     color: white;
     padding: 10px;
     text-align: center;
@@ -18,7 +18,7 @@ body {
 .logout-button {
     display: inline-block;
     background-color: white;
-    color: #007bff;
+    color: #00694E;  /* OHIO Cutler Green - Primary Color */
     padding: 5px 10px;
     border: none;
     border-radius: 4px;
@@ -28,7 +28,7 @@ body {
     font-size: 14px;
 }
 .logout-button:hover {
-    background-color: #0056b3;
+    background-color: #024230;  /* OHIO Under the Elms - Accent Color */
     color: white;
 }
 .container {
@@ -36,14 +36,14 @@ body {
     margin: 20px auto;
     padding: 20px;
     background: #fff;
-    border: 1px solid #ccc;
+    border: 1px solid #E7ECC3;  /* OHIO Sycamore - Secondary Color */
     border-radius: 8px;
 }
 .form-container {
     max-width: 600px;
     margin: 5px auto;
     padding: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #E7ECC3;  /* OHIO Sycamore - Secondary Color */
     border-radius: 8px;
 }
 .back-button-container {
@@ -56,7 +56,7 @@ body {
     padding: 10px 20px;
     text-decoration: none;
     color: white;
-    background-color: #007bff;
+    background-color: #00694E;  /* OHIO Cutler Green - Primary Color */
     border-radius: 4px;
     transition: background-color 0.2s ease;
     margin-left: 20px;
@@ -110,7 +110,7 @@ button:hover {
     background-color: #0056b3;  
 } */
 .readonly-field { 
-    background-color: #f9f9f9; 
+    background-color: #E7ECC3;  /* OHIO Sycamore - Secondary Color */
     border: none; 
 }
 .certifications-list ul { 
@@ -131,7 +131,7 @@ button:hover {
     padding: 10px 20px;
     display: block;
     width: 100%;
-    background-color: #007bff; 
+    background-color: #00694E;  /* OHIO Cutler Green - Primary Color */
     color: white; 
     border: none; 
     border-radius: 4px; 
@@ -165,14 +165,6 @@ textarea {
     margin-left: 10px;
     padding: 10px;
 }
-.certification-container { 
-    max-width: 800px; 
-    margin: 20px auto; 
-    padding: 20px; 
-    border: 1px solid #ccc; 
-    border-radius: 8px; 
-}
-
 .button-container {
     display: flex;
     gap: 10px; /* Adds space between the buttons */
@@ -182,7 +174,7 @@ textarea {
 
 .button-container button, .button-container .back-button {
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #00694E;  /* OHIO Cutler Green - Primary Color */
     color: white;
     border: none;
     border-radius: 4px;
@@ -194,5 +186,5 @@ textarea {
 }
 
 .button-container button:hover, .button-container .back-button:hover {
-    background-color: #0056b3;
+    background-color: #024230;  /* OHIO Under the Elms - Accent Color */
 }
