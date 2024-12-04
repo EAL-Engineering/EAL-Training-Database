@@ -1,13 +1,7 @@
 <?php
 session_start();
 
-function getTimeUntilSessionExpires() {
-    if (isset($_SESSION['last_activity'])) {
-        $remaining = (2 * 60 * 60) - (time() - $_SESSION['last_activity']);
-        return max($remaining, 0); // Ensure no negative time is returned
-    }
-    return 0;
-}
+include_once("config.php");
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 ?>
