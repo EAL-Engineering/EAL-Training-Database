@@ -135,7 +135,6 @@ foreach ($available_certifications as $cert) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
