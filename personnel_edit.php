@@ -1,41 +1,72 @@
 <?php
+/**
+ * Edit Operator Details Page
+ * 
+ * This script retrieves and displays the details of an operator for editing. 
+ * It ensures proper authorization and handles operator data securely.
+ * 
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start session to access success/error messages
 session_start();
-// Include the database connection file
-include_once("config.php");
 
-// Check if the user is logged in and has the required access level (1 or 2)
+/**
+ * Database connection and configuration.
+ * Includes the `config.php` file to establish a connection with the database.
+ */
+require_once "config.php";
+
+/**
+ * Check if the user is logged in and authorized to edit personnel details.
+ * Redirects unauthorized users to the login page.
+ */
 if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
-    // Redirect to login page if not authorized
     header("Location: login.php");
     exit();
 }
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Check if 'id' is provided in the URL
+/**
+ * Validate and sanitize the `id` parameter from the URL.
+ * 
+ * @throws Exception If the ID is not set or not numeric.
+ */
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid request. No operator ID provided.");
 }
 
 $id = intval($_GET['id']); // Sanitize the ID
 
-// Prepare the SQL statement to fetch operator details
+/**
+ * Retrieve operator details from the database.
+ * 
+ * @var string $query SQL query to fetch operator details.
+ * @var mysqli_stmt $operator_stmt Prepared statement for fetching operator details.
+ */
 $query = "SELECT * FROM operators WHERE seq_nmbr = ?";
 $operator_stmt = $mysqli->prepare($query);
 
 if (!$operator_stmt) {
-    die("Database error: " . $mysqli->error); // Debugging helper
+    die("Database error: " . $mysqli->error);
 }
 
-// Bind the parameter and execute the statement
 $operator_stmt->bind_param("i", $id);
 $operator_stmt->execute();
-
-// Bind the result fields to variables
 $operator_stmt->bind_result($seq_nmbr, $name, $fname, $email, $altemail, $phones, $status, $office, $home, $updated, $comments, $entered, $addedby);
 
-// Fetch the result
+/**
+ * Fetch the operator's details into an array for display and editing.
+ * 
+ * @var array $operator Associative array holding operator details.
+ */
 if ($operator_stmt->fetch()) {
     $operator = [
         'seq_nmbr' => $seq_nmbr,
@@ -56,10 +87,14 @@ if ($operator_stmt->fetch()) {
     die("No operator found with the provided ID.");
 }
 
-// Close the statement
 $operator_stmt->close();
 
-// Fetch certifications for the operator
+/**
+ * Fetch certifications for the operator.
+ * 
+ * @var string $certifications_query SQL query to retrieve operator certifications.
+ * @var mysqli_stmt $certifications_stmt Prepared statement for fetching certifications.
+ */
 $certifications_query = "
     SELECT c.certification 
     FROM optraining ot
@@ -74,11 +109,13 @@ if (!$certifications_stmt) {
 
 $certifications_stmt->bind_param("i", $id);
 $certifications_stmt->execute();
-
-// Bind results to variables
 $certifications_stmt->bind_result($certification);
 
-// Retrieve the certifications
+/**
+ * Retrieve certifications into an array.
+ * 
+ * @var array $certifications List of certifications for the operator.
+ */
 $certifications = [];
 while ($certifications_stmt->fetch()) {
     $certifications[] = $certification;
@@ -95,7 +132,7 @@ $certifications_stmt->close();
     <link rel="stylesheet" href="dataTables.dataTables.css">
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="common.js" defer></script>
     <script>
         // Pass the session expiration time to the JavaScript function
@@ -105,8 +142,9 @@ $certifications_stmt->close();
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <div class="form-container">
+        <!-- HTML form and interface for editing operator details -->
         <div class="back-button-container">
             <a href="personnel_list.php">Back to Personnel List</a>
             <a href="index.php">Back to main page</a>
@@ -174,7 +212,7 @@ $certifications_stmt->close();
         </form>
         <div class="certifications">
             <h2>Certifications</h2>
-            <?php if (count($certifications) > 0): ?>
+            <?php if (count($certifications) > 0) : ?>
                 <ul>
                     <?php foreach ($certifications as $cert): ?>
                         <li><?php echo htmlspecialchars($cert); ?></li>

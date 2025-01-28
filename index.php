@@ -1,8 +1,25 @@
 <?php
+/**
+ * Main entry point for the OUAL Training Management System.
+ *
+ * This page provides an overview of the system and links to the main functionalities.
+ * It includes database connection initialization and session handling.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 session_start();
 
-include_once("config.php");
+// Include the configuration and utility functions
+require_once "config.php";
 
+// Calculate the remaining session time for the countdown script
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 ?>
 <!DOCTYPE html>
@@ -18,27 +35,29 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="common.js" defer></script>
     <script>
-        // Pass the session expiration time to the JavaScript function
+        // Initialize the session expiration countdown
         document.addEventListener('DOMContentLoaded', () => {
             setCountdown(<?php echo $timeUntilSessionExpires; ?>);
         });
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <div class="container">
         <h1>OUAL Training Information</h1>
         <h2>Operator Training Information Database</h2>
-        <p>This is a complete green field re-write of the operators database that was created by John 
+        <p>This is a complete greenfield re-write of the operators database that was created by John 
             O'Donnel and maintained by Donald Carter.</p>
-        <p>This version was started in November of 2024 by Gregory Leblanc.  It was developed using 
+        <p>This version was started in November of 2024 by Gregory Leblanc. It was developed using 
             ChatGPT, among other resources.</p>
         <p>The basic function of the operator training information database and related web pages 
             is to record an association between a person (operator) and a certification, indicating 
             that the person has completed all the training required to obtain the certification.</p>
+
+        <!-- Links to relevant pages and their descriptions -->
         <p>The main list of current EAL personnel can be found at:
             <a href="personnel_list.php">personnel_list.php</a></p>
-        <p>The list of all personnel including folks who are no longer active at EAL can be found at:
+        <p>The list of all personnel including those no longer active at EAL can be found at:
             <a href="personnel_list_all.php">personnel_list_all.php</a></p>
         <p>The list of personnel who can give each certification sorted by trainer can be found at:
             <a href="trainer_list.php">trainer_list.php</a></p>
@@ -48,23 +67,24 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
             <a href="personnel_add.php">personnel_add.php</a></p>
         <p>New trainers can be added at:
             <a href="trainer_add.php">trainer_add.php</a></p>
-		<p>Login at:
+        <p>Login at:
             <a href="login.php">login.php</a></p>
-		<p>Logout at:
+        <p>Logout at:
             <a href="logout.php">logout.php</a></p>
 
-
-        <p>New trainings can be registered using: certification_add.php, but don't access that page directly.  
+        <p>New trainings can be registered using <b>certification_add.php</b>, but don't access that page directly. 
             Instead, go to edit a user and add a certification from there.</p>
+
+        <!-- Description of the database tables and their purposes -->
         <p>This information is recorded in a database table named <b>optraining</b> and kept on the 
-        localhost system using MySQL.  The optraining table links an operator and a certification, and 
+        localhost system using MySQL. The optraining table links an operator and a certification, and 
         also includes additional information on who is responsible for the training, a status (usually 
-        <i>Active</i>) an expiration date (usually not used), and a time stamp showing when the completed 
+        <i>Active</i>), an expiration date (usually not used), and a timestamp showing when the completed 
         training was entered in the table. This information is usually accessed using the <i>List 
         Completed Certifications</i> button on the main operator training web page, and certifications 
         are added to the database using the <i>Add completed training certification</i> button (actually
         you select an operator from a list of names, then press a button).</p>
-        <p>Another table, <b>certifications</b>, contains a list of available certifications.  This 
+        <p>Another table, <b>certifications</b>, contains a list of available certifications. This 
         table includes a long and short form name for the certification, a comment field, and an 
         expiration field showing the number of months a certification is valid (usually not used, 
         indicating the certification does not expire).</p>
@@ -76,7 +96,7 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
         certification.</p>
         <p>A table, <b>can_certify</b>, links trainers to certifications, showing which trainers are 
         allowed to certify what training.</p>
-        <p>Most everyday transactions should be accomplished using the appropriate web pages.  Some 
+        <p>Most everyday transactions should be accomplished using the appropriate web pages. Some 
         advanced operations are done manually using the MySQL database interface on localhost.</p>
         <p>Please report problems or suggestions to Gregory Leblanc</p>
     </div>

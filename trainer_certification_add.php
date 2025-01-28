@@ -1,19 +1,56 @@
 <?php
+/**
+ * Add Trainer Certification
+ *
+ * This script processes the addition of a certification for a trainer. 
+ * It validates the input data, performs the database insertion, and stores
+ * success or error messages in the session.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Include the database connection file
-include_once("config.php");
+require_once "config.php";
 
 // Start session to store success/error messages
 session_start();
 
 // Check if POST data is valid
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trainer_id'], $_POST['cert_id'])) {
+    /**
+     * Trainer ID from the POST request.
+     *
+     * @var int $trainer_id
+     */
     $trainer_id = intval($_POST['trainer_id']);
+
+    /**
+     * Certification ID from the POST request.
+     *
+     * @var int $cert_id
+     */
     $cert_id = intval($_POST['cert_id']);
 
     // Check if trainer_id and cert_id are valid
     if ($trainer_id > 0 && $cert_id > 0) {
-        // Add the certification to the can_certify table
+        /**
+         * SQL query to insert the trainer certification.
+         *
+         * @var string $query
+         */
         $query = "INSERT INTO can_certify (trainer_ptr, cert_ptr) VALUES (?, ?)";
+
+        /**
+         * Prepared statement for the database query.
+         *
+         * @var mysqli_stmt|false $stmt
+         */
         $stmt = $mysqli->prepare($query);
         if ($stmt) {
             $stmt->bind_param("ii", $trainer_id, $cert_id);

@@ -1,9 +1,25 @@
 <?php
+/**
+ * Add New Trainer
+ *
+ * This script allows authorized trainers to add new trainers to the system.
+ * It validates the operator's eligibility and sends a password reset email
+ * upon successful addition.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start the session
 session_start();
 
 // Include configuration and helper files
-include_once("config.php");
+require_once "config.php";
 
 // Redirect to login if the user is not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -11,17 +27,28 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+/**
+ * Remaining session time in seconds.
+ *
+ * @var int $timeUntilSessionExpires
+ */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Check if the user is an existing trainer
-$trainerCheckQuery = $mysqli->prepare("
+/**
+ * Check if the currently logged-in user is an existing trainer.
+ *
+ * @var bool $isTrainer True if the user is a trainer, false otherwise.
+ */
+$trainerCheckQuery = $mysqli->prepare(
+    "
     SELECT 
         COUNT(*) 
     FROM 
         trainers 
     WHERE 
         seq_nmbr = ?"
-    );
+);
 $trainerCheckQuery->bind_param("i", $_SESSION['user_id']);
 $trainerCheckQuery->execute();
 $trainerCheckQuery->bind_result($isTrainer);
@@ -34,6 +61,11 @@ if (!$isTrainer) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
+    /**
+     * ID of the operator to be added as a trainer.
+     *
+     * @var int $operator_id
+     */
     $operator_id = intval($_POST['operator_id']);
 
     // Check if the operator exists
@@ -59,7 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
             // Send password reset email
             $resetLink = "http://yourdomain.com/reset_password.php?email=" . urlencode($email);
             $subject = "Set Your Password for the Training Portal";
-            $message = "Hello $fname,\n\nYou have been added as a trainer in the Training Information Portal. Please set your password using the following link:\n\n$resetLink\n\nThank you.";
+            $message = "Hello $fname,\n\nYou have been added as a trainer in the Training Information Portal. 
+            Please set your password using the following link:\n\n$resetLink\n\nThank you.";
             mail($email, $subject, $message, "From: no-reply@yourdomain.com");
 
             $success = "Trainer added successfully, and an email has been sent.";
@@ -71,28 +104,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
 }
 
 // Fetch eligible operators
-$eligibleOperators = $mysqli->query("
+/**
+ * Query to fetch eligible operators for trainer addition.
+ *
+ * @var mysqli_result|false $eligibleOperators Result set of eligible operators.
+ */
+$eligibleOperators = $mysqli->query(
+    "
 SELECT 
-	o.seq_nmbr, 
-	o.fname, 
-	o.email 
+    o.seq_nmbr, 
+    o.fname, 
+    o.email 
 FROM 
-	operators o 
-	JOIN optraining ot ON o.seq_nmbr = ot.operator 
+    operators o 
+    JOIN optraining ot ON o.seq_nmbr = ot.operator 
 WHERE 
-	o.status = 'Active' 
-	AND o.email IS NOT NULL 
-	AND o.email != '' 
-	AND ot.certification = 3 
-	AND o.seq_nmbr NOT IN (
-		SELECT 
-			trainer_ptr 
-		FROM 
-			can_certify
-	) 
+    o.status = 'Active' 
+    AND o.email IS NOT NULL 
+    AND o.email != '' 
+    AND ot.certification = 3 
+    AND o.seq_nmbr NOT IN (
+        SELECT 
+            trainer_ptr 
+        FROM 
+            can_certify
+    ) 
 ORDER BY 
-	`o`.`fname` ASC
-");
+    `o`.`fname` ASC
+"
+);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -114,12 +154,12 @@ ORDER BY
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <div class="form-container">
         <h1>Add New Trainer</h1>
-        <?php if (isset($success)): ?>
+        <?php if (isset($success)) : ?>
             <p class="success"><?php echo $success; ?></p>
-        <?php elseif (isset($error)): ?>
+        <?php elseif (isset($error)) : ?>
             <p class="error"><?php echo $error; ?></p>
         <?php endif; ?>
         <form method="POST" action="">

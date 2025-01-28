@@ -1,5 +1,20 @@
 <?php
-// logout.php
+/**
+ * Logout Script
+ *
+ * This script handles user logout by clearing session data and optionally
+ * removing session cookies. After logout, the user is redirected to the
+ * home page or login page.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 session_start();
 
 // Destroy all session data

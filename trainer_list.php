@@ -1,17 +1,47 @@
 <?php
+/**
+ * Trainer List Page
+ *
+ * This script retrieves and displays a list of trainers along with their certifications.
+ * Active trainers are fetched from the database, and the data is displayed in a
+ * paginated and searchable table using DataTables.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start the session at the beginning of the page
 session_start();
 
-// Capture the current page URL
+/**
+ * Capture the current page URL to return the user to this page if redirected.
+ *
+ * @var string $currentUrl The encoded current page URL.
+ */
 $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
 
 // Include the database connection file
-include_once("config.php");
+require_once "config.php";
 
+/**
+ * Get the time remaining until the user's session expires.
+ *
+ * @var int $timeUntilSessionExpires Time in seconds until the session expires.
+ */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Fetch trainer list and their certifications
-$trainer_list = $mysqli->query("
+/**
+ * Fetch a list of active trainers and their associated certifications.
+ *
+ * @var mysqli_result|false $trainer_list Query result containing trainer data.
+ */
+$trainer_list = $mysqli->query(
+    "
     SELECT 
         o.fname AS TrainerName, 
         o.email AS TrainerEmail, 
@@ -25,7 +55,8 @@ $trainer_list = $mysqli->query("
         o.status = 'Active' 
     GROUP BY 
         o.seq_nmbr 
-");
+"
+);
 ?>
 <!doctype html>
 <html lang="en">
@@ -47,7 +78,7 @@ $trainer_list = $mysqli->query("
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
 
     <div class="form-container">
         <div class="back-button-container">

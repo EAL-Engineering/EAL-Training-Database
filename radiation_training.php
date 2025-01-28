@@ -1,32 +1,80 @@
 <?php
+/**
+ * Register Radiation Safety Training
+ *
+ * This script handles the registration of radiation safety training for operators.
+ * It provides an interface for authorized trainers to select operators and record
+ * the training date in the database.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
 // Include necessary files
-include_once("config.php");
-include_once("auth.php");
+require_once "config.php";
+require_once "auth.php";
 
 if ($mysqli->connect_error) {
     die("Database connection failed: " . $mysqli->connect_error);
 }
 
+/**
+ * Remaining session time in seconds.
+ * 
+ * @var int $timeUntilSessionExpires
+ */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
-$currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
+
+/**
+ * Encoded URL string of the current page for safe use in GET parameters.
+ * 
+ * @var string $currentUrl
+ */
+$currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
 // Check authorization
+/**
+ * Check if the user is authorized to record training for certification ID 18.
+ * 
+ * @var bool $authorizedTrainer True if authorized, false otherwise.
+ */
 $authorizedTrainer = isset($_SESSION['user_id']) && checkCertification($_SESSION['user_id'], 18);
 if (!$authorizedTrainer) {
     header("Location: login.php?return=$currentUrl");
     exit();
 }
 
+/**
+ * Message to be displayed after form submission.
+ * 
+ * @var string $message
+ */
 $message = ''; // Initialize message
 
 // Form submission logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    /**
+     * The date of the training entered by the user.
+     * 
+     * @var string $dateOfTraining
+     */
     $dateOfTraining = isset($_POST['date_of_training']) ? trim($_POST['date_of_training']) : '';
+
+    /**
+     * Array of selected operator IDs.
+     * 
+     * @var array $selectedOperators
+     */
     $selectedOperators = isset($_POST['operators']) ? $_POST['operators'] : [];
 
     if (!empty($dateOfTraining) && !empty($selectedOperators)) {
@@ -35,7 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($selectedOperators as $operator) {
             $operator = (int)$operator; // Ensure the ID is numeric
-            $stmt = $mysqli->prepare("INSERT INTO optraining (operator, certification, entered) VALUES (?, 18, ?) ON DUPLICATE KEY UPDATE entered = VALUES(entered)");
+            $stmt = $mysqli->prepare(
+                "INSERT INTO optraining (operator, certification, entered) 
+                VALUES (?, 18, ?) 
+                ON DUPLICATE KEY UPDATE entered = VALUES(entered)"
+            );
             $stmt->bind_param("is", $operator, $date);
             if ($stmt->execute()) {
                 $successCount++;
@@ -43,14 +95,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         }
 
-        $message = $successCount > 0 ? "Successfully registered $successCount operators." : "No operators were registered.";
+        $message = $successCount > 0 
+            ? "Successfully registered $successCount operators." 
+            : "No operators were registered.";
     } else {
         $message = "Please select at least one operator and enter a valid date.";
     }
 }
 
 // Fetch operators eligible for training and their most recent training date
-$operatorsResult = $mysqli->query("
+/**
+ * Fetch the list of active operators and their last training date.
+ * 
+ * @var mysqli_result|false $operatorsResult Result set of eligible operators.
+ */
+$operatorsResult = $mysqli->query(
+    "
     SELECT 
         o.seq_nmbr AS id, 
         o.name AS name, 
@@ -63,19 +123,32 @@ $operatorsResult = $mysqli->query("
         o.status = 'Active'
     GROUP BY 
         o.seq_nmbr
-");
+"
+);
 
 if (!$operatorsResult) {
     die("Query failed: " . $mysqli->error);
 }
 
 // Fetch data using a loop since `fetch_all` is unavailable in PHP 5.4
+/**
+ * Array of operators with their details.
+ * 
+ * @var array $operators
+ */
 $operators = [];
 while ($row = $operatorsResult->fetch_assoc()) {
     $operators[] = $row;
 }
 
-// Function to check authorization
+/**
+ * Check if a trainer is authorized to certify a specific certification.
+ *
+ * @param int $trainerId       ID of the trainer
+ * @param int $certificationId Certification ID
+ * 
+ * @return bool True if the trainer is authorized, false otherwise.
+ */
 function checkCertification($trainerId, $certificationId)
 {
     global $mysqli;
@@ -91,11 +164,13 @@ function checkCertification($trainerId, $certificationId)
         return false;
     }
 
-    $stmt = $mysqli->prepare("
+    $stmt = $mysqli->prepare(
+        "
         SELECT COUNT(*) 
         FROM can_certify 
         WHERE trainer_ptr = ? AND cert_ptr = ?
-    ");
+        "
+    );
     $stmt->bind_param("ii", $operatorId, $certificationId);
     $stmt->execute();
     $stmt->bind_result($count);
@@ -126,12 +201,12 @@ function checkCertification($trainerId, $certificationId)
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
 
     <h1>Record Radiation Safety Training</h1>
 
     <div class="form-container">
-        <?php if (!empty($message)): ?>
+        <?php if (!empty($message)) : ?>
             <p class="message"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
 

@@ -1,6 +1,21 @@
 <?php
+/**
+ * Save Personnel Data
+ * 
+ * This script handles saving personnel data to the database. It updates the
+ * operators table with the provided information from a submitted form.
+ * 
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Include the database connection file
-include_once("config.php");
+require_once "config.php";
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
@@ -9,7 +24,20 @@ error_reporting(E_ALL);
 
 // Check if the form is submitted via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitize and validate inputs
+    /**
+     * Sanitize and validate inputs from the form submission.
+     *
+     * @var int    $seq_nmbr   Sequence number of the operator (required)
+     * @var string $name       Name of the operator (required)
+     * @var string $fname      First name of the operator (required)
+     * @var string $email      Email address of the operator (required)
+     * @var string $altemail   Alternate email address of the operator (optional)
+     * @var string $phones     Phone numbers of the operator (optional)
+     * @var string $status     Status of the operator (required)
+     * @var string $office     Office address of the operator (optional)
+     * @var string $home       Home address of the operator (optional)
+     * @var string $comments   Additional comments about the operator (optional)
+     */
     $seq_nmbr = isset($_POST['seq_nmbr']) ? intval($_POST['seq_nmbr']) : null;
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
     $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
@@ -23,10 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate required fields
     if (!$seq_nmbr || empty($name) || empty($fname) || empty($email) || empty($status)) {
-        echo "<pre>";
-print_r($_POST);
-echo "</pre>";
-die();
         die("Missing required fields.");
     }
 
@@ -38,7 +62,11 @@ die();
         die("Invalid alternate email address.");
     }
 
-    // Prepare the SQL statement to update the operator
+    /**
+     * Prepare the SQL statement to update the operator's information in the database.
+     * 
+     * @var string $query SQL update query.
+     */
     $query = "
         UPDATE operators
         SET 
@@ -56,10 +84,23 @@ die();
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
-        die("Database error: " . $mysqli->error); // Debugging helper
+        die("Database error: " . $mysqli->error);
     }
 
-    // Bind the parameters to the query
+    /**
+     * Bind the parameters to the prepared SQL statement.
+     *
+     * @param string $name      Name of the operator.
+     * @param string $fname     First name of the operator.
+     * @param string $email     Email address of the operator.
+     * @param string $altemail  Alternate email address of the operator.
+     * @param string $phones    Phone numbers of the operator.
+     * @param string $status    Status of the operator.
+     * @param string $office    Office address of the operator.
+     * @param string $home      Home address of the operator.
+     * @param string $comments  Additional comments about the operator.
+     * @param int    $seq_nmbr  Sequence number of the operator.
+     */
     $stmt->bind_param(
         "sssssssssi",
         $name,

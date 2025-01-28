@@ -1,6 +1,20 @@
 <?php
-// Include database connection
-include_once("config.php");
+/**
+ * Login page for the OUAL Training Management System
+ * 
+ * This script handles user authentication by validating usernames and passwords
+ * against the `trainers` table in the database. Successful login initializes
+ * session variables and redirects the user to the desired page.
+ * 
+ * PHP version 5.4+
+ * 
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+require_once "config.php";
 session_start();
 
 if (isset($_GET['return'])) {
@@ -77,9 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <h1>Login</h1>
-    <?php if (isset($error)): ?>
+    <?php if (isset($error)) : ?>
         <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
     <form method="post">

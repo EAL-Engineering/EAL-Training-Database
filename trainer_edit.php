@@ -1,30 +1,58 @@
 <?php
+/**
+ * Trainer Certification Management
+ *
+ * This script allows authorized users to edit certifications for a specific trainer.
+ * Users can view and remove current certifications or add new ones from the list
+ * of available certifications.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start session to access success/error messages
 session_start();
 
-// Include the database connection file
-include_once("config.php");
+/**
+ * Include the database connection file to connect to the database.
+ */
+require_once "config.php";
 
 // Capture the current page URL
 $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
 
-// Check if the user is logged in and has the required access level (1 or 2)
+/**
+ * Check if the user is logged in and has the required access level (1 or 2).
+ * Redirects unauthorized users to the login page.
+ */
 if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
-    // Redirect to login page with a return parameter
     header("Location: login.php?return=$currentUrl");
     exit();
 }
 
+// Get the session expiration time
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Check if 'id' is provided in the URL
+/**
+ * Check if 'id' is provided in the URL.
+ * If not, terminate the script with an error message.
+ */
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid request. No trainer ID provided.");
 }
 
-$trainer_id = intval($_GET['id']); // Sanitize the ID
+$trainer_id = intval($_GET['id']); // Sanitize the trainer ID
 
-// Fetch trainer's name
+/**
+ * Fetch the trainer's name using their ID.
+ *
+ * @var string $trainer_name The name of the trainer.
+ */
 $query = "SELECT fname FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
@@ -38,7 +66,11 @@ if (!$stmt->fetch()) {
 }
 $stmt->close();
 
-// Fetch existing certifications from the can_certify table
+/**
+ * Fetch the trainer's current certifications.
+ *
+ * @var array $current_certifications Array of the trainer's current certifications.
+ */
 $query = "
     SELECT c.certification, c.seq_nmbr AS cert_id
     FROM can_certify cc
@@ -49,7 +81,6 @@ $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
 }
-
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
 $stmt->bind_result($certification, $cert_id);
@@ -63,7 +94,11 @@ while ($stmt->fetch()) {
 }
 $stmt->close();
 
-// Fetch all available certifications (that are not already assigned to the trainer)
+/**
+ * Fetch all certifications available for assignment to the trainer.
+ *
+ * @var array $available_certifications Array of certifications not assigned to the trainer.
+ */
 $query = "
     SELECT c.certification, c.seq_nmbr AS cert_id
     FROM certifications c
@@ -75,7 +110,6 @@ $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
 }
-
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
 $stmt->bind_result($available_certification, $available_cert_id);
@@ -89,13 +123,19 @@ while ($stmt->fetch()) {
 }
 $stmt->close();
 
-// Display any session messages (success or error)
+/**
+ * Display any success or error messages stored in the session.
+ *
+ * @var string $message HTML string containing the message to display.
+ */
 $message = '';
 if (isset($_SESSION['message'])) {
-    $message = '<p style="color: ' . ($_SESSION['message']['type'] == 'success' ? 'green' : 'red') . ';">' . htmlspecialchars($_SESSION['message']['text']) . '</p>';
-    
-    // Clear the message after it has been displayed
-    unset($_SESSION['message']);
+    $message = '<p style="color: ' 
+    . ($_SESSION['message']['type'] == 'success' ? 'green' : 'red') 
+    . ';">' 
+    . htmlspecialchars($_SESSION['message']['text']) 
+    . '</p>';
+    unset($_SESSION['message']); // Clear the message after it has been displayed
 }
 ?>
 
@@ -116,7 +156,7 @@ if (isset($_SESSION['message'])) {
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
             <a href="trainer_list.php">Back to Trainer List</a>
@@ -129,7 +169,7 @@ if (isset($_SESSION['message'])) {
 
         <!-- Current Certifications -->
         <h2>Current Certifications</h2>
-        <?php if (!empty($current_certifications)): ?>
+        <?php if (!empty($current_certifications)) : ?>
             <div class="certifications-list">
                 <ul>
                     <?php foreach ($current_certifications as $cert): ?>
@@ -152,7 +192,7 @@ if (isset($_SESSION['message'])) {
 
         <!-- Available Certifications -->
         <h2>Available Certifications</h2>
-        <?php if (!empty($available_certifications)): ?>
+        <?php if (!empty($available_certifications)) : ?>
             <div class="certifications-list">
                 <ul>
                     <?php foreach ($available_certifications as $cert): ?>

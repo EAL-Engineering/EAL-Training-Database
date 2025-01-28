@@ -1,6 +1,18 @@
 <?php
-// Include the database connection file
-include_once("config.php");
+/**
+ * Password Reset Script
+ *
+ * This script handles the resetting of a user's password using a token.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+require_once "config.php";
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);

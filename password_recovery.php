@@ -1,5 +1,19 @@
 <?php
-include("config.php");
+/**
+ * Password Recovery Script
+ *
+ * This script handles user password recovery requests.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
+require "config.php";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']); // Sanitize email input
@@ -22,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_result($trainer_id, $username, $optbl_ptr);
 
     if ($stmt->fetch()) {
-        // Generate a secure reset token and expiration timestamp
         // Generate a secure reset token and expiration time
         $reset_token = bin2hex(openssl_random_pseudo_bytes(16)); // Generates 16 bytes of random data
         if (!$reset_token) {

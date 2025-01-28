@@ -1,9 +1,25 @@
 <?php
+/**
+ * Certification Add Script
+ * 
+ * This script provides functionality for adding certifications to a specific
+ * operator. It retrieves existing certifications and trainers for the operator, 
+ * displays them in a form, and allows users to add new certifications.
+ * 
+ * PHP version 5.4+
+ * 
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start the session
 session_start();
 
 // Include the database connection file
-include_once("config.php");
+require_once "config.php";
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
@@ -53,7 +69,9 @@ if (!$stmt) {
 }
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
-$stmt->bind_result($cert_name, $status, $date_entered, $expiration_date, $completed_by_name);
+$stmt->bind_result(
+    $cert_name, $status, $date_entered, $expiration_date, $completed_by_name
+);
 
 $certifications = [];
 while ($stmt->fetch()) {
@@ -143,7 +161,7 @@ foreach ($available_certifications as $cert) {
     <link rel="stylesheet" href="dataTables.dataTables.css">
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="common.js" defer></script>
@@ -155,7 +173,7 @@ foreach ($available_certifications as $cert) {
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <div>
         <div class="back-button-container">
             <a href="personnel_list.php">To Personnel List</a>
@@ -170,7 +188,7 @@ foreach ($available_certifications as $cert) {
 
         <!-- Display Existing Certifications -->
         <h2>Existing Certifications</h2>
-        <?php if (!empty($certifications)): ?>
+        <?php if (!empty($certifications)) : ?>
             <table>
                 <thead>
                     <tr>

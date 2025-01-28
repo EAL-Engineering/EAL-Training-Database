@@ -1,9 +1,23 @@
 <?php
+/**
+ * Password Change Script
+ *
+ * This script allows authenticated users to change their password.
+ *
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start the session
 session_start();
 
-include("auth.php");
-include("config.php");
+require "auth.php";
+require "config.php";
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
@@ -56,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <h1>Change Password</h1>
     <form method="post" class="pw_change">
         <label for="current_password">Current Password:</label>

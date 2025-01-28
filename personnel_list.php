@@ -1,17 +1,50 @@
 <?php
+/**
+ * Personnel List
+ * 
+ * This script displays a table of active personnel and their details, including their
+ * name, email, and highest certification. The data is fetched from a
+ * MySQL database and displayed using DataTables for enhanced interactivity.
+ * 
+ * PHP version 5.4+
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Start the session at the beginning of the page
 session_start();
 
-// Capture the current page URL
-$currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
+/**
+ * Capture the current page URL for safe use in GET parameters.
+ * 
+ * @var string $currentUrl Encoded URL string of the current page.
+ */
+$currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
 // Include the database connection file
-include_once("config.php");
+require_once "config.php";
 
+/**
+ * Get the remaining time until the session expires.
+ * 
+ * @return int Remaining session time in seconds.
+ */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Fetch operator list
-$opertor_list = $mysqli->query("
+/**
+ * Fetch the list of active operators and their highest certifications.
+ * 
+ * The query retrieves the operator's name, email, and highest
+ * certification, filtering certifications to a maximum seq_nmbr of 3.
+ * 
+ * @var mysqli_result $opertor_list Result set of the query.
+ */
+$opertor_list = $mysqli->query(
+    "
     SELECT 
         o.name AS OperatorName, 
         o.email AS OperatorEmail, 
@@ -29,7 +62,8 @@ $opertor_list = $mysqli->query("
         AND inner_c.seq_nmbr <= 3 
     ) 
     ORDER BY o.name
-    ");
+    "
+);
 ?>
 <!doctype html>
 <html lang="en">
@@ -51,7 +85,7 @@ $opertor_list = $mysqli->query("
     </script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php require 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list_all.php">To ALL Personnel List</a>
@@ -65,13 +99,17 @@ $opertor_list = $mysqli->query("
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Certification</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2): ?>
+                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
                     <th>User</th>
                 <?php endif; ?>
             </tr>
         </thead>
         <tbody>
             <?php
+            /**
+             * Generate table rows dynamically based on the fetched operator data.
+             * Each row includes the operator's name, email, and certification.
+             */
             $rowCounter = 0; // Unique ID for each row's email
             while ($res = mysqli_fetch_array($opertor_list)) {
                 $email = explode('@', $res['OperatorEmail']);

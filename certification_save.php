@@ -1,6 +1,38 @@
 <?php
+/**
+ * Processes the addition of a certification to an operator in the database.
+ *
+ * This script validates the form input submitted via POST, retrieves the expiration period
+ * for the selected certification, and adds a new record to the `optraining` table. On success,
+ * it redirects back to the `certification_add.php` page with a success message. If an error occurs,
+ * it redirects back with an error message.
+ * 
+ * PHP version 5.4+
+ *
+ * Requirements:
+ * - Database connection via `config.php`.
+ * - `POST` request containing the following required fields:
+ *   - `operator_id` (int): The ID of the operator receiving the certification.
+ *   - `cert_id` (int): The ID of the certification being assigned.
+ *   - `completed_by` (int): The ID of the trainer completing the certification.
+ *
+ * Error Handling:
+ * - If required fields are missing or invalid, the script terminates with an error message.
+ * - If database queries fail, the script terminates with a database error message.
+ *
+ * Redirect Behavior:
+ * - On success: Redirects to `certification_add.php` with `success=1`.
+ * - On failure: Redirects to `certification_add.php` with `error=1`.
+ *
+ * @category Certification
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ */
+
 // Include the database connection file
-include_once("config.php");
+require_once "config.php";
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
