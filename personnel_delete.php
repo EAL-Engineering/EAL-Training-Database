@@ -60,12 +60,31 @@ if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
 }
 
 // Fetch personnel list
-$result = $mysqli->query(
-    "SELECT o.seq_nmbr AS id, o.name AS OperatorName, o.email AS OperatorEmail, " .
-    "(SELECT c.certification FROM optraining ot " .
-    "JOIN certifications c ON ot.certification = c.seq_nmbr " .
-    "WHERE ot.operator = o.seq_nmbr ORDER BY c.seq_nmbr DESC LIMIT 1) AS HighestCertification " .
-    "FROM operators o WHERE o.status = 'Active' ORDER BY o.name"
+$result = $mysqli->query("
+SELECT 
+    o.seq_nmbr AS id, 
+    o.name AS OperatorName, 
+    o.email AS OperatorEmail,
+    (
+        SELECT 
+            c.certification 
+        FROM
+            optraining ot 
+        JOIN 
+            certifications c ON ot.certification = c.seq_nmbr
+        WHERE 
+            ot.operator = o.seq_nmbr 
+        ORDER BY 
+            c.seq_nmbr DESC LIMIT 1
+    ) 
+    AS HighestCertification
+    FROM 
+        operators o 
+    WHERE 
+        o.status = 'Active' 
+    ORDER BY 
+    o.name
+"
 );
 ?>
 <!doctype html>
@@ -92,7 +111,6 @@ $result = $mysqli->query(
             <tr>
                 <th>Full Name</th>
                 <th>Email</th>
-                <th>Certification</th>
                 <?php if ($_SESSION['role_id'] <= 2) : ?>
                     <th>Delete</th>
                 <?php endif; ?>
@@ -103,7 +121,6 @@ $result = $mysqli->query(
                 <tr>
                     <td><?php echo htmlspecialchars($res['OperatorName']); ?></td>
                     <td><?php echo '<a href="mailto:' . htmlspecialchars($res['OperatorEmail']) . '">' . htmlspecialchars($res['OperatorEmail']) . '</a>'; ?></td>
-                    <td><?php echo htmlspecialchars($res['HighestCertification']); ?></td>
                     <?php if ($_SESSION['role_id'] <= 2) : ?>
                         <td>
                             <button onclick="confirmDeletion(<?php echo $res['id']; ?>, '<?php echo htmlspecialchars(addslashes($res['OperatorName'])); ?>')">Delete</button>
