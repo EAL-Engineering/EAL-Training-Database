@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $reset_link = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token=" . urlencode($reset_token);
         $subject = "Password Recovery Request";
         $message = "Hello, $username,\n\nClick the following link to reset your password:\n\n$reset_link\n\nThis link is valid for 1 hour.";
-        $headers = "From: no-reply@yourdomain.com";
+        $headers = "From: no-reply@ohio.edu";
 
         if (!mail($email, $subject, $message, $headers)) {
             error_log("Failed to send email to $email");
