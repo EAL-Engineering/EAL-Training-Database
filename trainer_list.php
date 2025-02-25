@@ -50,7 +50,7 @@ $trainer_list = $mysqli->query(
     FROM 
         operators o 
         JOIN can_certify cc ON o.seq_nmbr = cc.trainer_ptr 
-        JOIN certifications c ON cc.cert_ptr = c.seq_nmbr 
+        LEFT JOIN certifications c ON cc.cert_ptr = c.seq_nmbr 
     WHERE 
         o.status = 'Active' 
     GROUP BY 
