@@ -8,7 +8,7 @@
  * @package  TrainingManagementSystem
  * @author   Gregory Leblanc <leblanc+php@ohio.edu>
  * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
- * @link     https://inpp.ohio.edu/~leblanc/eal_2020
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
 // Start the session
@@ -17,71 +17,106 @@ session_start();
 // Include configuration and helper files
 require_once "config.php";
 
-// Redirect to login if the user is not logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php?return=" . urlencode($_SERVER['REQUEST_URI']));
+/**
+ * Encoded URL string of the current page for safe use in GET parameters.
+ * 
+ * @var string $currentUrl
+ */
+$currentUrl = urlencode($_SERVER['REQUEST_URI']);
+
+// Ensure user is logged in and has the correct role
+if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] > 2) {
+    header("Location: login.php?return=$currentUrl");
     exit();
 }
 
 /**
- * Remaining session time in seconds.
+ * Time until the session expires
  *
  * @var int $timeUntilSessionExpires
  */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Check if the user is an existing trainer
-/**
- * Check if the currently logged-in user is an existing trainer.
- *
- * @var bool $isTrainer True if the user is a trainer, false otherwise.
- */
-$trainerCheckQuery = $mysqli->prepare(
-    "
-    SELECT 
-        COUNT(*) 
-    FROM 
-        trainers 
-    WHERE 
-        seq_nmbr = ?"
-);
-$trainerCheckQuery->bind_param("i", $_SESSION['user_id']);
-$trainerCheckQuery->execute();
-$trainerCheckQuery->bind_result($isTrainer);
-$trainerCheckQuery->fetch();
-$trainerCheckQuery->close();
-
-if (!$isTrainer) {
-    die("Access denied: Only existing trainers can add new trainers.");
-}
-
-
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("Invalid request.");
-}
-
-$seq_nmbr = intval($_GET['id']);
-
-// Begin transaction
-mysqli_autocommit($conn, false);
-
-$queries = [
-    "DELETE FROM annualradsafety WHERE op_ptr = $seq_nmbr",
-    "DELETE FROM optraining WHERE operator = $seq_nmbr",
-    "DELETE FROM trainers WHERE optbl_ptr = $seq_nmbr",
-    "DELETE FROM operators WHERE seq_nmbr = $seq_nmbr"
-];
-
-foreach ($queries as $query) {
-    if (!mysqli_query($conn, $query)) {
-        mysqli_rollback($conn);
-        die("Error deleting record: " . mysqli_error($conn));
+// Handle deletion request
+if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
+    $id = intval($_GET['id']);
+    
+    $mysqli->autocommit(false);
+    
+    $deleteSuccess = true;
+    $deleteSuccess &= $mysqli->query("DELETE FROM annualradsafety WHERE op_ptr = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM optraining WHERE operator = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM trainers WHERE optbl_ptr = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM operators WHERE seq_nmbr = $id");
+    
+    if ($deleteSuccess) {
+        $mysqli->commit();
+    } else {
+        $mysqli->rollback();
     }
+    
+    header("Location: personnel_delete.php");
+    exit();
 }
 
-mysqli_commit($conn);
-mysqli_autocommit($conn, true);
-
-header("Location: personnel_list.php?msg=deleted");
-exit;
+// Fetch personnel list
+$result = $mysqli->query(
+    "SELECT o.seq_nmbr AS id, o.name AS OperatorName, o.email AS OperatorEmail, " .
+    "(SELECT c.certification FROM optraining ot " .
+    "JOIN certifications c ON ot.certification = c.seq_nmbr " .
+    "WHERE ot.operator = o.seq_nmbr ORDER BY c.seq_nmbr DESC LIMIT 1) AS HighestCertification " .
+    "FROM operators o WHERE o.status = 'Active' ORDER BY o.name"
+);
 ?>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Personnel</title>
+    <link rel="stylesheet" href="dataTables.dataTables.css">
+    <link rel="stylesheet" href="common.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script>
+        function confirmDeletion(id, name) {
+            if (confirm("Are you sure you want to delete " + name + "? This action cannot be undone.")) {
+                window.location.href = "personnel_delete.php?id=" + id + "&confirm=1";
+            }
+        }
+    </script>
+</head>
+<body>
+    <?php require 'header.php'; ?>
+    <table id="personnel" class="display">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Certification</th>
+                <?php if ($_SESSION['role_id'] <= 2) : ?>
+                    <th>Delete</th>
+                <?php endif; ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($res = mysqli_fetch_array($result)) : ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($res['OperatorName']); ?></td>
+                    <td><?php echo '<a href="mailto:' . htmlspecialchars($res['OperatorEmail']) . '">' . htmlspecialchars($res['OperatorEmail']) . '</a>'; ?></td>
+                    <td><?php echo htmlspecialchars($res['HighestCertification']); ?></td>
+                    <?php if ($_SESSION['role_id'] <= 2) : ?>
+                        <td>
+                            <button onclick="confirmDeletion(<?php echo $res['id']; ?>, '<?php echo htmlspecialchars(addslashes($res['OperatorName'])); ?>')">Delete</button>
+                        </td>
+                    <?php endif; ?>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function() {
+            new DataTable('#personnel', { scrollX: true, pageLength: 15, lengthMenu: [10, 15, 25, 50, 100] });
+        });
+    </script>
+</body>
+</html>
