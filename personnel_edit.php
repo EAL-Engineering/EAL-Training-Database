@@ -24,6 +24,13 @@ session_start();
 require_once "config.php";
 
 /**
+ * Encoded URL string of the current page for safe use in GET parameters.
+ * 
+ * @var string $currentUrl
+ */
+$currentUrl = urlencode($_SERVER['REQUEST_URI']);
+
+/**
  * Check if the user is logged in and authorized to edit personnel details.
  * Redirects unauthorized users to the login page.
  */
@@ -32,6 +39,11 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role
     exit();
 }
 
+/**
+ * Time until the session expires
+ *
+ * @var int $timeUntilSessionExpires
+ */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 /**
