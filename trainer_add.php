@@ -81,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
         $operatorCheckQuery->bind_result($fname, $email);
         $operatorCheckQuery->fetch();
         $operatorCheckQuery->close();
+        $login_name = substr($email, 0, strpos($email, '@'));
 
         // Start a transaction
         $mysqli->autocommit(false);
@@ -97,8 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
             // Insert into trainers table
-            $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (seq_nmbr, reset_token, reset_expiration) VALUES (?, ?, ?)");
-            $addTrainerEntry->bind_param("iss", $operator_id, $token, $expires);
+            $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (seq_nmbr, login_name, reset_token, reset_expiration) VALUES (?, ?, ?, ?)");
+            $addTrainerEntry->bind_param("isss", $operator_id, $login_name, $token, $expires);
             $addTrainerEntry->execute();
             $addTrainerEntry->close();
 
