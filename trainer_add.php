@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
             $addTrainerQuery->close();
 
             // Send password reset email
-            $resetLink = "https://inpp.ohio.edu/~leblanc/eal_2024/reset_password.php?email=" . urlencode($email);
+            $resetLink = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?email=" . urlencode($email);
             $subject = "Set Your Password for the Training Portal";
             $message = "Hello $fname,\n\nYou have been added as a trainer in the Training Information Portal. 
             Please set your password using the following link:\n\n$resetLink\n\nThank you.";
