@@ -83,17 +83,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
         $operatorCheckQuery->close();
 
         // Start a transaction
-        $mysqli->begin_transaction();
+        $mysqli->autocommit(false);
 
         try {
             // Add the operator to the can_certify table
-            $addCan_certifyQuer = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr) VALUES (?)");
-            $addCan_certifyQuer->bind_param("i", $operator_id);
+            $addCan_certifyQuery = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr) VALUES (?)");
+            $addCan_certifyQuery->bind_param("i", $operator_id);
             $addCan_certifyQuery->execute();
             $addCan_certifyQuery->close();
 
             // Generate password reset token
-            $token = bin2hex(random_bytes(32));
+            $token = bin2hex(openssl_random_pseudo_bytes(16));
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
             // Insert into trainers table
@@ -104,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
 
             // Commit the transaction since both queries succeeded
             $mysqli->commit();
+            $mysqli->autocommit(true);
         
             // Send password reset email
             $resetLink = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token=" . urlencode($token);
@@ -116,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
         } catch (Exception $e) {
             // Rollback if any query fails
             $mysqli->rollback();
+            $mysqli->autocommit(true); // Ensure autocommit is re-enabled
             $error = "Failed to add trainer. Please try again.";
         }
     }
