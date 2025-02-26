@@ -82,22 +82,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
         $operatorCheckQuery->fetch();
         $operatorCheckQuery->close();
 
-        // Add the operator as a trainer
-        $addTrainerQuery = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr) VALUES (?)");
-        $addTrainerQuery->bind_param("i", $operator_id);
-        if ($addTrainerQuery->execute()) {
-            $addTrainerQuery->close();
+        // Start a transaction
+        $mysqli->begin_transaction();
 
+        try {
+            // Add the operator to the can_certify table
+            $addCan_certifyQuer = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr) VALUES (?)");
+            $addCan_certifyQuer->bind_param("i", $operator_id);
+            $addCan_certifyQuery->execute();
+            $addCan_certifyQuery->close();
+
+            // Generate password reset token
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            // Insert into trainers table
+            $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (seq_nmbr, reset_token, reset_expiration) VALUES (?, ?, ?)");
+            $addTrainerEntry->bind_param("iss", $operator_id, $token, $expires);
+            $addTrainerEntry->execute();
+            $addTrainerEntry->close();
+
+            // Commit the transaction since both queries succeeded
+            $mysqli->commit();
+        
             // Send password reset email
-            $resetLink = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?email=" . urlencode($email);
+            $resetLink = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token=" . urlencode($token);
             $subject = "Set Your Password for the Training Portal";
             $message = "Hello $fname,\n\nYou have been added as a trainer in the Training Information Portal. 
             Please set your password using the following link:\n\n$resetLink\n\nThank you.";
             mail($email, $subject, $message, "From: no-reply@ohio.edu");
 
             $success = "Trainer added successfully, and an email has been sent.";
-        } else {
-            $addTrainerQuery->close();
+        } catch (Exception $e) {
+            // Rollback if any query fails
+            $mysqli->rollback();
             $error = "Failed to add trainer. Please try again.";
         }
     }
@@ -155,6 +173,15 @@ ORDER BY
 </head>
 <body>
     <?php require 'header.php'; ?>
+    <div>
+        <div class="back-button-container">
+            <a href="personnel_list.php">To Personnel List</a>
+            <a href="personnel_edit.php?id=<?php echo htmlspecialchars($operator_id); ?>" class="back-button">
+                Back to Edit Operator
+            </a>
+            <a href="index.php">To main page</a>
+        </div>
+    </div>
     <div class="form-container">
         <h1>Add New Trainer</h1>
         <?php if (isset($success)) : ?>
