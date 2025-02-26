@@ -31,9 +31,9 @@ if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] > 2) {
 }
 
 /**
- * Time until the session expires
+ * Get the time remaining until the user's session expires.
  *
- * @var int $timeUntilSessionExpires
+ * @var int $timeUntilSessionExpires Time in seconds until the session expires.
  */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
@@ -94,18 +94,34 @@ SELECT
     <title>Delete Personnel</title>
     <link rel="stylesheet" href="dataTables.dataTables.css">
     <link rel="stylesheet" href="common.css">
+    <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="common.js" defer></script>
     <script>
         function confirmDeletion(id, name) {
-            if (confirm("Are you sure you want to delete " + name + "? This action cannot be undone.")) {
+            var userInput = prompt("Type 'YES' (all caps) to confirm deletion of " + name + ":");
+            if (userInput !== null && userInput === "YES") {
                 window.location.href = "personnel_delete.php?id=" + id + "&confirm=1";
+            } else {
+                alert("Deletion canceled.");
             }
-        }
+        };
+        // Pass the session expiration time to the JavaScript function
+        document.addEventListener('DOMContentLoaded', () => {
+            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+        });
     </script>
 </head>
 <body>
     <?php require 'header.php'; ?>
+    <div class="form-container">
+        <div class="back-button-container">
+            <a href="personnel_list_all.php">To ALL Personnel List</a>
+            <a href="index.php">To main page</a>
+        </div>
+    </div>
     <table id="personnel" class="display">
         <thead>
             <tr>
@@ -132,8 +148,25 @@ SELECT
     </table>
     <script>
         $(document).ready(function() {
-            new DataTable('#personnel', { scrollX: true, pageLength: 15, lengthMenu: [10, 15, 25, 50, 100] });
+            // Populate email links first
+            document.querySelectorAll('td[id^="email-"]').forEach(cell => {
+                const user = cell.getAttribute('data-user');
+                const domain = cell.getAttribute('data-domain');
+                const email = `${user}@${domain}`;
+                const link = document.createElement('a');
+                link.href = `mailto:${email}`;
+                link.textContent = email;
+                cell.appendChild(link);
+            });
+
+            // Now initialize the DataTable after the content is populated
+            new DataTable('#personnel', {
+                scrollX: true,
+                pageLength: 15,
+                lengthMenu: [10, 15, 25, 50, 75, 100]
+            });
         });
+
     </script>
 </body>
 </html>
