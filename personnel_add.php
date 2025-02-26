@@ -107,16 +107,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 $operator_id = $stmt->insert_id;
 
-                // Insert default certification
+                // Insert default certification with trainer and status
                 $default_certification = 1; // Replace with actual certification ID
+                $trainer_id = $_SESSION['user_id']; // Currently logged-in user
+                $status = 'Active';
+
                 $stmt_cert = $mysqli->prepare(
                     "
-                    INSERT INTO optraining (operator, certification) 
-                    VALUES (?, ?)
-                "
+                    INSERT INTO optraining (operator, certification, trainer, status) 
+                    VALUES (?, ?, ?, ?)
+                    "
                 );
                 if ($stmt_cert) {
-                    $stmt_cert->bind_param("ii", $operator_id, $default_certification);
+                    $stmt_cert->bind_param("iiis", $operator_id, $default_certification, $trainer_id, $status);
                     $stmt_cert->execute();
                     $stmt_cert->close();
                 }
