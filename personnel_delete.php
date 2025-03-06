@@ -47,7 +47,7 @@ if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
     $deleteSuccess &= $mysqli->query("DELETE FROM annualradsafety WHERE op_ptr = $id");
     $deleteSuccess &= $mysqli->query("DELETE FROM optraining WHERE operator = $id");
     $deleteSuccess &= $mysqli->query("DELETE FROM trainers WHERE optbl_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM can_certify WHERE tainer_ptr = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM can_certify WHERE trainer_ptr = $id");
     $deleteSuccess &= $mysqli->query("DELETE FROM operators WHERE seq_nmbr = $id");
     
     if ($deleteSuccess) {
