@@ -61,31 +61,32 @@ if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
 }
 
 // Fetch personnel list
-$result = $mysqli->query("
-SELECT 
-    o.seq_nmbr AS id, 
-    o.name AS OperatorName, 
-    o.email AS OperatorEmail,
-    (
-        SELECT 
-            c.certification 
-        FROM
-            optraining ot 
-        JOIN 
-            certifications c ON ot.certification = c.seq_nmbr
+$result = $mysqli->query(
+    "
+    SELECT 
+        o.seq_nmbr AS id, 
+        o.name AS OperatorName, 
+        o.email AS OperatorEmail,
+        (
+            SELECT 
+                c.certification 
+            FROM
+                optraining ot 
+            JOIN 
+                certifications c ON ot.certification = c.seq_nmbr
+            WHERE 
+                ot.operator = o.seq_nmbr 
+            ORDER BY 
+                c.seq_nmbr DESC LIMIT 1
+        ) 
+        AS HighestCertification
+        FROM 
+            operators o 
         WHERE 
-            ot.operator = o.seq_nmbr 
+            o.status = 'Active' 
         ORDER BY 
-            c.seq_nmbr DESC LIMIT 1
-    ) 
-    AS HighestCertification
-    FROM 
-        operators o 
-    WHERE 
-        o.status = 'Active' 
-    ORDER BY 
-    o.name
-"
+        o.name
+    "
 );
 ?>
 <!doctype html>
@@ -134,18 +135,31 @@ SELECT
             </tr>
         </thead>
         <tbody>
-            <?php while ($res = mysqli_fetch_array($result)) : ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($res['OperatorName']); ?></td>
-                    <td><?php echo '<a href="mailto:' . htmlspecialchars($res['OperatorEmail']) . '">' . htmlspecialchars($res['OperatorEmail']) . '</a>'; ?></td>
-                    <?php if ($_SESSION['role_id'] <= 2) : ?>
-                        <td>
-                            <button onclick="confirmDeletion(<?php echo $res['id']; ?>, '<?php echo htmlspecialchars(addslashes($res['OperatorName'])); ?>')">Delete</button>
-                        </td>
-                    <?php endif; ?>
-                </tr>
-            <?php endwhile; ?>
-        </tbody>
+    <?php while ($res = mysqli_fetch_array($result)) : ?>
+        <tr>
+            <td>
+                <?php echo htmlspecialchars($res['OperatorName']); ?>
+            </td>
+            <td>
+                <?php 
+                    $operatorEmail = htmlspecialchars($res['OperatorEmail']);
+                    echo '<a href="mailto:' . $operatorEmail . '">' . $operatorEmail . '</a>';
+                ?>
+            </td>
+            <?php if ($_SESSION['role_id'] <= 2) : ?>
+                <td>
+                    <?php 
+                        $operatorId = $res['id'];
+                        $operatorName = htmlspecialchars(addslashes($res['OperatorName']));
+                    ?>
+                    <button onclick="confirmDeletion(<?php echo $operatorId; ?>, '<?php echo $operatorName; ?>')">
+                        Delete
+                    </button>
+                </td>
+            <?php endif; ?>
+        </tr>
+    <?php endwhile; ?>
+</tbody>
     </table>
     <script>
         $(document).ready(function() {
