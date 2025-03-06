@@ -39,6 +39,11 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role
 }
 
 /**
+ * Create the added by variable to enter into the database.
+ */
+$addedby = isset($_SESSION['fname']) ? $_SESSION['fname'] : 'Unknown';
+
+/**
  * Time until the session expires
  *
  * @var int $timeUntilSessionExpires
@@ -98,12 +103,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Insert into the database
         $stmt = $mysqli->prepare(
             "
-            INSERT INTO operators (fname, name, email, altemail, phones, office, home, comments, status, entered) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        "
+            INSERT INTO operators (
+	            fname, name, email, altemail, phones, 
+                office, home, comments, status, entered, 
+                addedby
+            ) 
+            VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "
         );
         if ($stmt) {
-            $stmt->bind_param("ssssssssss", $fname, $name, $email, $altemail, $phone, $office, $home, $comments, $status, $entered);
+            $stmt->bind_param(
+                "sssssssssss",
+                $fname,
+                $name,
+                $email,
+                $altemail,
+                $phone,
+                $office,
+                $home,
+                $comments,
+                $status,
+                $entered,
+                $addedby
+            );
             if ($stmt->execute()) {
                 $operator_id = $stmt->insert_id;
 
