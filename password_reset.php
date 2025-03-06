@@ -27,7 +27,7 @@ if (!isset($_GET['token'])) {
 $reset_token = $_GET['token'];
 
 // Verify the reset token in the database
-$query = "SELECT seq_nmbr, reset_expiration FROM trainers WHERE reset_token = ?";
+$query = "SELECT seq_nmbr, reset_expiration, login_name FROM trainers WHERE reset_token = ?";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
@@ -36,7 +36,7 @@ if (!$stmt) {
 $stmt->bind_param("s", $reset_token);
 $stmt->execute();
 $stmt->store_result();
-$stmt->bind_result($trainer_id, $reset_expiration);
+$stmt->bind_result($trainer_id, $reset_expiration, $login_name);
 
 // Check if a valid record exists and the token hasn't expired
 if ($stmt->num_rows === 0) {
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update_stmt->bind_param("si", $hashed_password, $trainer_id);
     if ($update_stmt->execute()) {
         // Redirect to login page after successful password change
-        header("Location: login.php?password_reset=success");
+        header("Location: login.php?password_reset=success&login_name=".urlencode($login_name));
         exit();
     } else {
         die("Error updating password.");
