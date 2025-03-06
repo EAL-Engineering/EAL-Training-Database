@@ -41,6 +41,8 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
+$username = isset($_GET['login_name']) ? htmlspecialchars($_GET['login_name']) : '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -98,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php endif; ?>
     <form method="post">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+        <input type="text" name="username" value="<?php echo $username; ?>" /><br><br>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required><br><br>
         <button type="submit">Login</button>
