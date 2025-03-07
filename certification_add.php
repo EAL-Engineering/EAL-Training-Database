@@ -88,33 +88,39 @@ $stmt->close();
 // Fetch certifications not yet completed by the operator and their trainers
 $query = "
 SELECT 
-	c.seq_nmbr AS cert_id, 
-	c.certification AS cert_name, 
-	GROUP_CONCAT(
-		CONCAT(o.fname, ' ', o.seq_nmbr)
-	) AS trainers 
+    c.seq_nmbr AS cert_id, 
+    c.certification AS cert_name, 
+    GROUP_CONCAT(
+        CONCAT(o.fname, ' ', o.seq_nmbr)
+    ) AS trainers 
 FROM 
-	certifications c 
-	LEFT JOIN can_certify cc ON c.seq_nmbr = cc.cert_ptr 
-	LEFT JOIN operators o ON cc.trainer_ptr = o.seq_nmbr 
+    certifications c 
+    LEFT JOIN can_certify cc ON c.seq_nmbr = cc.cert_ptr 
+    LEFT JOIN operators o ON cc.trainer_ptr = o.seq_nmbr 
 WHERE 
-	o.status = 'Active'
-	AND c.seq_nmbr NOT IN (
-		SELECT 
-			ot.certification 
-		FROM 
-			optraining ot 
-		WHERE 
-			ot.operator = ?
-	) 
+    o.status = 'Active'
+    AND c.seq_nmbr NOT IN (
+        SELECT 
+            ot.certification 
+        FROM 
+            optraining ot 
+        WHERE 
+            ot.operator = ?
+    )
+    AND (
+        (SELECT COUNT(*) FROM optraining WHERE operator = ? AND certification = 1) = 0
+        OR (c.seq_nmbr = 2 AND (SELECT COUNT(*) FROM optraining WHERE operator = ? AND certification = 1) > 0)
+        OR (c.seq_nmbr = 3 AND (SELECT COUNT(*) FROM optraining WHERE operator = ? AND certification = 2) > 0)
+        OR (c.seq_nmbr NOT IN (1, 2, 3) AND (SELECT COUNT(*) FROM optraining WHERE operator = ? AND certification = 3) > 0)
+    )
 GROUP BY 
-	c.seq_nmbr
+    c.seq_nmbr
 ";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error);
 }
-$stmt->bind_param("i", $operator_id);
+$stmt->bind_param("iiiii", $operator_id, $operator_id, $operator_id, $operator_id, $operator_id);
 $stmt->execute();
 $stmt->bind_result($cert_id, $cert_name, $trainers);
 
