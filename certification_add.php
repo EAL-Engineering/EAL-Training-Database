@@ -33,7 +33,7 @@ error_reporting(E_ALL);
 
 // Check if 'id' is provided in the URL
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("Invalid request. No operator ID provided.");
+    die("Invalid request. No operator ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
 $operator_id = intval($_GET['id']); // Sanitize the ID
@@ -42,7 +42,7 @@ $operator_id = intval($_GET['id']); // Sanitize the ID
 $query = "SELECT fname FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
@@ -68,7 +68,7 @@ WHERE
 ";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
@@ -121,7 +121,7 @@ GROUP BY
 ";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("iiiii", $operator_id, $operator_id, $operator_id, $operator_id, $operator_id);
 $stmt->execute();

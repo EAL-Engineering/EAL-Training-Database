@@ -94,7 +94,7 @@ $query = "
 ";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
@@ -123,7 +123,7 @@ $query = "
 ";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();

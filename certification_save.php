@@ -43,21 +43,21 @@ error_reporting(E_ALL);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate required fields
     if (!isset($_POST['operator_id'])) {
-        die("Error: Operator ID is missing.");
+        die("Error: Operator ID is missing. <a href='index.php'>Go to Main Page</a>");
     } elseif (!is_numeric($_POST['operator_id'])) {
-        die("Error: Operator ID must be numeric.");
+        die("Error: Operator ID must be numeric. <a href='index.php'>Go to Main Page</a>");
     }
     
     if (!isset($_POST['cert_id'])) {
-        die("Error: Certification ID is missing.");
+        die("Error: Certification ID is missing. <a href='index.php'>Go to Main Page</a>");
     } elseif (!is_numeric($_POST['cert_id'])) {
-        die("Error: Certification ID must be numeric.");
+        die("Error: Certification ID must be numeric. <a href='index.php'>Go to Main Page</a>");
     }
     
     if (!isset($_POST['completed_by'])) {
-        die("Error: Trainer ID (Completed By) is missing.");
+        die("Error: Trainer ID (Completed By) is missing. <a href='index.php'>Go to Main Page</a>");
     } elseif (!is_numeric($_POST['completed_by'])) {
-        die("Error: Trainer ID (Completed By) must be numeric.");
+        die("Error: Trainer ID (Completed By) must be numeric. <a href='index.php'>Go to Main Page</a>");
     }
 
     $operator_id = intval($_POST['operator_id']);
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "SELECT exp_months FROM certifications WHERE seq_nmbr = ?";
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
-        die("Database error: " . $mysqli->error);
+        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
     }
     $stmt->bind_param("i", $cert_id);
     $stmt->execute();
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
-        die("Database error: " . $mysqli->error);
+        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
     }
     $stmt->bind_param("iiisss", $operator_id, $cert_id, $completed_by, $status, $entered, $expires);
 
@@ -105,6 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 } else {
-    die("Invalid request method.");
+    die("Invalid request method. <a href='index.php'>Go to Main Page</a>");
 }
 ?>

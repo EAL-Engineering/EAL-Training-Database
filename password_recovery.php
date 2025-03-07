@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
-        die("Database error: " . $mysqli->error);
+        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
     }
 
     $stmt->bind_param("ss", $email, $email);
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $reset_token = bin2hex(openssl_random_pseudo_bytes(16)); // Generates 16 bytes of random data
         if (!$reset_token) {
             error_log("Error generating reset token.");
-            die("Internal server error. Please try again later.");
+            die("Internal server error. Please try again later. <a href='index.php'>Go to Main Page</a>");
         }
         $reset_expiration = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if (!$update_stmt = $mysqli->prepare($update_query)) {
             error_log("Error preparing update statement: " . $mysqli->error);
-            die("Internal server error. Please try again later." . $mysqli->error);
+            die("Internal server error. Please try again later." . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
         }
 
         // Bind parameters to the prepared statement
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Execute the statement
         if (!$update_stmt->execute()) {
             error_log("Error executing update statement: " . $update_stmt->error);
-            die("Internal server error. Please try again later.");
+            die("Internal server error. Please try again later. <a href='index.php'>Go to Main Page</a>");
         }
 
         // Close the update statement after use
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if (!mail($email, $subject, $message, $headers)) {
             error_log("Failed to send email to $email");
-            die("Failed to send the email. Please try again later.");
+            die("Failed to send the email. Please try again later. <a href='index.php'>Go to Main Page</a>");
         }
 
         echo "A password recovery email has been sent to $email.";

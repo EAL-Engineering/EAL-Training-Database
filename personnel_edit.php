@@ -52,7 +52,7 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
  * @throws Exception If the ID is not set or not numeric.
  */
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("Invalid request. No operator ID provided.");
+    die("Invalid request. No operator ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
 $id = intval($_GET['id']); // Sanitize the ID
@@ -67,7 +67,7 @@ $query = "SELECT * FROM operators WHERE seq_nmbr = ?";
 $operator_stmt = $mysqli->prepare($query);
 
 if (!$operator_stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 
 $operator_stmt->bind_param("i", $id);

@@ -55,7 +55,7 @@ try {
     $query = "DELETE FROM can_certify WHERE trainer_ptr = ? AND cert_ptr = ?";
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
-        throw new Exception("Database error: " . $mysqli->error);
+        throw new Exception("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
     }
 
     $stmt->bind_param("ii", $trainer_id, $cert_id);

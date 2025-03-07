@@ -51,15 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate required fields
     if (!$seq_nmbr || empty($name) || empty($fname) || empty($email) || empty($status)) {
-        die("Missing required fields.");
+        die("Missing required fields. <a href='index.php'>Go to Main Page</a>");
     }
 
     // Check email validity
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die("Invalid email address.");
+        die("Invalid email address. <a href='index.php'>Go to Main Page</a>");
     }
     if (!empty($altemail) && !filter_var($altemail, FILTER_VALIDATE_EMAIL)) {
-        die("Invalid alternate email address.");
+        die("Invalid alternate email address. <a href='index.php'>Go to Main Page</a>");
     }
 
     /**
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
-        die("Database error: " . $mysqli->error);
+        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
     }
 
     /**
@@ -121,8 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: personnel_list.php?message=update_success");
         exit();
     } else {
-        die("Failed to update operator: " . $stmt->error);
+        die("Failed to update operator: " . $stmt->error . " <a href='index.php'>Go to Main Page</a>");
     }
 } else {
-    die("Invalid request method.");
+    die("Invalid request method. <a href='index.php'>Go to Main Page</a>");
 }
