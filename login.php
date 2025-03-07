@@ -15,6 +15,7 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 require_once "config.php";
+require_once "auth.php"; // Add this line to include auth.php
 session_start();
 
 if (isset($_GET['return'])) {

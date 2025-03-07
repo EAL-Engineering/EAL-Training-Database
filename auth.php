@@ -53,4 +53,17 @@ function Check_access($required_role)
         exit;
     }
 }
+
+/**
+ * Check if the user is logged in and has the required access level.
+ * Redirects unauthorized users to the login page.
+ *
+ * @param int $requiredLevel The required access level.
+ */
+function checkLogin($requiredLevel) {
+    if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] < $requiredLevel) {
+        header("Location: login.php");
+        exit;
+    }
+}
 ?>

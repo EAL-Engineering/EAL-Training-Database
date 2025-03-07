@@ -14,6 +14,7 @@
  */
 
 require "config.php";
+require_once "auth.php"; // Add this line to include auth.php
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']); // Sanitize email input

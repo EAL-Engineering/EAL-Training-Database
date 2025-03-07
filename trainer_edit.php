@@ -22,6 +22,7 @@ session_start();
  * Include the database connection file to connect to the database.
  */
 require_once "config.php";
+require_once "auth.php"; // Add this line to include auth.php
 
 // Capture the current page URL
 $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
