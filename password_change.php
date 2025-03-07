@@ -19,6 +19,9 @@ session_start();
 require "auth.php";
 require "config.php";
 
+// Check if the user is logged in
+checkLogin(1);
+
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

@@ -21,11 +21,8 @@ session_start();
 // Include configuration and helper files
 require_once "config.php";
 
-// Redirect to login if the user is not logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php?return=" . urlencode($_SERVER['REQUEST_URI']));
-    exit();
-}
+// Check if the user is logged in
+checkLogin(1);
 
 /**
  * Remaining session time in seconds.

@@ -30,10 +30,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe us
  * Check if the user is logged in and has the required access level (1 or 2).
  * Redirects unauthorized users to the login page.
  */
-if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
-    header("Location: login.php?return=$currentUrl");
-    exit();
-}
+checkLogin(1);
 
 // Get the session expiration time
 $timeUntilSessionExpires = getTimeUntilSessionExpires();

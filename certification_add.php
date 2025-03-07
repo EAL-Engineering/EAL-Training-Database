@@ -21,14 +21,8 @@ session_start();
 // Include the database connection file
 require_once "config.php";
 
-/**
- * Check if the user is logged in and authorized to edit personnel details.
- * Redirects unauthorized users to the login page.
- */
-if (!isset($_SESSION['user_id']) || ($_SESSION['role_id'] < 1 || $_SESSION['role_id'] > 2)) {
-    header("Location: login.php?return=$currentUrl");
-    exit();
-}
+// Check if the user is logged in and authorized to edit personnel details
+checkLogin(1);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
