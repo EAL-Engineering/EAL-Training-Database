@@ -63,7 +63,8 @@ $query = "SELECT
 FROM 
 	optraining ot 
 	JOIN certifications c ON ot.certification = c.seq_nmbr 
-	LEFT JOIN operators o ON ot.trainer = o.seq_nmbr 
+	LEFT JOIN trainers t ON ot.trainer = t.seq_nmbr 
+	LEFT JOIN operators o ON t.optbl_ptr = o.seq_nmbr 
 WHERE 
 	ot.operator = ?
 ";
