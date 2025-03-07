@@ -40,10 +40,28 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
  * If not, terminate the script with an error message.
  */
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("Invalid request. No trainer ID provided.");
+    die("Invalid request. No trainer ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
 $trainer_id = intval($_GET['id']); // Sanitize the trainer ID
+
+/**
+ * Verify if the trainer ID matches a pre-existing optbl_ptr in the trainers table.
+ */
+$query = "SELECT COUNT(*) FROM trainers WHERE optbl_ptr = ?";
+$stmt = $mysqli->prepare($query);
+if (!$stmt) {
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
+}
+$stmt->bind_param("i", $trainer_id);
+$stmt->execute();
+$stmt->bind_result($count);
+$stmt->fetch();
+$stmt->close();
+
+if ($count == 0) {
+    die("Invalid request. Trainer ID does not exist. <a href='index.php'>Go to Main Page</a>");
+}
 
 /**
  * Fetch the trainer's name using their ID.
@@ -53,13 +71,13 @@ $trainer_id = intval($_GET['id']); // Sanitize the trainer ID
 $query = "SELECT fname FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
-    die("Database error: " . $mysqli->error);
+    die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
 $stmt->bind_result($trainer_name);
 if (!$stmt->fetch()) {
-    die("Trainer not found.");
+    die("Trainer not found. <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->close();
 
