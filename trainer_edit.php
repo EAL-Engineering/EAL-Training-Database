@@ -31,7 +31,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe us
  * Check if the user is logged in and has the required access level (1 or 2).
  * Redirects unauthorized users to the login page.
  */
-checkLogin(1);
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 // Get the session expiration time
 $timeUntilSessionExpires = getTimeUntilSessionExpires();

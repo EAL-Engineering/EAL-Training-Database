@@ -20,7 +20,7 @@ require "auth.php";
 require "config.php";
 
 // Check if the user is logged in
-checkLogin(1);
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 

@@ -59,10 +59,11 @@ function Check_access($required_role)
  * Redirects unauthorized users to the login page.
  *
  * @param int $requiredLevel The required access level.
+ * @param string $currentPage The current page URI to redirect back after login.
  */
-function checkLogin($requiredLevel) {
+function checkLogin($requiredLevel, $currentPage = 'index.php') {
     if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] < $requiredLevel) {
-        header("Location: login.php");
+        header("Location: login.php?return=" . urlencode($currentPage));
         exit;
     }
 }

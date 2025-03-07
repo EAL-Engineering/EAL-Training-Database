@@ -23,7 +23,7 @@ require_once "config.php";
 require_once "auth.php"; 
 
 // Check if the user is logged in
-checkLogin(1);
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 /**
  * Remaining session time in seconds.

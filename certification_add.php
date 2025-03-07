@@ -23,7 +23,7 @@ require_once "config.php";
 require_once "auth.php"; // Ensure this line is included
 
 // Check if the user is logged in and authorized to edit personnel details
-checkLogin(1);
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
