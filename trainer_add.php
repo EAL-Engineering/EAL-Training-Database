@@ -20,7 +20,7 @@ session_start();
 
 // Include configuration and helper files
 require_once "config.php";
-require_once "auth.php"; // Add this line to include auth.php
+require_once "auth.php"; 
 
 // Check if the user is logged in
 checkLogin(1);

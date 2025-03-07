@@ -21,6 +21,7 @@ session_start();
  * Include the database connection file
  */
 require_once "config.php";
+require_once "auth.php";
 
 // Check if the user is logged in and authorized to edit personnel details
 checkLogin(1);

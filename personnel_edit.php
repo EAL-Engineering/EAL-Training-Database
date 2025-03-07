@@ -22,6 +22,7 @@ session_start();
  * Includes the `config.php` file to establish a connection with the database.
  */
 require_once "config.php";
+require_once "auth.php";
 
 /**
  * Encoded URL string of the current page for safe use in GET parameters.

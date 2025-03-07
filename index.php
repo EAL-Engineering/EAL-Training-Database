@@ -18,6 +18,7 @@ session_start();
 
 // Include the configuration and utility functions
 require_once "config.php";
+require_once "auth.php";
 
 // Calculate the remaining session time for the countdown script
 $timeUntilSessionExpires = getTimeUntilSessionExpires();

@@ -66,4 +66,23 @@ function checkLogin($requiredLevel) {
         exit;
     }
 }
+
+/**
+ * Calculate the time remaining until the user's session expires.
+ *
+ * This function checks the `last_activity` timestamp stored in the session
+ * and calculates how much time is left before the session expires. 
+ * Sessions are set to expire after 2 hours of inactivity.
+ *
+ * @return int The number of seconds remaining until the session expires. 
+ *             Returns 0 if the session has already expired or if `last_activity` is not set.
+ */
+function getTimeUntilSessionExpires() 
+{
+    if (isset($_SESSION['last_activity'])) {
+        $remaining = (2 * 60 * 60) - (time() - $_SESSION['last_activity']);
+        return max($remaining, 0); // Ensure no negative time is returned
+    }
+    return 0;
+}
 ?>

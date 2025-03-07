@@ -27,6 +27,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
 // Include the database connection file
 require_once "config.php";
+require_once "auth.php";
 
 /**
  * Get the remaining time until the session expires.

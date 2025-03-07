@@ -16,6 +16,7 @@ session_start();
 
 // Include configuration and helper files
 require_once "config.php";
+require_once "auth.php";
 
 /**
  * Encoded URL string of the current page for safe use in GET parameters.
