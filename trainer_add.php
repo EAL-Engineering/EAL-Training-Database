@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
             // Insert into trainers table
-            $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (seq_nmbr, login_name, reset_token, reset_expiration) VALUES (?, ?, ?, ?)");
+            $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (optbl_ptr, login_name, reset_token, reset_expiration) VALUES (?, ?, ?, ?)");
             $addTrainerEntry->bind_param("isss", $operator_id, $login_name, $token, $expires);
             $addTrainerEntry->execute();
             $addTrainerEntry->close();
