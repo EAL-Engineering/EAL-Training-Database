@@ -39,7 +39,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $operator_id = intval($_GET['id']); // Sanitize the ID
 
-// Fetch operator details
+// Fetch operator name
 $query = "SELECT fname FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
