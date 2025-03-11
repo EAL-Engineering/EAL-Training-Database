@@ -15,7 +15,7 @@
 -- Stores information about accelerator operators/personnel
 CREATE TABLE `operators` (
   `seq_nmbr` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) NOT NULL COMMENT 'Username/login name',
+  `name` varchar(64) NOT NULL COMMENT 'Original short name of the operator (legacy only)',
   `fname` varchar(255) NOT NULL COMMENT 'Full name of the operator',
   `email` varchar(255) DEFAULT NULL COMMENT 'Primary email address',
   `altemail` varchar(255) DEFAULT NULL COMMENT 'Secondary email address',
