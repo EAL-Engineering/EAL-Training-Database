@@ -17,6 +17,7 @@
 
 // Include the database connection file
 require_once "config.php";
+require_once "auth.php";
 
 // Start the session
 session_start();
