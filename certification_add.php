@@ -96,12 +96,13 @@ SELECT
     c.seq_nmbr AS cert_id, 
     c.certification AS cert_name, 
     GROUP_CONCAT(
-        CONCAT(o.fname, ' ', o.seq_nmbr)
+        CONCAT(o.fname, ' ', t.seq_nmbr)
     ) AS trainers 
 FROM 
     certifications c 
     LEFT JOIN can_certify cc ON c.seq_nmbr = cc.cert_ptr 
     LEFT JOIN operators o ON cc.trainer_ptr = o.seq_nmbr 
+	LEFT JOIN trainers t on o.seq_nmbr = t.optbl_ptr
 WHERE 
     o.status = 'Active'
     AND c.seq_nmbr NOT IN (
