@@ -62,10 +62,13 @@ function Check_access($required_role)
  * Check if the user is logged in and has the required access level.
  * Redirects unauthorized users to the login page.
  *
- * @param int $requiredRole The required access level.
- * @param string $currentPage The current page URI to redirect back after login.
+ * @param int    $requiredRole The required access level.
+ * @param string $redirectUrl  The current page URI to redirect back after login.
+ * 
+ * @return void 
  */
-function checkLogin($requiredRole, $redirectUrl) {
+function checkLogin($requiredRole, $redirectUrl)
+{
     if (!isset($_SESSION['user_id'])) {
         error_log("User not logged in. Redirecting to main page.");
         header("Location: index.php");
@@ -92,7 +95,8 @@ function checkLogin($requiredRole, $redirectUrl) {
  *
  * @return int The role of the user.
  */
-function getUserRole() {
+function getUserRole()
+{
     global $mysqli;
     $user_id = $_SESSION['user_id'];
     $query = $mysqli->prepare("SELECT role_id FROM trainers WHERE seq_nmbr = ?");
