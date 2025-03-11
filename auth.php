@@ -58,13 +58,28 @@ function Check_access($required_role)
  * Check if the user is logged in and has the required access level.
  * Redirects unauthorized users to the login page.
  *
- * @param int $requiredLevel The required access level.
+ * @param int $requiredRole The required access level.
  * @param string $currentPage The current page URI to redirect back after login.
  */
-function checkLogin($requiredLevel, $currentPage = 'index.php') {
-    if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] < $requiredLevel) {
-        header("Location: login.php?return=" . urlencode($currentPage));
-        exit;
+function checkLogin($requiredRole, $redirectUrl) {
+    if (!isset($_SESSION['user_id'])) {
+        error_log("User not logged in. Redirecting to main page.");
+        header("Location: index.php");
+        exit();
+    }
+
+    // Assuming there's a function to get the user's role
+    $userRole = getUserRole($_SESSION['user_id']);
+    if ($userRole === null) {
+        error_log("User role not set. Ensure role_id is correctly set in the database.");
+        header("Location: index.php");
+        exit();
+    }
+
+    if ($userRole < $requiredRole) {
+        error_log("User does not have the required role. Redirecting to main page.");
+        header("Location: index.php");
+        exit();
     }
 }
 

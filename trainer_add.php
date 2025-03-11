@@ -54,6 +54,7 @@ $trainerCheckQuery->fetch();
 $trainerCheckQuery->close();
 
 if (!$isTrainer) {
+    error_log("Access denied: Only existing trainers can add new trainers.");
     die("Access denied: Only existing trainers can add new trainers.");
 }
 
