@@ -15,6 +15,11 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Start the session
 session_start();
 
@@ -47,6 +52,10 @@ $trainerCheckQuery = $mysqli->prepare(
     WHERE 
         seq_nmbr = ?"
 );
+if (!$trainerCheckQuery) {
+    error_log("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
+    die("Database error. Please try again later.");
+}
 $trainerCheckQuery->bind_param("i", $_SESSION['user_id']);
 $trainerCheckQuery->execute();
 $trainerCheckQuery->bind_result($isTrainer);
@@ -69,6 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
 
     // Check if the operator exists
     $operatorCheckQuery = $mysqli->prepare("SELECT fname, email FROM operators WHERE seq_nmbr = ? AND status = 'Active'");
+    if (!$operatorCheckQuery) {
+        error_log("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
+        die("Database error. Please try again later.");
+    }
     $operatorCheckQuery->bind_param("i", $operator_id);
     $operatorCheckQuery->execute();
     $operatorCheckQuery->store_result();
@@ -88,6 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
         try {
             // Add the operator to the can_certify table
             $addCan_certifyQuery = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr) VALUES (?)");
+            if (!$addCan_certifyQuery) {
+                throw new Exception("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
+            }
             $addCan_certifyQuery->bind_param("i", $operator_id);
             $addCan_certifyQuery->execute();
             $addCan_certifyQuery->close();
@@ -98,6 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
 
             // Insert into trainers table
             $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (optbl_ptr, login_name, reset_token, reset_expiration) VALUES (?, ?, ?, ?)");
+            if (!$addTrainerEntry) {
+                throw new Exception("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
+            }
             $addTrainerEntry->bind_param("isss", $operator_id, $login_name, $token, $expires);
             $addTrainerEntry->execute();
             $addTrainerEntry->close();
@@ -118,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
             // Rollback if any query fails
             $mysqli->rollback();
             $mysqli->autocommit(true); // Ensure autocommit is re-enabled
+            error_log("Transaction failed: " . $e->getMessage());
             $error = "Failed to add trainer. Please try again.";
         }
     }
@@ -153,6 +173,10 @@ ORDER BY
     `o`.`fname` ASC
 "
 );
+if (!$eligibleOperators) {
+    error_log("Query failed: (" . $mysqli->errno . ") " . $mysqli->error);
+    die("Database error. Please try again later.");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
