@@ -1,7 +1,7 @@
 -- ========================================================
 -- Tandem Accelerator Database Schema
 -- ========================================================
--- Version: 1.0
+-- Version: 1.1
 -- Last updated: 2025-03-11
 -- 
 -- This schema defines the structure for a particle accelerator
@@ -53,6 +53,10 @@ CREATE TABLE `trainers` (
   `optbl_ptr` int(11) DEFAULT '-1' COMMENT 'Foreign key to operators table',
   `added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When trainer status was granted',
   `comment` tinytext COMMENT 'Additional notes about this trainer',
+  `role_id` tinyint(4) DEFAULT NULL COMMENT 'Role ID for the trainer',
+  `password_hash` varchar(255) DEFAULT NULL COMMENT 'Hashed password for the trainer',
+  `reset_token` varchar(255) DEFAULT NULL COMMENT 'Password reset token',
+  `reset_expiration` datetime NOT NULL COMMENT 'Password reset token expiration time',
   PRIMARY KEY (`seq_nmbr`),
   UNIQUE KEY `fk_tbl.trainers_optbl_ptr_tbl.operators_seq_nmbr` (`optbl_ptr`) COMMENT 'Each operator can have at most one trainer record'
 ) COMMENT 'Personnel authorized to certify and train other operators';
