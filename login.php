@@ -22,9 +22,6 @@ if (isset($_GET['return'])) {
     $_SESSION['return_url'] = $_GET['return'];
 }
 
-// Session timeout duration in seconds (2 hours)
-define('SESSION_TIMEOUT', 2 * 60 * 60); // 7200 seconds
-
 // Check if the user is already logged in
 if (isset($_SESSION['user_id'])) {
     // Check if session has expired
