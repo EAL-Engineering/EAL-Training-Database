@@ -28,6 +28,7 @@ error_reporting(E_ALL);
  * Validate and retrieve the required POST parameters.
  *
  * @throws Exception If required parameters are missing or invalid.
+ *  Trainer ID and Certification ID must be provided and numeric.
  *
  * @return array Associative array with sanitized 'trainer_id' and 'cert_id'.
  */
