@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $confirm_password = $_POST['confirm_password'];
 
     // Fetch current password hash
-    $query = "SELECT password_hash FROM trainers WHERE id = ?";
+    $query = "SELECT password_hash FROM trainers WHERE seq_nmbr = ?";
     $stmt = $mysqli->prepare($query);
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($new_password === $confirm_password) {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
-            $update_query = "UPDATE trainers SET password_hash = ? WHERE id = ?";
+            $update_query = "UPDATE trainers SET password_hash = ? WHERE seq_nmbr = ?";
             $update_stmt = $mysqli->prepare($update_query);
             $update_stmt->bind_param("si", $hashed_password, $_SESSION['user_id']);
             $update_stmt->execute();
