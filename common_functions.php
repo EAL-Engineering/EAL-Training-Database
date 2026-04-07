@@ -36,4 +36,21 @@ function Build_Operator_Training_pulldown()
     // }
 }
 
+/**
+ * Validates that a redirect URL is a safe relative path on this site.
+ *
+ * Rejects absolute URLs (e.g. https://evil.com), protocol-relative URLs
+ * (e.g. //evil.com), and anything containing characters not expected in
+ * a local path. Falls-through to the caller to use a safe default if
+ * this returns false.
+ *
+ * @param string $url The URL to validate.
+ *
+ * @return bool True if the URL is safe to redirect to, false otherwise.
+ */
+function isSafeRedirect($url)
+{
+    return (bool) preg_match('/^[a-zA-Z0-9_\-][a-zA-Z0-9_\-\/\.]*(?:\?[^#]*)?$/', $url);
+}
+
 ?>

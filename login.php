@@ -16,6 +16,7 @@
  */
 require_once "config.php";
 require_once "auth.php"; // Add this line to include auth.php
+require_once "common_functions.php";
 session_start();
 
 if (isset($_GET['return'])) {
@@ -60,7 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['fname'] = $fname;
             $_SESSION['role_id'] = $role_id;
             $_SESSION['last_activity'] = time(); // Record the login time
-            $redirectUrl = isset($_GET['return']) ? urldecode($_GET['return']) : 'index.php';
+            $redirectUrl = 'index.php';
+            if (isset($_GET['return'])) {
+                $candidate = urldecode($_GET['return']);
+                if (isSafeRedirect($candidate)) {
+                    $redirectUrl = $candidate;
+                }
+            }
             header("Location: $redirectUrl");
         }
     }
