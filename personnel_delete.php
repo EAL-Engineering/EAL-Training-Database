@@ -35,23 +35,53 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
 // Handle deletion request
 if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
     $id = intval($_GET['id']);
-    
+
     $mysqli->autocommit(false);
-    
     $deleteSuccess = true;
-    $deleteSuccess &= $mysqli->query("DELETE FROM annualradsafety WHERE op_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM optraining WHERE operator = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM trainers WHERE optbl_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM can_certify WHERE trainer_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM operators WHERE seq_nmbr = $id");
-    
+
+    // can_certify links through trainers, not directly to operators
+    $stmt = $mysqli->prepare(
+        "DELETE FROM can_certify WHERE trainer_ptr IN
+         (SELECT seq_nmbr FROM trainers WHERE optbl_ptr = ?)"
+    );
+    if (!$stmt) {
+        $deleteSuccess = false;
+    } else {
+        $stmt->bind_param("i", $id);
+        $deleteSuccess &= $stmt->execute();
+        $stmt->close();
+    }
+
+    // Remaining tables delete directly by operator id
+    $directDeletes = [
+        "DELETE FROM annualradsafety WHERE op_ptr = ?",
+        "DELETE FROM optraining WHERE operator = ?",
+        "DELETE FROM trainers WHERE optbl_ptr = ?",
+        "DELETE FROM operators WHERE seq_nmbr = ?",
+    ];
+
+    foreach ($directDeletes as $sql) {
+        if (!$deleteSuccess) {
+            break;
+        }
+        $stmt = $mysqli->prepare($sql);
+        if (!$stmt) {
+            $deleteSuccess = false;
+            break;
+        }
+        $stmt->bind_param("i", $id);
+        $deleteSuccess &= $stmt->execute();
+        $stmt->close();
+    }
+
     if ($deleteSuccess) {
         $mysqli->commit();
+        header("Location: personnel_delete.php");
     } else {
         $mysqli->rollback();
+        header("Location: personnel_delete.php?error=1");
     }
-    
-    header("Location: personnel_delete.php");
+    $mysqli->autocommit(true);
     exit();
 }
 
@@ -112,6 +142,11 @@ $result = $mysqli->query(
     </script>
 </head>
 <body>
+    <?php if (isset($_GET['error'])): ?>
+        <div class="alert alert-danger">
+            Delete failed. The record may be partially deleted — please contact an administrator.
+        </div>
+    <?php endif; ?>
     <?php require 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
