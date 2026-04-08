@@ -33,6 +33,13 @@
 
 // Include the database connection file
 require_once "config.php";
+require_once "auth.php";
+
+/**
+ * Check if the user is logged in and authorized to edit personnel details.
+ * Redirects unauthorized users to the login page.
+ */
+checkLogin(1, 'REQUEST_URI')
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);

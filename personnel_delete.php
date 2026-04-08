@@ -18,18 +18,12 @@ session_start();
 require_once "config.php";
 require_once "auth.php";
 
-/**
- * Encoded URL string of the current page for safe use in GET parameters.
- * 
- * @var string $currentUrl
- */
-$currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
-// Ensure user is logged in and has the correct role
-if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] > 2) {
-    header("Location: login.php?return=$currentUrl");
-    exit();
-}
+/**
+ * Check if the user is logged in and authorized to edit personnel details.
+ * Redirects unauthorized users to the login page.
+ */
+checkLogin(1, 'REQUEST_URI')
 
 /**
  * Get the time remaining until the user's session expires.

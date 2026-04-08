@@ -20,15 +20,15 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Start the session
-session_start();
-
 // Include configuration and helper files
 require_once "config.php";
 require_once "auth.php"; 
 
-// Check if the user is logged in
-checkLogin(1, $_SERVER['REQUEST_URI']);
+/**
+ * Check if the user is logged in and authorized to edit personnel details.
+ * Redirects unauthorized users to the login page.
+ */
+checkLogin(1, 'REQUEST_URI')
 
 /**
  * Remaining session time in seconds.

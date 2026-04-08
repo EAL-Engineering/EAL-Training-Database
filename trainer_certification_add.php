@@ -17,9 +17,13 @@
 
 // Include the database connection file
 require_once "config.php";
+require_once "auth.php";
 
-// Start session to store success/error messages
-session_start();
+/**
+ * Check if the user is logged in and authorized to edit personnel details.
+ * Redirects unauthorized users to the login page.
+ */
+checkLogin(1, 'REQUEST_URI')
 
 // Check if POST data is valid
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trainer_id'], $_POST['cert_id'])) {

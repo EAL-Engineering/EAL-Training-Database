@@ -30,23 +30,27 @@ define('SESSION_TIMEOUT', 2 * 60 * 60);
  * 
  * @return void 
  */
-function checkLogin($requiredRole, $redirectUrl)
+function checkLogin($requiredRole, $redirectUrl = '')
 {
     if (!isset($_SESSION['user_id'])) {
-        error_log("User not logged in. Redirecting to main page.");
-        header("Location: index.php");
+        error_log("User not logged in. Redirecting to login page.");
+        $loginUrl = 'login.php';
+        if (!empty($redirectUrl)) {
+            $loginUrl .= '?return=' . urlencode($redirectUrl);
+        }
+        header("Location: " . $loginUrl);
         exit();
     }
 
-    // Assuming there's a function to get the user's role
     $userRole = getUserRole($_SESSION['user_id']);
+
     if ($userRole === null) {
         error_log("User role not set. Ensure role_id is correctly set in the database.");
         header("Location: index.php");
         exit();
     }
 
-    if ($userRole < $requiredRole) {
+    if ($userRole > $requiredRole) {
         error_log("User does not have the required role. Redirecting to main page.");
         header("Location: index.php");
         exit();

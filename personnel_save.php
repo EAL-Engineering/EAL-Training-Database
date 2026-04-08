@@ -16,6 +16,10 @@
 
 // Include the database connection file
 require_once "config.php";
+require_once "auth.php";
+
+session_start();
+checkLogin(1, $_Server['REQUEST_URI']);
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
