@@ -36,52 +36,42 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
 if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
     $id = intval($_GET['id']);
 
-    $mysqli->autocommit(false);
-    $deleteSuccess = true;
-
-    // can_certify links through trainers, not directly to operators
+    // If this operator is a trainer, refuse the delete entirely
     $stmt = $mysqli->prepare(
-        "DELETE FROM can_certify WHERE trainer_ptr IN
-         (SELECT seq_nmbr FROM trainers WHERE optbl_ptr = ?)"
+        "SELECT COUNT(*) FROM trainers WHERE optbl_ptr = ?"
     );
     if (!$stmt) {
-        $deleteSuccess = false;
-    } else {
-        $stmt->bind_param("i", $id);
-        $deleteSuccess &= $stmt->execute();
-        $stmt->close();
-    }
-
-    // Remaining tables delete directly by operator id
-    $directDeletes = [
-        "DELETE FROM annualradsafety WHERE op_ptr = ?",
-        "DELETE FROM optraining WHERE operator = ?",
-        "DELETE FROM trainers WHERE optbl_ptr = ?",
-        "DELETE FROM operators WHERE seq_nmbr = ?",
-    ];
-
-    foreach ($directDeletes as $sql) {
-        if (!$deleteSuccess) {
-            break;
-        }
-        $stmt = $mysqli->prepare($sql);
-        if (!$stmt) {
-            $deleteSuccess = false;
-            break;
-        }
-        $stmt->bind_param("i", $id);
-        $deleteSuccess &= $stmt->execute();
-        $stmt->close();
-    }
-
-    if ($deleteSuccess) {
-        $mysqli->commit();
-        header("Location: personnel_delete.php");
-    } else {
-        $mysqli->rollback();
         header("Location: personnel_delete.php?error=1");
+        exit();
     }
-    $mysqli->autocommit(true);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->bind_result($isTrainer);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($isTrainer) {
+        header("Location: personnel_delete.php?error=trainer");
+        exit();
+    }
+
+    // Safe to delete — not a trainer, no audit trail to preserve
+    $stmt = $mysqli->prepare("DELETE FROM optraining WHERE operator = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->close();
+
+    $stmt = $mysqli->prepare("DELETE FROM annualradsafety WHERE op_ptr = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->close();
+
+    $stmt = $mysqli->prepare("DELETE FROM operators WHERE seq_nmbr = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: personnel_delete.php");
     exit();
 }
 
@@ -144,10 +134,14 @@ $result = $mysqli->query(
 <body>
     <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-danger">
-            Delete failed. The record may be partially deleted — please contact an administrator.
+            <?php if ($_GET['error'] === 'trainer'): ?>
+                This person is a trainer. Trainer records cannot be deleted —
+                set their status to Inactive instead.
+            <?php else: ?>
+                Delete failed. Please try again or contact an administrator.
+            <?php endif; ?>
         </div>
     <?php endif; ?>
-    <?php require 'header.php'; ?>
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list_all.php">To ALL Personnel List</a>
