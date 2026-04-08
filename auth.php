@@ -42,7 +42,7 @@ function checkLogin($requiredRole, $redirectUrl = '')
         exit();
     }
 
-    $userRole = getUserRole($_SESSION['user_id']);
+    $userRole = getUserRole();
 
     if ($userRole === null) {
         error_log("User role not set. Ensure role_id is correctly set in the database.");
