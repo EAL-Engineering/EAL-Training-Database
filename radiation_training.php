@@ -79,11 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($selectedOperators as $operator) {
             $operator = (int)$operator; // Ensure the ID is numeric
             $stmt = $mysqli->prepare(
-                "INSERT INTO optraining (operator, certification, entered) 
-                VALUES (?, 18, ?) 
+                "INSERT INTO optraining (operator, certification, trainer, entered) 
+                VALUES (?, 18, ?, ?) 
                 ON DUPLICATE KEY UPDATE entered = VALUES(entered)"
             );
-            $stmt->bind_param("is", $operator, $date);
+            $stmt->bind_param("is", $operator, $_SESSION['user_id'], $date);
             if ($stmt->execute()) {
                 $successCount++;
             }
