@@ -14,11 +14,12 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
+session_start();
+
 // Include the database connection file
 require_once "config.php";
 require_once "auth.php";
 
-session_start();
 checkLogin(1, $_Server['REQUEST_URI']);
 
 // // Enable error reporting for debugging (remove in production)

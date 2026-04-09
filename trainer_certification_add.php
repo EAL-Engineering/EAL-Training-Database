@@ -15,6 +15,8 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
+session_start();
+
 // Include the database connection file
 require_once "config.php";
 require_once "auth.php";
@@ -23,7 +25,7 @@ require_once "auth.php";
  * Check if the user is logged in and authorized to edit personnel details.
  * Redirects unauthorized users to the login page.
  */
-checkLogin(1, 'REQUEST_URI')
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 // Check if POST data is valid
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trainer_id'], $_POST['cert_id'])) {

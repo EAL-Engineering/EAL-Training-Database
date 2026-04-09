@@ -29,26 +29,21 @@ if ($mysqli->connect_error) {
 }
 
 /**
- * Remaining session time in seconds.
- * 
- * @var int $timeUntilSessionExpires
- */
-$timeUntilSessionExpires = getTimeUntilSessionExpires();
-
-/**
  * Encoded URL string of the current page for safe use in GET parameters.
  * 
  * @var string $currentUrl
  */
 $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
-// Check authorization
-/**
- * Check if the user is authorized to record training for certification ID 18.
- * 
- * @var bool $authorizedTrainer True if authorized, false otherwise.
- */
-$authorizedTrainer = isset($_SESSION['user_id']) && checkCertification($_SESSION['user_id'], 18);
+// FIX (Issue #9): call checkLogin() first to ensure session validity and idle
+// timeout enforcement, then apply the cert-specific authorization check below.
+checkLogin(1, $_SERVER['REQUEST_URI']);
+
+$timeUntilSessionExpires = getTimeUntilSessionExpires();
+
+// Check authorization: user must hold certification #18 to record this training
+$authorizedTrainer = checkCertification($_SESSION['user_id'], 18);
+
 if (!$authorizedTrainer) {
     header("Location: login.php?return=$currentUrl");
     exit();
@@ -144,7 +139,7 @@ while ($row = $operatorsResult->fetch_assoc()) {
 /**
  * Check if a trainer is authorized to certify a specific certification.
  *
- * @param int $trainerId       ID of the trainer
+ * @param int $trainerId       ID of the trainer (trainers.seq_nmbr)
  * @param int $certificationId Certification ID
  * 
  * @return bool True if the trainer is authorized, false otherwise.

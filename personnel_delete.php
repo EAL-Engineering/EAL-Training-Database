@@ -23,7 +23,7 @@ require_once "auth.php";
  * Check if the user is logged in and authorized to edit personnel details.
  * Redirects unauthorized users to the login page.
  */
-checkLogin(1, 'REQUEST_URI')
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 /**
  * Get the time remaining until the user's session expires.
@@ -32,44 +32,29 @@ checkLogin(1, 'REQUEST_URI')
  */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Handle deletion request
+// Handle deletion request — only role 1 or 2 may actually delete
 if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
+    if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] > 2) {
+        header("Location: index.php");
+        exit();
+    }
+
     $id = intval($_GET['id']);
 
-    // If this operator is a trainer, refuse the delete entirely
-    $stmt = $mysqli->prepare(
-        "SELECT COUNT(*) FROM trainers WHERE optbl_ptr = ?"
-    );
-    if (!$stmt) {
-        header("Location: personnel_delete.php?error=1");
-        exit();
+    $mysqli->autocommit(false);
+    $deleteSuccess = true;
+
+    $deleteSuccess &= $mysqli->query("DELETE FROM annualradsafety WHERE op_ptr = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM optraining WHERE operator = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM trainers WHERE optbl_ptr = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM can_certify WHERE trainer_ptr = $id");
+    $deleteSuccess &= $mysqli->query("DELETE FROM operators WHERE seq_nmbr = $id");
+
+    if ($deleteSuccess) {
+        $mysqli->commit();
+    } else {
+        $mysqli->rollback();
     }
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->bind_result($isTrainer);
-    $stmt->fetch();
-    $stmt->close();
-
-    if ($isTrainer) {
-        header("Location: personnel_delete.php?error=trainer");
-        exit();
-    }
-
-    // Safe to delete — not a trainer, no audit trail to preserve
-    $stmt = $mysqli->prepare("DELETE FROM optraining WHERE operator = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-
-    $stmt = $mysqli->prepare("DELETE FROM annualradsafety WHERE op_ptr = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-
-    $stmt = $mysqli->prepare("DELETE FROM operators WHERE seq_nmbr = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
 
     header("Location: personnel_delete.php");
     exit();
@@ -78,29 +63,20 @@ if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
 // Fetch personnel list
 $result = $mysqli->query(
     "
-    SELECT 
-        o.seq_nmbr AS id, 
-        o.name AS OperatorName, 
+    SELECT
+        o.seq_nmbr AS id,
+        o.name AS OperatorName,
         o.email AS OperatorEmail,
         (
-            SELECT 
-                c.certification 
-            FROM
-                optraining ot 
-            JOIN 
-                certifications c ON ot.certification = c.seq_nmbr
-            WHERE 
-                ot.operator = o.seq_nmbr 
-            ORDER BY 
-                c.seq_nmbr DESC LIMIT 1
-        ) 
-        AS HighestCertification
-        FROM 
-            operators o 
-        WHERE 
-            o.status = 'Active' 
-        ORDER BY 
-        o.name
+            SELECT c.certification
+            FROM optraining ot
+            JOIN certifications c ON ot.certification = c.seq_nmbr
+            WHERE ot.operator = o.seq_nmbr
+            ORDER BY c.seq_nmbr DESC LIMIT 1
+        ) AS HighestCertification
+    FROM operators o
+    WHERE o.status = 'Active'
+    ORDER BY o.name
     "
 );
 ?>
@@ -132,80 +108,58 @@ $result = $mysqli->query(
     </script>
 </head>
 <body>
-    <?php if (isset($_GET['error'])): ?>
-        <div class="alert alert-danger">
-            <?php if ($_GET['error'] === 'trainer'): ?>
-                This person is a trainer. Trainer records cannot be deleted —
-                set their status to Inactive instead.
-            <?php else: ?>
-                Delete failed. Please try again or contact an administrator.
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
-    <div class="form-container">
-        <div class="back-button-container">
-            <a href="personnel_list_all.php">To ALL Personnel List</a>
-            <a href="index.php">To main page</a>
-        </div>
+<?php require 'header.php'; ?>
+<div class="form-container">
+    <div class="back-button-container">
+        <a href="personnel_list_all.php">To ALL Personnel List</a>
+        <a href="index.php">To main page</a>
     </div>
-    <table id="personnel" class="display">
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Email</th>
-                <?php if ($_SESSION['role_id'] <= 2) : ?>
-                    <th>Delete</th>
-                <?php endif; ?>
-            </tr>
-        </thead>
-        <tbody>
+</div>
+
+<table id="personnel" class="display">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <?php if ($_SESSION['role_id'] <= 2) : ?>
+            <th>Delete</th>
+            <?php endif; ?>
+        </tr>
+    </thead>
+    <tbody>
     <?php while ($res = mysqli_fetch_array($result)) : ?>
         <tr>
+            <td><?php echo htmlspecialchars($res['OperatorName']); ?></td>
             <td>
-                <?php echo htmlspecialchars($res['OperatorName']); ?>
-            </td>
-            <td>
-                <?php 
-                    $operatorEmail = htmlspecialchars($res['OperatorEmail']);
-                    echo '<a href="mailto:' . $operatorEmail . '">' . $operatorEmail . '</a>';
+                <?php
+                $operatorEmail = htmlspecialchars($res['OperatorEmail']);
+                echo '<a href="mailto:' . $operatorEmail . '">' . $operatorEmail . '</a>';
                 ?>
             </td>
             <?php if ($_SESSION['role_id'] <= 2) : ?>
-                <td>
-                    <?php 
-                        $operatorId = $res['id'];
-                        $operatorName = htmlspecialchars(addslashes($res['OperatorName']));
-                    ?>
-                    <button onclick="confirmDeletion(<?php echo $operatorId; ?>, '<?php echo $operatorName; ?>')">
-                        Delete
-                    </button>
-                </td>
+            <td>
+                <?php
+                $operatorId   = $res['id'];
+                $operatorName = htmlspecialchars(addslashes($res['OperatorName']));
+                ?>
+                <button onclick="confirmDeletion(<?php echo $operatorId; ?>, '<?php echo $operatorName; ?>')">
+                    Delete
+                </button>
+            </td>
             <?php endif; ?>
         </tr>
     <?php endwhile; ?>
-</tbody>
-    </table>
-    <script>
-        $(document).ready(function() {
-            // Populate email links first
-            document.querySelectorAll('td[id^="email-"]').forEach(cell => {
-                const user = cell.getAttribute('data-user');
-                const domain = cell.getAttribute('data-domain');
-                const email = `${user}@${domain}`;
-                const link = document.createElement('a');
-                link.href = `mailto:${email}`;
-                link.textContent = email;
-                cell.appendChild(link);
-            });
+    </tbody>
+</table>
 
-            // Now initialize the DataTable after the content is populated
-            new DataTable('#personnel', {
-                scrollX: true,
-                pageLength: 15,
-                lengthMenu: [10, 15, 25, 50, 75, 100]
-            });
+<script>
+    $(document).ready(function() {
+        new DataTable('#personnel', {
+            scrollX: true,
+            pageLength: 15,
+            lengthMenu: [10, 15, 25, 50, 75, 100]
         });
-
-    </script>
+    });
+</script>
 </body>
 </html>

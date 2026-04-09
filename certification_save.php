@@ -25,21 +25,20 @@
  * - On failure: Redirects to `certification_add.php` with `error=1`.
  *
  * @category Certification
- * @package  TrainingManagementSystem
- * @author   Gregory Leblanc <leblanc+php@ohio.edu>
- * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
- * @link     https://inpp.ohio.edu/~leblanc/eal_2024
+ * @package TrainingManagementSystem
+ * @author Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link https://inpp.ohio.edu/~leblanc/eal_2024
  */
+
+session_start();
 
 // Include the database connection file
 require_once "config.php";
 require_once "auth.php";
 
-/**
- * Check if the user is logged in and authorized to edit personnel details.
- * Redirects unauthorized users to the login page.
- */
-checkLogin(1, 'REQUEST_URI')
+// FIX (Issue #9): enforce authentication before processing any writes
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
@@ -71,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cert_id = intval($_POST['cert_id']);
     $completed_by = intval($_POST['completed_by']);
 
-    // Default values for status, entered date, and expiration
+    // Default values for status and entered date
     $status = 'Active';
     $entered = date('Y-m-d H:i:s');
     
