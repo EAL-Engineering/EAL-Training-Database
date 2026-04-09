@@ -25,20 +25,38 @@ define('SESSION_TIMEOUT', 2 * 60 * 60);
  * Check if the user is logged in and has the required access level.
  * Redirects unauthorized users to the login page.
  *
- * @param int $requiredRole The required access level.
- * @param string $redirectUrl The current page URI to redirect back after login.
+ * Also enforces the session idle timeout (Issue #13): if last_activity is
+ * older than SESSION_TIMEOUT, the session is destroyed and the user is sent
+ * to the login page with a return URL so they land back where they were after
+ * re-authenticating. last_activity is refreshed on every successful check so
+ * the timeout is idle-based rather than absolute.
+ *
+ * @param int    $requiredRole The required access level.
+ * @param string $redirectUrl  The current page URI to redirect back after login.
  *
  * @return void
  */
 function checkLogin($requiredRole, $redirectUrl)
 {
     if (!isset($_SESSION['user_id'])) {
-        error_log("User not logged in. Redirecting to main page.");
-        header("Location: index.php");
+        error_log("User not logged in. Redirecting to login page.");
+        header("Location: login.php?return=" . urlencode($redirectUrl));
         exit();
     }
 
-    // Assuming there's a function to get the user's role
+    // FIX (Issue #13): Enforce session idle timeout on every protected page.
+    // Previously this check only existed in login.php, meaning an authenticated
+    // user could stay active indefinitely on any other page.
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
+        session_unset();
+        session_destroy();
+        header("Location: login.php?return=" . urlencode($redirectUrl));
+        exit();
+    }
+
+    // Refresh the idle timer on every valid request.
+    $_SESSION['last_activity'] = time();
+
     $userRole = getUserRole($_SESSION['user_id']);
 
     if ($userRole === null) {
