@@ -170,6 +170,21 @@ function getCSRFToken() {
 }
 
 /**
+ * Regenerate the CSRF token for the current session.
+ * Use after login/session id regeneration to reduce the risk of token fixation.
+ *
+ * @return string The new CSRF token.
+ */
+function regenerateCSRFToken()
+{
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+    $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+    return $_SESSION['csrf_token'];
+}
+
+/**
  * Validates the CSRF token provided in a POST request.
  * * @param string $token The token from the form submission.
  * @return bool True if valid, false otherwise.

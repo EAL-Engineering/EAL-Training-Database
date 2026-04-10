@@ -55,6 +55,10 @@ $success_message = "";
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        $error_message = "Invalid CSRF token.";
+    }
     /**
      * Form input variables
      *

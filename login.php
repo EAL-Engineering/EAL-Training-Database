@@ -72,6 +72,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // useless after login.
             session_regenerate_id(true);
 
+            // Rotate CSRF token after regenerating the session ID to prevent token fixation.
+            if (function_exists('regenerateCSRFToken')) {
+                regenerateCSRFToken();
+            } else {
+                // Fallback: ensure a token exists
+                getCSRFToken();
+            }
+
             $_SESSION['user_id'] = $id;
             $_SESSION['fname'] = $fname;
             $_SESSION['role_id'] = $role_id;
