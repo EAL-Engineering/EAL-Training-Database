@@ -175,7 +175,30 @@ function getCSRFToken() {
  * @return bool True if valid, false otherwise.
  */
 function verifyCSRFToken($token) {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    if (!isset($_SESSION['csrf_token'])) {
+        return false;
+    }
+
+    // Use native hash_equals when available (PHP >= 5.6), otherwise
+    // perform a timing-safe comparison compatible with older PHP versions.
+    if (function_exists('hash_equals')) {
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
+
+    // Fallback timing-safe comparison
+    $known = $_SESSION['csrf_token'];
+    if (!is_string($known) || !is_string($token)) {
+        return false;
+    }
+    if (strlen($known) !== strlen($token)) {
+        return false;
+    }
+    $res = 0;
+    $len = strlen($known);
+    for ($i = 0; $i < $len; $i++) {
+        $res |= ord($known[$i]) ^ ord($token[$i]);
+    }
+    return $res === 0;
 }
 
 ?>
