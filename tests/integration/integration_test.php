@@ -39,6 +39,17 @@ if (isset($argv[1]) && strpos($argv[1], 'http') === 0) {
     $operatorId = getenv('OPERATOR_ID');
 }
 
+// Dry-run mode is ON by default. Disable with DRY_RUN=0 or pass --live.
+$dryRun = true;
+if (getenv('DRY_RUN') === '0' || in_array('--live', $argv)) {
+    $dryRun = false;
+}
+if ($dryRun) {
+    echo "DRY RUN mode enabled (default) — no POSTs will be executed. Use --live or DRY_RUN=0 to run POSTs.\n";
+} else {
+    echo "LIVE mode enabled — destructive POSTs will be executed.\n";
+}
+
 // If a local test config exists at tests/config.php, load it and use values
 $localConfig = __DIR__ . '/../config.php';
 if (file_exists($localConfig)) {
@@ -48,6 +59,10 @@ if (file_exists($localConfig)) {
     if (empty($user) && !empty($TEST_LOGIN_USER)) $user = $TEST_LOGIN_USER;
     if (empty($pass) && !empty($TEST_LOGIN_PASS)) $pass = $TEST_LOGIN_PASS;
     if (empty($operatorId) && !empty($TEST_OPERATOR_ID)) $operatorId = $TEST_OPERATOR_ID;
+    // Optional preferred trainer id configured in tests/config.php
+    if (!empty($TEST_SELECTED_TRAINER)) {
+        $PREFERRED_TRAINER = $TEST_SELECTED_TRAINER;
+    }
 }
 
 if (empty($base) || empty($user) || empty($pass) || empty($operatorId)) {
@@ -201,8 +216,14 @@ $postData = [
     'csrf_token' => $csrf_edit
 ];
 
-list($infoSave, $bodySave, $errSave, $headersSave) = httpPost($saveUrl, $postData, $cookieFile);
-if ($errSave) { echo "cURL error during save: $errSave\n"; exit(2); }
+if ($dryRun) {
+    echo "DRY RUN: would POST to $saveUrl with:\n" . print_r($postData, true) . "\n";
+    // treat as successful in dry-run
+    echo "- personnel_save POST skipped (dry-run)\n";
+    echo "Proceeding to certification endpoint checks...\n";
+} else {
+    list($infoSave, $bodySave, $errSave, $headersSave) = httpPost($saveUrl, $postData, $cookieFile);
+    if ($errSave) { echo "cURL error during save: $errSave\n"; exit(2); }
 
 // If the POST returned a redirect, follow it and assert success marker on the final page
 $location = null;
@@ -253,8 +274,13 @@ if ($location) {
             'completed_by' => $chosenTrainer,
             'csrf_token' => $csrf_cert
         ];
-        list($cInfo, $cBody, $cErr, $cHeaders) = httpPost($base . '/certification_save.php', $certPost, $cookieFile);
-        if ($cErr) { echo "cURL error during certification_save: $cErr\n"; @unlink($cookieFile); exit(2); }
+        if ($dryRun) {
+            echo "DRY RUN: would POST to certification_save.php with:\n" . print_r($certPost, true) . "\n";
+            echo "- certification_save skipped (dry-run)\n";
+        } else {
+            list($cInfo, $cBody, $cErr, $cHeaders) = httpPost($base . '/certification_save.php', $certPost, $cookieFile);
+            if ($cErr) { echo "cURL error during certification_save: $cErr\n"; @unlink($cookieFile); exit(2); }
+        }
         // follow redirect if present
         $cLoc = null;
         if (!empty($cHeaders) && preg_match('/^Location:\s*(.+)$/mi', $cHeaders, $mlc)) { $cLoc = trim($mlc[1]); }

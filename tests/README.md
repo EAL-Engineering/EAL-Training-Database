@@ -52,6 +52,18 @@ Option C — positional args:
 php tests/integration/integration_test.php https://inpp.ohio.edu/~leblanc/eal_2024 user pass 123
 ```
 
+Dry-run mode
+
+To run the integration script without making any changes, set the environment variable `DRY_RUN=1` or pass `--dry-run` on the command line. The script will perform GETs and parse CSRF tokens but will skip destructive POSTs and instead print the payloads it would send.
+
+Examples:
+
+```bash
+DRY_RUN=1 php tests/integration/integration_test.php
+# or
+php tests/integration/integration_test.php https://inpp.ohio.edu/~leblanc/eal_2024 user pass 123 --dry-run
+```
+
 Notes & security
 
 - Prefer creating a dedicated test/training account with limited privileges for automation.
