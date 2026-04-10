@@ -20,7 +20,7 @@ session_start();
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_Server['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 // // Enable error reporting for debugging (remove in production)
 // ini_set('display_errors', 1);

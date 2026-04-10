@@ -28,7 +28,7 @@ require_once "auth.php";
  * Check if the user is logged in and authorized to edit personnel details.
  * Redirects unauthorized users to the login page.
  */
-checkLogin(1, 'REQUEST_URI')
+checkLogin(1, $_SERVER['REQUEST_URI']);
 
 /**
  * Time until the session expires
