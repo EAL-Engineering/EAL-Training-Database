@@ -59,7 +59,8 @@ try {
             'type' => 'error',
             'text' => 'Invalid CSRF token.'
         ];
-        header("Location: trainer_edit.php?id=" . urlencode(intval($_POST['trainer_id'] ?? 0)));
+        $redirectId = isset($_POST['trainer_id']) ? intval($_POST['trainer_id']) : 0;
+        header("Location: trainer_edit.php?id=" . urlencode($redirectId));
         exit;
     }
     // Validate input
@@ -101,6 +102,7 @@ try {
     ];
 }
 
-// Redirect back to the trainer_edit.php page
-header("Location: trainer_edit.php?id=$trainer_id");
+// Ensure we always have a trainer id to redirect to
+$redirectId = isset($trainer_id) ? $trainer_id : (isset($_POST['trainer_id']) ? intval($_POST['trainer_id']) : 0);
+header("Location: trainer_edit.php?id=" . urlencode($redirectId));
 exit();

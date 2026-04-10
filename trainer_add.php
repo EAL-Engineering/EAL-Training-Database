@@ -217,7 +217,7 @@ if (!$eligibleOperators) {
 <div>
     <div class="back-button-container">
         <a href="personnel_list.php">To Personnel List</a>
-        <a href="personnel_edit.php?id=<?php echo htmlspecialchars($operator_id ?? ''); ?>" class="back-button">
+        <a href="personnel_edit.php?id=<?php echo htmlspecialchars(isset($operator_id) ? $operator_id : ''); ?>" class="back-button">
             Back to Edit Operator
         </a>
         <a href="index.php">To main page</a>
