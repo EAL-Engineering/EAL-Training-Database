@@ -3,3 +3,4 @@ test.html
 .phive
 docs
 config.php
+tests/config.php

@@ -1,0 +1,15 @@
+<?php
+/**
+ * Example test configuration for integration tests.
+ * Copy to tests/config.php and fill in real values. This file should be gitignored.
+ */
+
+// Base URL of the app (no trailing slash)
+$TEST_BASE_URL = 'https://inpp.ohio.edu/~leblanc/eal_2024';
+
+// Test credentials (create a dedicated test account)
+$TEST_LOGIN_USER = 'testuser';
+$TEST_LOGIN_PASS = 'secretpassword';
+
+// An operator ID that exists and that the test account can edit
+$TEST_OPERATOR_ID = 123;
