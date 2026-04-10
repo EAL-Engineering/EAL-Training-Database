@@ -102,6 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
         $mysqli->autocommit(false);
 
         try {
+            // Add the operator to the can_certify table
+            $addCan_certifyQuery = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr) VALUES (?)");
+            if (!$addCan_certifyQuery) {
+                throw new Exception("Prepare failed: (". $mysqli->errno . ") " . $mysqli->error);
+            }
+            $addCan_certifyQuery->bind_param("i", $operator_id);
+            $addCan_certifyQuery->execute();
+            $addCan_certifyQuery->close();
             // Generate password reset token
             $token = bin2hex(openssl_random_pseudo_bytes(16));
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
