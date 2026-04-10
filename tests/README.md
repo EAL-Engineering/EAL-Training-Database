@@ -14,7 +14,7 @@ Running the unit test (CSRF helpers)
 
 From the repository root run:
 
-```
+``` bash
 php tests/auth_csrf_test.php
 ```
 
