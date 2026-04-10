@@ -19,6 +19,11 @@ require_once "auth.php";
 $message = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        die("Invalid CSRF token. <a href='index.php'>Go to Main Page</a>");
+    }
+
     $email = trim($_POST['email']); 
 
     // Query to find the operator and ensure linkage to a trainer
@@ -101,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="email">Enter your email address:</label>
                 <input type="email" id="email" name="email" required>
             </div>
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
             <button type="submit" style="width:100%; padding:10px; margin-top:10px;">Submit Request</button>
         </form>
         <p style="text-align:center; margin-top:20px;"><a href="login.php">Back to Login</a></p>

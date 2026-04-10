@@ -29,6 +29,10 @@ checkLogin(1, $_Server['REQUEST_URI']);
 
 // Check if the form is submitted via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        die("Invalid CSRF token. <a href='index.php'>Go to Main Page</a>");
+    }
     /**
      * Sanitize and validate inputs from the form submission.
      *

@@ -153,4 +153,29 @@ function isSafeRedirect($url)
 
     return true;
 }
+
+/**
+ * Generates or retrieves a CSRF token for the current session.
+ * * @return string The CSRF token.
+ */
+function getCSRFToken() {
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (empty($_SESSION['csrf_token'])) {
+        // Generate a secure random token
+        $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Validates the CSRF token provided in a POST request.
+ * * @param string $token The token from the form submission.
+ * @return bool True if valid, false otherwise.
+ */
+function verifyCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
 ?>

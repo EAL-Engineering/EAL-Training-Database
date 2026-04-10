@@ -53,6 +53,15 @@ function validatePostParameters()
 }
 
 try {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        $_SESSION['message'] = [
+            'type' => 'error',
+            'text' => 'Invalid CSRF token.'
+        ];
+        header("Location: trainer_edit.php?id=" . urlencode(intval($_POST['trainer_id'] ?? 0)));
+        exit;
+    }
     // Validate input
     $params = validatePostParameters();
     $trainer_id = $params['trainer_id'];

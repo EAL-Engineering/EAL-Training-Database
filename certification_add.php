@@ -251,6 +251,7 @@ foreach ($available_certifications as $cert) {
                 </select>
             </div>
             <input type="hidden" name="operator_id" value="<?php echo htmlspecialchars($operator_id); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
 
             <div class="button-container">
                 <!-- Add Certification Button -->

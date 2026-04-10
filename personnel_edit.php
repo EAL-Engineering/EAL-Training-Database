@@ -211,6 +211,7 @@ $certifications_stmt->close();
                 <label>Comments:</label>
                 <textarea name="comments"><?php echo htmlspecialchars($operator['comments']); ?></textarea>
             </div>
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
             <button type="submit" class="full-width-button">Save Changes</button>
         </form>
         <div class="certifications">

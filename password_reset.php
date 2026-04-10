@@ -53,6 +53,10 @@ $stmt->close();
 
 // If the form is submitted, process the password change
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        die("Invalid CSRF token.");
+    }
     $new_password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
@@ -100,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="confirm_password">Confirm Password:</label>
         <input type="password" name="confirm_password" required>
         <br><br>
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
         <button type="submit">Reset Password</button>
     </form>
 </body>

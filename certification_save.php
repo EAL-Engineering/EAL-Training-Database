@@ -47,6 +47,10 @@ error_reporting(E_ALL);
 
 // Check if the form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        die("Invalid CSRF token. <a href='index.php'>Go to Main Page</a>");
+    }
     // Validate required fields
     if (!isset($_POST['operator_id'])) {
         die("Error: Operator ID is missing. <a href='index.php'>Go to Main Page</a>");

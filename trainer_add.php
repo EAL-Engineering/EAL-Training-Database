@@ -72,6 +72,10 @@ if (!$isTrainer) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['operator_id'])) {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        $error = "Invalid CSRF token.";
+    }
     /**
      * ID of the operator to be added as a trainer.
      *
@@ -239,6 +243,7 @@ if (!$eligibleOperators) {
             <?php endwhile; ?>
         </select>
         <button type="submit" class="primary-button">Add Trainer</button>
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
     </form>
 </div>
 </body>

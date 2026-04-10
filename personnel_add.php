@@ -235,6 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="Inactive">Inactive</option>
                 </select>
             </div>
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
             <button type="submit">Add Personnel</button>
         </form>
     </div>

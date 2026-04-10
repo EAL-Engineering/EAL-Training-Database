@@ -25,6 +25,10 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        die("Invalid CSRF token.");
+    }
     $current_password = $_POST['current_password'];
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
@@ -82,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="password" id="new_password" name="new_password" required><br>
         <label for="confirm_password">Confirm New Password:</label>
         <input type="password" id="confirm_password" name="confirm_password" required><br>
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
         <button type="submit">Change Password</button>
     </form>
 </body>

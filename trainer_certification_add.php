@@ -29,6 +29,15 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
 
 // Check if POST data is valid
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trainer_id'], $_POST['cert_id'])) {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        $_SESSION['message'] = [
+            'type' => 'error',
+            'text' => 'Invalid CSRF token.'
+        ];
+        header("Location: trainer_edit.php?id=" . urlencode(intval($_POST['trainer_id'])));
+        exit;
+    }
     /**
      * Trainer ID from the POST request.
      *

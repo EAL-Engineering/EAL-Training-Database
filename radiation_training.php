@@ -58,6 +58,10 @@ $message = ''; // Initialize message
 
 // Form submission logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        $message = "Invalid CSRF token.";
+    }
     /**
      * The date of the training entered by the user.
      * 
@@ -245,6 +249,7 @@ function checkCertification($trainerId, $certificationId)
                 </table>
             </div>
             <button type="submit">Register Training</button>
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
         </form>
     </div>
     <script>

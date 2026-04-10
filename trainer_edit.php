@@ -195,6 +195,7 @@ if (isset($_SESSION['message'])) {
                                 <form method="post" action="trainer_certification_remove.php" style="display:inline;">
                                     <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
                                     <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
                                     <button type="submit">Remove Certification</button>
                                 </form>
                             </div>
@@ -218,6 +219,7 @@ if (isset($_SESSION['message'])) {
                                 <form method="post" action="trainer_certification_add.php" style="display:inline;">
                                     <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
                                     <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
                                     <button type="submit">Add Certification</button>
                                 </form>
                             </div>
