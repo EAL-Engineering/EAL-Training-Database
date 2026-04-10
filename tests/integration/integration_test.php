@@ -105,6 +105,19 @@ function parseCsrf($html) {
     return null;
 }
 
+function parseSelectOptions($html, $selectName) {
+    $opts = [];
+    if (preg_match('/<select[^>]*name=["\']'.preg_quote($selectName,'/').'["\'][^>]*>(.*?)<\/select>/is', $html, $m)) {
+        $inside = $m[1];
+        if (preg_match_all('/<option[^>]*value=["\']([^"\']+)["\'][^>]*>(.*?)<\/option>/is', $inside, $oms, PREG_SET_ORDER)) {
+            foreach ($oms as $o) {
+                $opts[] = ['value' => $o[1], 'text' => trim(strip_tags($o[2]))];
+            }
+        }
+    }
+    return $opts;
+}
+
 echo "Integration test starting against $base\n";
 
 // 1) GET login page
@@ -208,6 +221,128 @@ if ($location) {
     if (strpos($location, 'personnel_list.php') !== false || strpos($finalText, 'update_success') !== false || stripos($finalText, 'success') !== false) {
         echo "- personnel_save POST redirected and final page contains success marker\n";
         echo "INTEGRATION TESTS PASSED\n";
+        // Continue with additional endpoint checks
+        echo "Proceeding to certification endpoint checks...\n";
+    } else {
+        echo "Redirected final page did not contain expected success marker.\n";
+        echo "Response snippet:\n" . substr($finalText,0,400) . "\n";
+        @unlink($cookieFile);
+        exit(2);
+    }
+    
+    // CERTIFICATION ADD/SAVE check
+    $certAddUrl = $base . '/certification_add.php?id=' . urlencode($operatorId);
+    list($ci, $cb, $ce) = httpGet($certAddUrl, $cookieFile);
+    if ($ci['http_code'] !== 200) { echo "GET certification_add.php returned HTTP {$ci['http_code']}\n"; @unlink($cookieFile); exit(2); }
+    $csrf_cert = parseCsrf($cb);
+    if (!$csrf_cert) { echo "Failed to parse CSRF token from certification_add page\n"; @unlink($cookieFile); exit(2); }
+    echo "- parsed certification_add CSRF token\n";
+
+    // parse available certifications and trainers
+    $certOptions = parseSelectOptions($cb, 'cert_id');
+    if (count($certOptions) === 0) { echo "No certifications available to add; skipping certification_add check.\n"; }
+    else {
+        $chosenCert = $certOptions[0]['value'];
+        // trainers select is named 'completed_by'
+        $trainerOptions = parseSelectOptions($cb, 'completed_by');
+        $chosenTrainer = isset($trainerOptions[0]) ? $trainerOptions[0]['value'] : '';
+
+        $certPost = [
+            'operator_id' => $operatorId,
+            'cert_id' => $chosenCert,
+            'completed_by' => $chosenTrainer,
+            'csrf_token' => $csrf_cert
+        ];
+        list($cInfo, $cBody, $cErr, $cHeaders) = httpPost($base . '/certification_save.php', $certPost, $cookieFile);
+        if ($cErr) { echo "cURL error during certification_save: $cErr\n"; @unlink($cookieFile); exit(2); }
+        // follow redirect if present
+        $cLoc = null;
+        if (!empty($cHeaders) && preg_match('/^Location:\s*(.+)$/mi', $cHeaders, $mlc)) { $cLoc = trim($mlc[1]); }
+        if ($cLoc) {
+            if (strpos($cLoc, 'http') !== 0) $cLoc = $base . '/' . ltrim($cLoc, '/');
+            list($fI, $fB, $fE) = httpGet($cLoc, $cookieFile);
+            $fText = strip_tags($fB);
+            if ($fI['http_code'] === 200 && (strpos($cLoc, 'certification_add.php') !== false || stripos($fText, 'success') !== false)) {
+                echo "- certification_save succeeded and redirected page contains success marker\n";
+            } else {
+                echo "Certification save redirect did not indicate success. Snippet:\n" . substr($fText,0,400) . "\n";
+                @unlink($cookieFile); exit(2);
+            }
+        } else {
+            $bodyText = strip_tags($cBody);
+            if (stripos($bodyText, 'success') !== false) {
+                echo "- certification_save returned success content\n";
+            } else {
+                echo "certification_save did not indicate success. Snippet:\n" . substr($bodyText,0,400) . "\n";
+                @unlink($cookieFile); exit(2);
+            }
+        }
+    }
+    
+    // TRAINER CERT ADD/REMOVE (optional): if we discovered a trainer id from cert add page, try add/remove
+    if (!empty($chosenTrainer)) {
+        echo "Proceeding to trainer certification add/remove checks for trainer id $chosenTrainer\n";
+        // Need a CSRF token from trainer_edit.php for trainer actions
+        $trainerEditUrl = $base . '/trainer_edit.php?id=' . urlencode($chosenTrainer);
+        list($ti, $tb, $te) = httpGet($trainerEditUrl, $cookieFile);
+        if ($ti['http_code'] !== 200) { echo "GET trainer_edit.php returned HTTP {$ti['http_code']}\n"; @unlink($cookieFile); exit(2); }
+        $csrf_trainer = parseCsrf($tb);
+        if (!$csrf_trainer) { echo "Failed to parse CSRF token from trainer_edit page\n"; @unlink($cookieFile); exit(2); }
+
+        // Add certification to trainer
+        $trainerAddPost = [
+            'trainer_id' => $chosenTrainer,
+            'cert_id' => $chosenCert,
+            'csrf_token' => $csrf_trainer
+        ];
+        list($taInfo, $taBody, $taErr, $taHeaders) = httpPost($base . '/trainer_certification_add.php', $trainerAddPost, $cookieFile);
+        if ($taErr) { echo "cURL error during trainer_certification_add: $taErr\n"; @unlink($cookieFile); exit(2); }
+        // follow redirect and check message
+        $taLoc = null; if (!empty($taHeaders) && preg_match('/^Location:\s*(.+)$/mi', $taHeaders, $mta)) $taLoc = trim($mta[1]);
+        if ($taLoc) {
+            if (strpos($taLoc, 'http') !== 0) $taLoc = $base . '/' . ltrim($taLoc, '/');
+            list($fI2,$fB2,$fE2) = httpGet($taLoc, $cookieFile);
+            $fText2 = strip_tags($fB2);
+            if ($fI2['http_code'] === 200 && stripos($fText2, 'Certification added successfully') !== false) {
+                echo "- trainer_certification_add succeeded (message found)\n";
+            } else {
+                echo "trainer_certification_add did not show expected success message. Snippet:\n" . substr($fText2,0,400) . "\n";
+                @unlink($cookieFile); exit(2);
+            }
+        }
+
+        // Now remove the certification we just added
+        // Need new CSRF token from trainer_edit page
+        list($ti2, $tb2, $te2) = httpGet($trainerEditUrl, $cookieFile);
+        $csrf_trainer2 = parseCsrf($tb2);
+        if (!$csrf_trainer2) { echo "Failed to parse CSRF token for removal from trainer_edit page\n"; @unlink($cookieFile); exit(2); }
+        $trainerRemPost = [
+            'trainer_id' => $chosenTrainer,
+            'cert_id' => $chosenCert,
+            'csrf_token' => $csrf_trainer2
+        ];
+        list($trInfo,$trBody,$trErr,$trHeaders) = httpPost($base . '/trainer_certification_remove.php', $trainerRemPost, $cookieFile);
+        if ($trErr) { echo "cURL error during trainer_certification_remove: $trErr\n"; @unlink($cookieFile); exit(2); }
+        $trLoc = null; if (!empty($trHeaders) && preg_match('/^Location:\s*(.+)$/mi', $trHeaders, $mtr)) $trLoc = trim($mtr[1]);
+        if ($trLoc) {
+            if (strpos($trLoc, 'http') !== 0) $trLoc = $base . '/' . ltrim($trLoc, '/');
+            list($fI3,$fB3,$fE3) = httpGet($trLoc, $cookieFile);
+            $fText3 = strip_tags($fB3);
+            if ($fI3['http_code'] === 200 && stripos($fText3, 'Certification removed successfully') !== false) {
+                echo "- trainer_certification_remove succeeded (message found)\n";
+            } else {
+                echo "trainer_certification_remove did not show expected message. Snippet:\n" . substr($fText3,0,400) . "\n";
+                @unlink($cookieFile); exit(2);
+            }
+        }
+    } else {
+        echo "No trainer found in certification_add page; skipping trainer cert add/remove checks.\n";
+    }
+
+    // If we reached here, all checks passed
+    echo "ALL INTEGRATION CHECKS PASSED\n";
+    @unlink($cookieFile);
+    exit(0);
         @unlink($cookieFile);
         exit(0);
     }
