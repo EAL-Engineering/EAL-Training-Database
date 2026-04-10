@@ -79,11 +79,19 @@ function httpPost($url, $postFields, $cookieFile) {
     curl_setopt($ch, CURLOPT_USERAGENT, 'EAL-Integration-Test/1.0');
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-    $body = curl_exec($ch);
+    // Include headers so we can parse Location on redirect
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    $resp = curl_exec($ch);
     $info = curl_getinfo($ch);
     $err = curl_error($ch);
     curl_close($ch);
-    return [$info, $body, $err];
+
+    // Separate headers and body
+    $header_size = isset($info['header_size']) ? $info['header_size'] : 0;
+    $headers = $header_size ? substr($resp, 0, $header_size) : '';
+    $body = $header_size ? substr($resp, $header_size) : $resp;
+
+    return [$info, $body, $err, $headers];
 }
 
 function parseCsrf($html) {
@@ -116,13 +124,15 @@ $post = [
     'password' => $pass,
     'csrf_token' => $csrf
 ];
-list($info, $body, $err) = httpPost($loginUrl, $post, $cookieFile);
+list($info, $body, $err, $headers) = httpPost($loginUrl, $post, $cookieFile);
 if ($err) { echo "cURL error during login: $err\n"; exit(2); }
 
 // If login posts redirect, follow Location header by performing GET to Location if present
-if (!empty($info['redirect_url'])) {
-    $loc = $info['redirect_url'];
-    // absolute or relative
+$loc = null;
+if (!empty($headers) && preg_match('/^Location:\s*(.+)$/mi', $headers, $mloc)) {
+    $loc = trim($mloc[1]);
+}
+if ($loc) {
     if (strpos($loc, 'http') !== 0) $loc = $base . '/' . ltrim($loc, '/');
     list($i2,$b2,$e2) = httpGet($loc, $cookieFile);
     $info = $i2; $body = $b2; $err = $e2;
@@ -178,27 +188,44 @@ $postData = [
     'csrf_token' => $csrf_edit
 ];
 
-list($infoSave, $bodySave, $errSave) = httpPost($saveUrl, $postData, $cookieFile);
+list($infoSave, $bodySave, $errSave, $headersSave) = httpPost($saveUrl, $postData, $cookieFile);
 if ($errSave) { echo "cURL error during save: $errSave\n"; exit(2); }
 
-// Expect redirect (302) to personnel_list.php on success
-if ($infoSave['http_code'] == 302 || $infoSave['http_code'] == 303) {
-    echo "- personnel_save POST redirected (likely success)\n";
-    echo "INTEGRATION TESTS PASSED\n";
-    // cleanup
+// If the POST returned a redirect, follow it and assert success marker on the final page
+$location = null;
+if (!empty($headersSave) && preg_match('/^Location:\s*(.+)$/mi', $headersSave, $mloc2)) {
+    $location = trim($mloc2[1]);
+}
+if ($location) {
+    if (strpos($location, 'http') !== 0) $location = $base . '/' . ltrim($location, '/');
+    list($finalInfo, $finalBody, $finalErr) = httpGet($location, $cookieFile);
+    if ($finalInfo['http_code'] !== 200) {
+        echo "Followed redirect but final page returned HTTP {$finalInfo['http_code']}\n";
+        @unlink($cookieFile);
+        exit(2);
+    }
+    $finalText = strip_tags($finalBody);
+    if (strpos($location, 'personnel_list.php') !== false || strpos($finalText, 'update_success') !== false || stripos($finalText, 'success') !== false) {
+        echo "- personnel_save POST redirected and final page contains success marker\n";
+        echo "INTEGRATION TESTS PASSED\n";
+        @unlink($cookieFile);
+        exit(0);
+    }
+    echo "Redirected final page did not contain expected success marker.\n";
+    echo "Response snippet:\n" . substr($finalText,0,400) . "\n";
     @unlink($cookieFile);
-    exit(0);
+    exit(2);
 } else {
-    // Some installs may return 200; check for success indicators
-    if (strpos($bodySave, 'update_success') !== false || strpos($bodySave, 'Successfully') !== false) {
+    // No redirect; check the POST response body for success indicators
+    $bodyText = strip_tags($bodySave);
+    if (strpos($bodySave, 'update_success') !== false || stripos($bodyText, 'success') !== false) {
         echo "- personnel_save returned success content\n";
         echo "INTEGRATION TESTS PASSED\n";
         @unlink($cookieFile);
         exit(0);
     }
     echo "personnel_save did not indicate success (HTTP {$infoSave['http_code']}).\n";
-    // print a short excerpt for debugging
-    echo "Response snippet:\n" . substr(strip_tags($bodySave),0,400) . "\n";
+    echo "Response snippet:\n" . substr($bodyText,0,400) . "\n";
     @unlink($cookieFile);
     exit(2);
 }
