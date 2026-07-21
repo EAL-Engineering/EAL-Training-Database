@@ -264,6 +264,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                     if (selectedIndex >= 0 && items[selectedIndex]) {
                         selectOperator(items[selectedIndex], input, hidden);
                     }
+                } else if (e.key === 'Tab') {
+                    // If exactly one match is highlighted, select it on Tab
+                    if (items.length === 1 && selectedIndex === 0) {
+                        e.preventDefault();
+                        selectOperator(items[0], input, hidden);
+                        // Move focus to next field manually
+                        const allInputs = Array.from(document.querySelectorAll('input, select, textarea, button'));
+                        const currentIdx = allInputs.indexOf(input);
+                        const nextInput = allInputs[currentIdx + 1];
+                        if (nextInput) nextInput.focus();
+                    } else {
+                        dropdown.style.display = 'none';
+                    }
                 } else if (e.key === 'Escape') {
                     dropdown.style.display = 'none';
                 }
@@ -285,12 +298,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                     });
                 });
 
-                // Auto-select if only one match
+                // Auto-highlight if only one match, but don't select until user confirms
                 if (items.length === 1) {
+                    selectedIndex = 0;
                     const singleItem = dropdown.querySelector('.searchable-item');
                     if (singleItem) {
-                        selectOperator(singleItem, input, hidden);
+                        singleItem.classList.add('searchable-highlight');
                     }
+                } else {
+                    selectedIndex = -1;
                 }
             }
 
