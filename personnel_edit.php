@@ -50,7 +50,7 @@ $id = intval($_GET['id']); // Sanitize the ID
 
 /**
  * Retrieve operator details from the database.
- * 
+ * Explicitly selecting columns ensures parameter binding accuracy.
  * @var string $query SQL query to fetch operator details.
  * @var mysqli_stmt $operator_stmt Prepared statement for fetching operator details.
  */
@@ -143,6 +143,24 @@ $certifications_stmt->close();
         // Pass the session expiration time to the JavaScript function
         document.addEventListener('DOMContentLoaded', () => {
             setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+
+            // Maintain subset relationship between Senior Staff and EAL Staff
+            const ealStaffCheckbox = document.getElementById('is_eal_staff');
+            const seniorStaffCheckbox = document.getElementById('is_senior_staff');
+
+            if (ealStaffCheckbox && seniorStaffCheckbox) {
+                seniorStaffCheckbox.addEventListener('change', () => {
+                    if (seniorStaffCheckbox.checked) {
+                        ealStaffCheckbox.checked = true;
+                    }
+                });
+
+                ealStaffCheckbox.addEventListener('change', () => {
+                    if (!ealStaffCheckbox.checked) {
+                        seniorStaffCheckbox.checked = false;
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -190,11 +208,11 @@ $certifications_stmt->close();
                 </select>
             </div>
             <div class="form-row">
-                <label for="is_eal_staff">Internal EAL Staff:</label>
+                <label for="is_eal_staff">EAL Staff:</label>
                 <input type="checkbox" name="is_eal_staff" id="is_eal_staff" value="1" <?php echo !empty($operator['is_eal_staff']) ? 'checked' : ''; ?>>
             </div>
             <div class="form-row">
-                <label for="is_senior_staff">Senior Staff / Lab Management:</label>
+                <label for="is_senior_staff">Senior Staff:</label>
                 <input type="checkbox" name="is_senior_staff" id="is_senior_staff" value="1" <?php echo !empty($operator['is_senior_staff']) ? 'checked' : ''; ?>>
             </div>
             <div class="form-row">

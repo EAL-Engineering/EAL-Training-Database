@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      * @var string $comments Additional comments
      * @var string $status Status of the personnel (Active/Inactive)
      * @var int    $is_eal_staff Internal EAL staff indicator (1 or 0)
-     * @var int    $is_senior_staff Senior staff / lab management indicator (1 or 0)
+     * @var int    $is_senior_staff Senior staff indicator (1 or 0)
      * @var string $entered Timestamp of when the personnel was added
      */
     $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
@@ -84,8 +84,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $home = isset($_POST['home']) ? trim($_POST['home']) : '';
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : '';
     $status = isset($_POST['status']) && $_POST['status'] !== '' ? trim($_POST['status']) : 'Active';
-    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+    
     $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
+    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+
+    // Senior staff is a subset of EAL staff
+    if ($is_senior_staff) {
+        $is_eal_staff = 1;
+    }
+
     $entered = date('Y-m-d H:i:s'); // Get current date and time in 'YYYY-MM-DD HH:MM:SS' format
 
     // Validate inputs
@@ -172,6 +179,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize the countdown with the session expiration time from PHP
             setCountdown(<?php echo $timeUntilSessionExpires; ?>);
+
+            // Maintain subset relationship between Senior Staff and EAL Staff
+            const ealStaffCheckbox = document.getElementById('is_eal_staff');
+            const seniorStaffCheckbox = document.getElementById('is_senior_staff');
+
+            if (ealStaffCheckbox && seniorStaffCheckbox) {
+                seniorStaffCheckbox.addEventListener('change', () => {
+                    if (seniorStaffCheckbox.checked) {
+                        ealStaffCheckbox.checked = true;
+                    }
+                });
+
+                ealStaffCheckbox.addEventListener('change', () => {
+                    if (!ealStaffCheckbox.checked) {
+                        seniorStaffCheckbox.checked = false;
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -248,13 +273,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group">
                 <label for="is_eal_staff">
                     <input type="checkbox" name="is_eal_staff" id="is_eal_staff" value="1">
-                    Internal EAL Staff
+                    EAL Staff
                 </label>
             </div>
             <div class="form-group">
                 <label for="is_senior_staff">
                     <input type="checkbox" name="is_senior_staff" id="is_senior_staff" value="1">
-                    Senior Staff / Lab Management
+                    Senior Staff
                 </label>
             </div>
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">

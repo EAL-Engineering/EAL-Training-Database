@@ -56,8 +56,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $altemail = isset($_POST['altemail']) ? filter_var(trim($_POST['altemail']), FILTER_SANITIZE_EMAIL) : '';
     $phones = isset($_POST['phones']) ? trim($_POST['phones']) : '';
     $status = isset($_POST['status']) ? trim($_POST['status']) : '';
-    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+    
     $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
+    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+
+    // Senior staff is a subset of EAL staff
+    if ($is_senior_staff) {
+        $is_eal_staff = 1;
+    }
+
     $office = isset($_POST['office']) ? trim($_POST['office']) : '';
     $home = isset($_POST['home']) ? trim($_POST['home']) : '';
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : '';

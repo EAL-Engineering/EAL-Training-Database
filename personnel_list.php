@@ -38,8 +38,7 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 /**
  * Fetch the list of active operators and their highest certifications.
- * 
- * The query retrieves the operator's name, email, and highest
+ * The query retrieves the operator's name, email, staff flags, and highest
  * certification, filtering certifications to a maximum seq_nmbr of 3.
  * 
  * @var mysqli_result $opertor_list Result set of the query.
