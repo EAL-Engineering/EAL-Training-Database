@@ -231,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
             const dropdown = container.querySelector('.searchable-dropdown');
             const hidden = container.querySelector('input[type="hidden"]');
             let selectedIndex = -1;
+            let isTabbing = false;
 
             input.addEventListener('focus', () => {
                 renderDropdown(operatorsData);
@@ -238,6 +239,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
             });
 
             input.addEventListener('blur', () => {
+                // If we're tabbing, let the Tab handler do the cleanup
+                if (isTabbing) {
+                    isTabbing = false;
+                    return;
+                }
                 setTimeout(() => { dropdown.style.display = 'none'; }, 150);
             });
 
@@ -265,18 +271,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                         selectOperator(items[selectedIndex], input, hidden);
                     }
                 } else if (e.key === 'Tab') {
-                    // If a match is highlighted (by arrow keys or single-match auto-highlight), select it
+                    isTabbing = true;
+                    // If a match is highlighted, select it before focus moves
                     if (selectedIndex >= 0 && items[selectedIndex]) {
-                        e.preventDefault();
                         selectOperator(items[selectedIndex], input, hidden);
-                        // Move focus to next field manually since we prevented default
-                        const allInputs = Array.from(document.querySelectorAll('input, select, textarea, button'));
-                        const currentIdx = allInputs.indexOf(input);
-                        const nextInput = allInputs[currentIdx + 1];
-                        if (nextInput) nextInput.focus();
                     } else {
                         dropdown.style.display = 'none';
                     }
+                    // Let default Tab behavior move focus; don't preventDefault
                 } else if (e.key === 'Escape') {
                     dropdown.style.display = 'none';
                 }
@@ -298,7 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                     });
                 });
 
-                // Auto-highlight if only one match, but don't select until user confirms
+                // Auto-highlight if only one match
                 if (items.length === 1) {
                     selectedIndex = 0;
                     const singleItem = dropdown.querySelector('.searchable-item');
