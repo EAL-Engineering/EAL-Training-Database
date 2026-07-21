@@ -167,7 +167,6 @@ while ($row = $operators_result->fetch_assoc()) {
                     <th>Status</th>
                     <th>Issued</th>
                     <th>Returned</th>
-                    <th>Notes</th>
                     <th>Entered</th>
                     <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
                         <th>Actions</th>
@@ -212,7 +211,8 @@ while ($row = $operators_result->fetch_assoc()) {
                 scrollX: true,
                 pageLength: 25,
                 lengthMenu: [10, 15, 25, 50, 75, 100],
-                order: [[3, 'desc'], [0, 'asc']]
+                order: [[3, 'desc'], [0, 'asc']],
+                autoWidth: false
             });
         });
     </script>

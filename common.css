@@ -390,3 +390,15 @@ textarea {
     color: #666;
     font-style: italic;
 }
+
+
+/* Operator Keys table column widths */
+#keys th:nth-child(1), #keys td:nth-child(1) { width: 20%; }  /* Operator */
+#keys th:nth-child(2), #keys td:nth-child(2) { width: 12%; }  /* Key Type */
+#keys th:nth-child(3), #keys td:nth-child(3) { width: 12%; }  /* Serial # */
+#keys th:nth-child(4), #keys td:nth-child(4) { width: 10%; }  /* Status */
+#keys th:nth-child(5), #keys td:nth-child(5) { width: 12%; white-space: nowrap; }  /* Issued */
+#keys th:nth-child(6), #keys td:nth-child(6) { width: 12%; white-space: nowrap; }  /* Returned */
+#keys th:nth-child(7), #keys td:nth-child(7) { width: 12%; white-space: nowrap; }  /* Entered */
+#keys th:nth-child(8), #keys td:nth-child(8) { width: 10%; }  /* Actions */
+
