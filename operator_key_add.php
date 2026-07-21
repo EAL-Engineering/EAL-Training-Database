@@ -29,6 +29,15 @@ $success_message = "";
 // Pre-fill operator if passed via URL
 $prefill_operator_id = isset($_GET['operator_id']) ? intval($_GET['operator_id']) : null;
 
+// Define available key types: DB value => UI label
+$key_type_options = [
+    'badge'   => 'Badge',
+    '200A2'   => '200A2 (Operator Key)',
+    '200A21'  => '200A21 (Student Lab Key)',
+    '4CA'     => '4CA (Faculty Key)',
+    '4CAB'    => '4CAB (Student Key)',
+];
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
@@ -43,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate
         if ($operator_id <= 0) {
             $error_message = "Please select an operator.";
-        } elseif (empty($key_type)) {
-            $error_message = "Key type is required.";
+        } elseif (empty($key_type) || !array_key_exists($key_type, $key_type_options)) {
+            $error_message = "Please select a valid key type.";
         } elseif (empty($serial_number)) {
             $error_message = "Serial number is required.";
         } else {
@@ -74,8 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->bind_param("isssss", $operator_id, $key_type, $serial_number, $issued_date, $notes, $entered_by);
                     if ($stmt->execute()) {
                         $success_message = "Key assigned successfully.";
-                        // Clear form for next entry
-                        $prefill_operator_id = $operator_id; // Keep same operator for batch entry
+                        // Keep same operator for batch entry
                     } else {
                         $error_message = "Database error: " . $stmt->error;
                     }
@@ -93,13 +101,6 @@ $operators_result = $mysqli->query("SELECT seq_nmbr, fname FROM operators WHERE 
 $operators = [];
 while ($row = $operators_result->fetch_assoc()) {
     $operators[] = $row;
-}
-
-// Get existing key types for datalist
-$key_types_result = $mysqli->query("SELECT DISTINCT key_type FROM operator_keys ORDER BY key_type");
-$key_types = [];
-while ($row = $key_types_result->fetch_assoc()) {
-    $key_types[] = $row['key_type'];
 }
 ?>
 <!doctype html>
@@ -158,13 +159,14 @@ while ($row = $key_types_result->fetch_assoc()) {
 
             <div class="form-group">
                 <label for="key_type">Key Type:</label>
-                <input type="text" name="key_type" id="key_type" list="key_types" required
-                    placeholder="e.g., badge, 200A2, 200A21">
-                <datalist id="key_types">
-                    <?php foreach ($key_types as $kt): ?>
-                        <option value="<?php echo htmlspecialchars($kt); ?>">
+                <select name="key_type" id="key_type" required>
+                    <option value="">-- Select Key Type --</option>
+                    <?php foreach ($key_type_options as $value => $label): ?>
+                        <option value="<?php echo htmlspecialchars($value); ?>">
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
                     <?php endforeach; ?>
-                </datalist>
+                </select>
             </div>
 
             <div class="form-group">
