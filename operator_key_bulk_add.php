@@ -29,6 +29,10 @@ $success_message = "";
 $errors = [];
 $success_count = 0;
 
+if (isset($_GET['success']) && is_numeric($_GET['success'])) {
+    $success_message = "Successfully assigned " . intval($_GET['success']) . " key(s).";
+}
+
 $key_type_options = [
     'badge'   => 'Badge',
     '200A2'   => '200A2 (Operator Key)',
@@ -120,7 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($all_ok && $success_count > 0) {
                 $mysqli->commit();
-                $success_message = "Successfully assigned " . $success_count . " key(s).";
+                header("Location: operator_key_bulk_add.php?success=" . $success_count);
+                exit();
             } elseif ($success_count > 0) {
                 $mysqli->commit();
                 $success_message = "Assigned " . $success_count . " key(s) with " . count($errors) . " error(s).";
