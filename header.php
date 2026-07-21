@@ -23,17 +23,24 @@ if (session_status() === PHP_SESSION_NONE) {
 $currentScript = basename($_SERVER['PHP_SELF']);
 ?>
 <div class="header">
-    <?php if (isset($_SESSION['user_id'])) : ?>
-        <!-- Display user information and session countdown for logged-in users -->
-        <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
-        <span>Session expires in: <span id="countdown"></span></span>
-        <a href="logout.php" class="logout-button">Logout</a>
-    <?php else: ?>
-        <!-- Display welcome message and login button for guests -->
-        <span>Welcome to the OUAL Training Information Portal</span>
-        <?php if ($currentScript !== 'login.php') : ?>
-            <!-- Show login button only if not on login.php -->
-            <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="logout-button">Login</a>
+    <div class="header-logo">
+        <a href="index.php">
+            <img src="EALlogoZM.svg" alt="EAL Logo" class="header-logo-img">
+        </a>
+    </div>
+    <div class="header-info">
+        <?php if (isset($_SESSION['user_id'])) : ?>
+            <!-- Display user information and session countdown for logged-in users -->
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
+            <span>Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" class="logout-button">Logout</a>
+        <?php else: ?>
+            <!-- Display welcome message and login button for guests -->
+            <span>Welcome to the OUAL Training Information Portal</span>
+            <?php if ($currentScript !== 'login.php') : ?>
+                <!-- Show login button only if not on login.php -->
+                <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="logout-button">Login</a>
+            <?php endif; ?>
         <?php endif; ?>
-    <?php endif; ?>
+    </div>
 </div>

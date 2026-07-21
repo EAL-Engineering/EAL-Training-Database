@@ -190,6 +190,37 @@ textarea {
 }
 
 /* ========================================================
+   Header with Logo
+   ======================================================== */
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+.header-logo {
+    flex-shrink: 0;
+}
+
+.header-logo a {
+    display: block;
+    text-decoration: none;
+}
+
+.header-logo-img {
+    height: 50px;
+    width: auto;
+    display: block;
+}
+
+.header-info {
+    text-align: right;
+    flex-grow: 1;
+}
+
+/* ========================================================
    Key Tracking Styles
    ======================================================== */
 
