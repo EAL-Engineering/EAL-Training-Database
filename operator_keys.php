@@ -98,6 +98,8 @@ while ($row = $operators_result->fetch_assoc()) {
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.dataTables.css">
+    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js"></script>
     <script src="common.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -208,8 +210,14 @@ while ($row = $operators_result->fetch_assoc()) {
                 scrollX: true,
                 pageLength: 25,
                 lengthMenu: [10, 15, 25, 50, 75, 100],
-                order: [[3, 'desc'], [0, 'asc']],
-                autoWidth: false
+                order: [[0, 'asc'], [3, 'desc']],
+                autoWidth: false,
+                rowGroup: {
+                    dataSrc: 0
+                },
+                columnDefs: [
+                    { targets: 0, visible: false }
+                ]
             });
         });
     </script>
