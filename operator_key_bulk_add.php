@@ -265,11 +265,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                         selectOperator(items[selectedIndex], input, hidden);
                     }
                 } else if (e.key === 'Tab') {
-                    // If exactly one match is highlighted, select it on Tab
-                    if (items.length === 1 && selectedIndex === 0) {
+                    // If a match is highlighted (by arrow keys or single-match auto-highlight), select it
+                    if (selectedIndex >= 0 && items[selectedIndex]) {
                         e.preventDefault();
-                        selectOperator(items[0], input, hidden);
-                        // Move focus to next field manually
+                        selectOperator(items[selectedIndex], input, hidden);
+                        // Move focus to next field manually since we prevented default
                         const allInputs = Array.from(document.querySelectorAll('input, select, textarea, button'));
                         const currentIdx = allInputs.indexOf(input);
                         const nextInput = allInputs[currentIdx + 1];
