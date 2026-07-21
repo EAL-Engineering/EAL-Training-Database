@@ -130,24 +130,31 @@ $certifications_stmt->close();
 
 /**
  * Fetch keys for the operator.
+ * Gracefully handles the case where operator_keys table does not yet exist.
  *
  * @var array $operator_keys List of keys assigned to this operator.
  */
-$keys_query = "
-    SELECT seq_nmbr, key_type, serial_number, status, issued_date, returned_date, notes
-    FROM operator_keys
-    WHERE operator_id = ?
-    ORDER BY status = 'Active' DESC, key_type, serial_number
-";
-$keys_stmt = $mysqli->prepare($keys_query);
-$keys_stmt->bind_param("i", $id);
-$keys_stmt->execute();
-$keys_result = $keys_stmt->get_result();
 $operator_keys = [];
-while ($row = $keys_result->fetch_assoc()) {
-    $operator_keys[] = $row;
+$keys_table_exists = $mysqli->query("SHOW TABLES LIKE 'operator_keys'")->num_rows > 0;
+
+if ($keys_table_exists) {
+    $keys_query = "
+        SELECT seq_nmbr, key_type, serial_number, status, issued_date, returned_date, notes
+        FROM operator_keys
+        WHERE operator_id = ?
+        ORDER BY status = 'Active' DESC, key_type, serial_number
+    ";
+    $keys_stmt = $mysqli->prepare($keys_query);
+    if ($keys_stmt) {
+        $keys_stmt->bind_param("i", $id);
+        $keys_stmt->execute();
+        $keys_result = $keys_stmt->get_result();
+        while ($row = $keys_result->fetch_assoc()) {
+            $operator_keys[] = $row;
+        }
+        $keys_stmt->close();
+    }
 }
-$keys_stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -266,7 +273,9 @@ $keys_stmt->close();
 
         <div class="keys-section">
             <h2>Assigned Keys</h2>
-            <?php if (count($operator_keys) > 0) : ?>
+            <?php if (!$keys_table_exists) : ?>
+                <p class="alert alert-danger">Key tracking table not found. Please run the database migration (1.2-to-1.3-add-keys.sql).</p>
+            <?php elseif (count($operator_keys) > 0) : ?>
                 <table class="keys-table">
                     <thead>
                         <tr>
@@ -309,7 +318,7 @@ $keys_stmt->close();
                 <p>No keys assigned to this operator.</p>
             <?php endif; ?>
 
-            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2 && $keys_table_exists) : ?>
                 <div class="add-key-link">
                     <a href="operator_key_add.php?operator_id=<?php echo urlencode($id); ?>">+ Add Key</a>
                 </div>
