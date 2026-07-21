@@ -76,6 +76,16 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
         <p>New trainings can be registered using <b>certification_add.php</b>, but don't access that page directly. 
             Instead, go to edit a user and add a certification from there.</p>
 
+        <h2>Key Management</h2>
+        <p>The list of all assigned keys can be found at:
+            <a href="operator_keys.php">operator_keys.php</a></p>
+        <p>Assign a single key to an operator at:
+            <a href="operator_key_add.php">operator_key_add.php</a></p>
+        <p>Assign multiple keys at once (useful for badge audits or re-keying) at:
+            <a href="operator_key_bulk_add.php">operator_key_bulk_add.php</a></p>
+        <p>Mark an entire key type as obsolete (e.g., after re-keying) at:
+            <a href="operator_key_mark_obsolete.php">operator_key_mark_obsolete.php</a></p>
+
         <!-- Description of the database tables and their purposes -->
         <p>This information is recorded in a database table named <b>optraining</b> and kept on the 
         localhost system using MySQL. The optraining table links an operator and a certification, and 
@@ -97,6 +107,9 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
         certification.</p>
         <p>A table, <b>can_certify</b>, links trainers to certifications, showing which trainers are 
         allowed to certify what training.</p>
+        <p>A table, <b>operator_keys</b>, tracks keys assigned to operators for lab restricted area 
+        access, including badge IDs, operator keys (200A2), student lab keys (200A21), and office 
+        keys (4CA, 4CAB).</p>
         <p>Most everyday transactions should be accomplished using the appropriate web pages. Some 
         advanced operations are done manually using the MySQL database interface on localhost.</p>
         <p>Please report problems or suggestions to Gregory Leblanc</p>
