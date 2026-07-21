@@ -1,8 +1,8 @@
 -- ========================================================
 -- Tandem Accelerator Database Schema
 -- ========================================================
--- Version: 1.1
--- Last updated: 2025-03-11
+-- Version: 1.2
+-- Last updated: 2026-07-21
 -- 
 -- This schema defines the structure for a particle accelerator
 -- management system, tracking operators, certifications,
@@ -21,6 +21,8 @@ CREATE TABLE `operators` (
   `altemail` varchar(255) DEFAULT NULL COMMENT 'Secondary email address',
   `phones` varchar(255) DEFAULT NULL COMMENT 'Contact phone numbers',
   `status` enum('Active','Inactive','Other') DEFAULT NULL COMMENT 'Current operator status',
+  `is_eal_staff` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 if internal EAL staff member, 0 for outside users/clients',
+  `is_senior_staff` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 if senior staff/lab management',
   `office` varchar(255) DEFAULT NULL COMMENT 'Office location',
   `home` varchar(255) DEFAULT NULL COMMENT 'Home address',
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last record update time',
