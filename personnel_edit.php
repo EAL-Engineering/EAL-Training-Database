@@ -127,6 +127,27 @@ while ($certifications_stmt->fetch()) {
 }
 
 $certifications_stmt->close();
+
+/**
+ * Fetch keys for the operator.
+ *
+ * @var array $operator_keys List of keys assigned to this operator.
+ */
+$keys_query = "
+    SELECT seq_nmbr, key_type, serial_number, status, issued_date, returned_date, notes
+    FROM operator_keys
+    WHERE operator_id = ?
+    ORDER BY status = 'Active' DESC, key_type, serial_number
+";
+$keys_stmt = $mysqli->prepare($keys_query);
+$keys_stmt->bind_param("i", $id);
+$keys_stmt->execute();
+$keys_result = $keys_stmt->get_result();
+$operator_keys = [];
+while ($row = $keys_result->fetch_assoc()) {
+    $operator_keys[] = $row;
+}
+$keys_stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -242,6 +263,59 @@ $certifications_stmt->close();
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
             <button type="submit" class="full-width-button">Save Changes</button>
         </form>
+
+        <div class="keys-section">
+            <h2>Assigned Keys</h2>
+            <?php if (count($operator_keys) > 0) : ?>
+                <table class="keys-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Serial #</th>
+                            <th>Status</th>
+                            <th>Issued</th>
+                            <th>Returned</th>
+                            <th>Notes</th>
+                            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                                <th>Actions</th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($operator_keys as $key): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($key['key_type']); ?></td>
+                            <td><?php echo htmlspecialchars($key['serial_number']); ?></td>
+                            <td>
+                                <span class="status-badge status-<?php echo strtolower($key['status']); ?>">
+                                    <?php echo htmlspecialchars($key['status']); ?>
+                                </span>
+                            </td>
+                            <td><?php echo $key['issued_date'] ? htmlspecialchars($key['issued_date']) : '-'; ?></td>
+                            <td><?php echo $key['returned_date'] ? htmlspecialchars($key['returned_date']) : '-'; ?></td>
+                            <td><?php echo htmlspecialchars($key['notes'] ?? ''); ?></td>
+                            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                            <td>
+                                <?php if ($key['status'] === 'Active'): ?>
+                                    <a href="operator_key_return.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Return</a>
+                                <?php endif; ?>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <p>No keys assigned to this operator.</p>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <div class="add-key-link">
+                    <a href="operator_key_add.php?operator_id=<?php echo urlencode($id); ?>">+ Add Key</a>
+                </div>
+            <?php endif; ?>
+        </div>
+
         <div class="certifications">
             <h2>Certifications</h2>
             <?php if (count($certifications) > 0) : ?>

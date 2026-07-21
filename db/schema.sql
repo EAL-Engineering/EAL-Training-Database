@@ -1,12 +1,12 @@
 -- ========================================================
 -- Tandem Accelerator Database Schema
 -- ========================================================
--- Version: 1.2
+-- Version: 1.3
 -- Last updated: 2026-07-21
 -- 
 -- This schema defines the structure for a particle accelerator
 -- management system, tracking operators, certifications,
--- and training.
+-- training, and lab restricted area key access.
 -- ========================================================
 
 -- --------------------------------------------------------
@@ -111,6 +111,29 @@ CREATE TABLE `annualradsafety` (
 ) COMMENT 'Annual radiation safety training records for operators';
 
 -- --------------------------------------------------------
+-- Table: operator_keys
+-- --------------------------------------------------------
+-- Tracks keys assigned to operators for lab restricted area access.
+-- When a key is returned, status becomes 'Returned' with returned_date set.
+-- When keys are replaced during re-keying, status becomes 'Obsolete'.
+CREATE TABLE `operator_keys` (
+  `seq_nmbr` int(11) NOT NULL AUTO_INCREMENT,
+  `operator_id` int(11) NOT NULL COMMENT 'Foreign key to operators.seq_nmbr',
+  `key_type` varchar(16) NOT NULL COMMENT 'badge, 200A2, 200A21, or future re-key number',
+  `serial_number` varchar(16) NOT NULL COMMENT 'Key serial number',
+  `status` enum('Active','Lost','Returned','Obsolete') NOT NULL DEFAULT 'Active' COMMENT 'Current status of the key',
+  `issued_date` date DEFAULT NULL COMMENT 'When the key was issued',
+  `returned_date` date DEFAULT NULL COMMENT 'When the key was returned',
+  `notes` tinytext COMMENT 'Additional notes about this key assignment',
+  `replaced_by_seq_nmbr` int(11) DEFAULT NULL COMMENT 'Points to replacement key record after re-keying',
+  `entered` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When record was created',
+  `entered_by` tinytext COMMENT 'Who entered this record',
+  PRIMARY KEY (`seq_nmbr`),
+  KEY `fk_operator_id` (`operator_id`),
+  KEY `fk_replaced_by` (`replaced_by_seq_nmbr`)
+) COMMENT='Tracks keys assigned to operators, including history';
+
+-- --------------------------------------------------------
 -- Foreign Key Relationships (documented but not enforced)
 -- --------------------------------------------------------
 -- 1. trainers.optbl_ptr -> operators.seq_nmbr
@@ -122,3 +145,5 @@ CREATE TABLE `annualradsafety` (
 -- 7. annualradsafety.op_ptr -> operators.seq_nmbr
 -- 8. annualradsafety.trainer_ptr -> trainers.seq_nmbr
 -- 9. annualradsafety.entered_by -> operators.seq_nmbr
+-- 10. operator_keys.operator_id -> operators.seq_nmbr
+-- 11. operator_keys.replaced_by_seq_nmbr -> operator_keys.seq_nmbr (self-reference)
