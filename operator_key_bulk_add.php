@@ -230,102 +230,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
             const input = container.querySelector('.searchable-input');
             const dropdown = container.querySelector('.searchable-dropdown');
             const hidden = container.querySelector('input[type="hidden"]');
-            let selectedIndex = -1;
-            let isTabbing = false;
+            let highlightedItem = null;
 
+            // Show dropdown on focus
             input.addEventListener('focus', () => {
-                renderDropdown(operatorsData);
+                filterAndRender(input.value);
                 dropdown.style.display = 'block';
             });
 
+            // Hide dropdown on blur; if something is highlighted, select it
             input.addEventListener('blur', () => {
-                // If we're tabbing, let the Tab handler do the cleanup
-                if (isTabbing) {
-                    isTabbing = false;
-                    return;
+                if (highlightedItem) {
+                    doSelect(highlightedItem);
                 }
-                setTimeout(() => { dropdown.style.display = 'none'; }, 150);
+                setTimeout(() => { dropdown.style.display = 'none'; }, 100);
             });
 
+            // Filter as user types
             input.addEventListener('input', () => {
-                const term = input.value.toLowerCase();
-                const filtered = operatorsData.filter(op => op.name.toLowerCase().includes(term));
-                renderDropdown(filtered);
+                filterAndRender(input.value);
                 dropdown.style.display = 'block';
-                selectedIndex = -1;
             });
 
+            // Keyboard navigation
             input.addEventListener('keydown', (e) => {
                 const items = dropdown.querySelectorAll('.searchable-item');
+
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                    highlightItem(items, selectedIndex);
+                    moveHighlight(items, 1);
                 } else if (e.key === 'ArrowUp') {
                     e.preventDefault();
-                    selectedIndex = Math.max(selectedIndex - 1, -1);
-                    highlightItem(items, selectedIndex);
+                    moveHighlight(items, -1);
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (selectedIndex >= 0 && items[selectedIndex]) {
-                        selectOperator(items[selectedIndex], input, hidden);
+                    if (highlightedItem) {
+                        doSelect(highlightedItem);
                     }
-                } else if (e.key === 'Tab') {
-                    isTabbing = true;
-                    // If a match is highlighted, select it before focus moves
-                    if (selectedIndex >= 0 && items[selectedIndex]) {
-                        selectOperator(items[selectedIndex], input, hidden);
-                    } else {
-                        dropdown.style.display = 'none';
-                    }
-                    // Let default Tab behavior move focus; don't preventDefault
                 } else if (e.key === 'Escape') {
+                    highlightedItem = null;
                     dropdown.style.display = 'none';
                 }
+                // Tab is NOT intercepted; blur will handle selection
             });
 
-            function renderDropdown(items) {
-                if (items.length === 0) {
+            function filterAndRender(term) {
+                const t = term.toLowerCase().trim();
+                const filtered = t === '' ? operatorsData : operatorsData.filter(op => op.name.toLowerCase().includes(t));
+
+                if (filtered.length === 0) {
                     dropdown.innerHTML = '<div class="searchable-no-results">No matches</div>';
+                    highlightedItem = null;
                     return;
                 }
-                dropdown.innerHTML = items.map((op, i) =>
+
+                dropdown.innerHTML = filtered.map(op =>
                     `<div class="searchable-item" data-id="${op.id}" data-name="${op.name}">${op.name}</div>`
                 ).join('');
 
-                dropdown.querySelectorAll('.searchable-item').forEach(item => {
+                const items = dropdown.querySelectorAll('.searchable-item');
+                items.forEach(item => {
                     item.addEventListener('mousedown', (e) => {
                         e.preventDefault();
-                        selectOperator(item, input, hidden);
+                        highlightedItem = item;
+                        doSelect(item);
                     });
                 });
 
-                // Auto-highlight if only one match
+                // Auto-highlight first item, or only item
                 if (items.length === 1) {
-                    selectedIndex = 0;
-                    const singleItem = dropdown.querySelector('.searchable-item');
-                    if (singleItem) {
-                        singleItem.classList.add('searchable-highlight');
-                    }
+                    highlightedItem = items[0];
+                    items[0].classList.add('searchable-highlight');
+                } else if (items.length > 0) {
+                    highlightedItem = items[0];
+                    items[0].classList.add('searchable-highlight');
                 } else {
-                    selectedIndex = -1;
+                    highlightedItem = null;
                 }
             }
 
-            function highlightItem(items, index) {
+            function moveHighlight(items, direction) {
+                if (items.length === 0) return;
+                let idx = -1;
                 items.forEach((item, i) => {
-                    item.classList.toggle('searchable-highlight', i === index);
+                    if (item.classList.contains('searchable-highlight')) idx = i;
+                    item.classList.remove('searchable-highlight');
                 });
+                idx = Math.max(0, Math.min(idx + direction, items.length - 1));
+                items[idx].classList.add('searchable-highlight');
+                highlightedItem = items[idx];
             }
 
-            function selectOperator(item, inp, hid) {
-                inp.value = item.dataset.name;
-                hid.value = item.dataset.id;
+            function doSelect(item) {
+                input.value = item.dataset.name;
+                hidden.value = item.dataset.id;
                 dropdown.style.display = 'none';
-                selectedIndex = -1;
+                highlightedItem = null;
                 // Trigger auto-expand check
                 const event = new Event('change', { bubbles: true });
-                hid.dispatchEvent(event);
+                hidden.dispatchEvent(event);
             }
         }
     </script>
