@@ -116,8 +116,7 @@ while ($row = $operators_result->fetch_assoc()) {
         </div>
     </div>
 
-    <div class="container">
-        <h1>Operator Keys</h1>
+    <h1>Operator Keys</h1>
 
         <form method="get" action="operator_keys.php" class="filter-form" style="margin-bottom: 20px;">
             <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
