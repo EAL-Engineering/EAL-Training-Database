@@ -151,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
         document.addEventListener('DOMContentLoaded', () => {
             setCountdown(<?php echo $timeUntilSessionExpires; ?>);
             initAutoExpand();
+            initSearchableSelects();
         });
 
         function initAutoExpand() {
@@ -186,22 +187,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
 
             function addRow(index) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        <select name="rows[${index}][operator_id]">
-                            <option value="">-- Select --</option>
-                            <?php foreach ($operators as $op): ?>
-                            <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>">
-                                <?php echo htmlspecialchars($op['fname']); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" name="rows[${index}][serial_number]" placeholder="Serial #">
-                    </td>
-                `;
+                tr.innerHTML = buildRowHtml(index);
                 tbody.appendChild(tr);
+                initSearchableSelect(tr.querySelector('.searchable-select'));
+            }
+        }
+
+        function buildRowHtml(index) {
+            return `
+                <td>
+                    <div class="searchable-select" data-index="${index}">
+                        <input type="text" class="searchable-input" placeholder="Type to search..." autocomplete="off">
+                        <div class="searchable-dropdown"></div>
+                        <input type="hidden" name="rows[${index}][operator_id]" value="">
+                    </div>
+                </td>
+                <td>
+                    <input type="text" name="rows[${index}][serial_number]" placeholder="Serial #">
+                </td>
+            `;
+        }
+
+        // Operator data for JS filtering
+        const operatorsData = [
+            <?php foreach ($operators as $op): ?>
+            { id: "<?php echo htmlspecialchars($op['seq_nmbr']); ?>", name: "<?php echo htmlspecialchars($op['fname']); ?>" },
+            <?php endforeach; ?>
+        ];
+
+        function initSearchableSelects() {
+            document.querySelectorAll('.searchable-select').forEach(el => {
+                initSearchableSelect(el);
+            });
+        }
+
+        function initSearchableSelect(container) {
+            const input = container.querySelector('.searchable-input');
+            const dropdown = container.querySelector('.searchable-dropdown');
+            const hidden = container.querySelector('input[type="hidden"]');
+            let selectedIndex = -1;
+
+            input.addEventListener('focus', () => {
+                renderDropdown(operatorsData);
+                dropdown.style.display = 'block';
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => { dropdown.style.display = 'none'; }, 150);
+            });
+
+            input.addEventListener('input', () => {
+                const term = input.value.toLowerCase();
+                const filtered = operatorsData.filter(op => op.name.toLowerCase().includes(term));
+                renderDropdown(filtered);
+                dropdown.style.display = 'block';
+                selectedIndex = -1;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                const items = dropdown.querySelectorAll('.searchable-item');
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    highlightItem(items, selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    highlightItem(items, selectedIndex);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && items[selectedIndex]) {
+                        selectOperator(items[selectedIndex], input, hidden);
+                    }
+                } else if (e.key === 'Escape') {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            function renderDropdown(items) {
+                if (items.length === 0) {
+                    dropdown.innerHTML = '<div class="searchable-no-results">No matches</div>';
+                    return;
+                }
+                dropdown.innerHTML = items.map((op, i) =>
+                    `<div class="searchable-item" data-id="${op.id}" data-name="${op.name}">${op.name}</div>`
+                ).join('');
+
+                dropdown.querySelectorAll('.searchable-item').forEach(item => {
+                    item.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        selectOperator(item, input, hidden);
+                    });
+                });
+            }
+
+            function highlightItem(items, index) {
+                items.forEach((item, i) => {
+                    item.classList.toggle('searchable-highlight', i === index);
+                });
+            }
+
+            function selectOperator(item, inp, hid) {
+                inp.value = item.dataset.name;
+                hid.value = item.dataset.id;
+                dropdown.style.display = 'none';
+                selectedIndex = -1;
+                // Trigger auto-expand check
+                const event = new Event('change', { bubbles: true });
+                hid.dispatchEvent(event);
             }
         }
     </script>
@@ -272,15 +365,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                     <?php for ($i = 0; $i < $display_rows; $i++): ?>
                     <tr>
                         <td>
-                            <select name="rows[<?php echo $i; ?>][operator_id]">
-                                <option value="">-- Select --</option>
-                                <?php foreach ($operators as $op): ?>
-                                    <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>"
-                                        <?php echo (isset($_POST['rows'][$i]['operator_id']) && intval($_POST['rows'][$i]['operator_id']) === intval($op['seq_nmbr'])) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($op['fname']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div class="searchable-select" data-index="<?php echo $i; ?>">
+                                <input type="text" class="searchable-input" placeholder="Type to search..."
+                                    value="<?php
+                                        if (isset($_POST['rows'][$i]['operator_id'])) {
+                                            foreach ($operators as $op) {
+                                                if (intval($op['seq_nmbr']) === intval($_POST['rows'][$i]['operator_id'])) {
+                                                    echo htmlspecialchars($op['fname']);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    ?>"
+                                    autocomplete="off">
+                                <div class="searchable-dropdown"></div>
+                                <input type="hidden" name="rows[<?php echo $i; ?>][operator_id]"
+                                    value="<?php echo isset($_POST['rows'][$i]['operator_id']) ? htmlspecialchars($_POST['rows'][$i]['operator_id']) : ''; ?>">
+                            </div>
                         </td>
                         <td>
                             <input type="text" name="rows[<?php echo $i; ?>][serial_number]"
@@ -296,23 +397,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
             <button type="submit" class="full-width-button" style="margin-top: 20px;">Assign Keys</button>
         </form>
     </div>
-
-    <style>
-        .bulk-keys-table select,
-        .bulk-keys-table input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .bulk-keys-table th {
-            text-align: left;
-            padding: 8px 12px;
-            background-color: #e9ecef;
-        }
-        .bulk-keys-table td {
-            padding: 6px 12px;
-        }
-    </style>
 </body>
 </html>

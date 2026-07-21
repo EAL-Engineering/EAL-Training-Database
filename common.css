@@ -321,3 +321,72 @@ textarea {
     flex-wrap: wrap;
     align-items: flex-end;
 }
+
+
+/* ========================================================
+   Bulk Key Add Styles
+   ======================================================== */
+
+.bulk-keys-table select,
+.bulk-keys-table input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.bulk-keys-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background-color: #e9ecef;
+}
+
+.bulk-keys-table td {
+    padding: 6px 12px;
+}
+
+/* Searchable select styles */
+.searchable-select {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.searchable-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.searchable-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.searchable-item:hover,
+.searchable-highlight {
+    background-color: #00694E;
+    color: white;
+}
+
+.searchable-no-results {
+    padding: 8px 12px;
+    color: #666;
+    font-style: italic;
+}
