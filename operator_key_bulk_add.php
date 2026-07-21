@@ -284,6 +284,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                         selectOperator(item, input, hidden);
                     });
                 });
+
+                // Auto-select if only one match
+                if (items.length === 1) {
+                    const singleItem = dropdown.querySelector('.searchable-item');
+                    if (singleItem) {
+                        selectOperator(singleItem, input, hidden);
+                    }
+                }
             }
 
             function highlightItem(items, index) {
