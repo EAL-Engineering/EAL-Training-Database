@@ -36,16 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /**
      * Sanitize and validate inputs from the form submission.
      *
-     * @var int    $seq_nmbr   Sequence number of the operator (required)
-     * @var string $name       Name of the operator (required)
-     * @var string $fname      First name of the operator (required)
-     * @var string $email      Email address of the operator (required)
-     * @var string $altemail   Alternate email address of the operator (optional)
-     * @var string $phones     Phone numbers of the operator (optional)
-     * @var string $status     Status of the operator (required)
-     * @var string $office     Office address of the operator (optional)
-     * @var string $home       Home address of the operator (optional)
-     * @var string $comments   Additional comments about the operator (optional)
+     * @var int    $seq_nmbr        Sequence number of the operator (required)
+     * @var string $name            Name of the operator (required)
+     * @var string $fname           First name of the operator (required)
+     * @var string $email           Email address of the operator (required)
+     * @var string $altemail        Alternate email address of the operator (optional)
+     * @var string $phones          Phone numbers of the operator (optional)
+     * @var string $status          Status of the operator (required)
+     * @var int    $is_eal_staff    Internal EAL staff flag (1 or 0)
+     * @var int    $is_senior_staff Senior staff flag (1 or 0)
+     * @var string $office          Office address of the operator (optional)
+     * @var string $home            Home address of the operator (optional)
+     * @var string $comments        Additional comments about the operator (optional)
      */
     $seq_nmbr = isset($_POST['seq_nmbr']) ? intval($_POST['seq_nmbr']) : null;
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
@@ -54,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $altemail = isset($_POST['altemail']) ? filter_var(trim($_POST['altemail']), FILTER_SANITIZE_EMAIL) : '';
     $phones = isset($_POST['phones']) ? trim($_POST['phones']) : '';
     $status = isset($_POST['status']) ? trim($_POST['status']) : '';
+    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+    $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
     $office = isset($_POST['office']) ? trim($_POST['office']) : '';
     $home = isset($_POST['home']) ? trim($_POST['home']) : '';
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : '';
@@ -79,14 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "
         UPDATE operators
         SET 
-            name = ?, 
-            fname = ?, 
-            email = ?, 
-            altemail = ?, 
-            phones = ?, 
-            status = ?, 
-            office = ?, 
-            home = ?, 
+            name = ?,
+            fname = ?,
+            email = ?,
+            altemail = ?,
+            phones = ?,
+            status = ?,
+            is_eal_staff = ?,
+            is_senior_staff = ?,
+            office = ?,
+            home = ?,
             comments = ?
         WHERE seq_nmbr = ?
     ";
@@ -99,25 +105,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /**
      * Bind the parameters to the prepared SQL statement.
      *
-     * @param string $name      Name of the operator.
-     * @param string $fname     First name of the operator.
-     * @param string $email     Email address of the operator.
-     * @param string $altemail  Alternate email address of the operator.
-     * @param string $phones    Phone numbers of the operator.
-     * @param string $status    Status of the operator.
-     * @param string $office    Office address of the operator.
-     * @param string $home      Home address of the operator.
-     * @param string $comments  Additional comments about the operator.
-     * @param int    $seq_nmbr  Sequence number of the operator.
+     * @param string $name            Name of the operator.
+     * @param string $fname           First name of the operator.
+     * @param string $email           Email address of the operator.
+     * @param string $altemail        Alternate email address of the operator.
+     * @param string $phones          Phone numbers of the operator.
+     * @param string $status          Status of the operator.
+     * @param int    $is_eal_staff    Internal EAL staff flag.
+     * @param int    $is_senior_staff Senior staff flag.
+     * @param string $office          Office address of the operator.
+     * @param string $home            Home address of the operator.
+     * @param string $comments        Additional comments about the operator.
+     * @param int    $seq_nmbr        Sequence number of the operator.
      */
     $stmt->bind_param(
-        "sssssssssi",
+        "ssssssiisssi",
         $name,
         $fname,
         $email,
         $altemail,
         $phones,
         $status,
+        $is_eal_staff,
+        $is_senior_staff,
         $office,
         $home,
         $comments,

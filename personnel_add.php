@@ -71,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      * @var string $home Home address
      * @var string $comments Additional comments
      * @var string $status Status of the personnel (Active/Inactive)
+     * @var int    $is_eal_staff Internal EAL staff indicator (1 or 0)
+     * @var int    $is_senior_staff Senior staff / lab management indicator (1 or 0)
      * @var string $entered Timestamp of when the personnel was added
      */
     $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
@@ -82,6 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $home = isset($_POST['home']) ? trim($_POST['home']) : '';
     $comments = isset($_POST['comments']) ? trim($_POST['comments']) : '';
     $status = isset($_POST['status']) && $_POST['status'] !== '' ? trim($_POST['status']) : 'Active';
+    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+    $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
     $entered = date('Y-m-d H:i:s'); // Get current date and time in 'YYYY-MM-DD HH:MM:SS' format
 
     // Validate inputs
@@ -96,17 +100,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $mysqli->prepare(
             "
             INSERT INTO operators (
-	            fname, name, email, altemail, phones, 
-                office, home, comments, status, entered, 
-                addedby
+                fname, name, email, altemail, phones,
+                office, home, comments, status, is_eal_staff,
+                is_senior_staff, entered, addedby
             ) 
             VALUES 
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             "
         );
         if ($stmt) {
             $stmt->bind_param(
-                "sssssssssss",
+                "sssssssssiiss",
                 $fname,
                 $name,
                 $email,
@@ -116,6 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $home,
                 $comments,
                 $status,
+                $is_eal_staff,
+                $is_senior_staff,
                 $entered,
                 $addedby
             );
@@ -238,6 +244,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="Active" selected>Active</option>
                     <option value="Inactive">Inactive</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="is_eal_staff">
+                    <input type="checkbox" name="is_eal_staff" id="is_eal_staff" value="1">
+                    Internal EAL Staff
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="is_senior_staff">
+                    <input type="checkbox" name="is_senior_staff" id="is_senior_staff" value="1">
+                    Senior Staff / Lab Management
+                </label>
             </div>
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
             <button type="submit">Add Personnel</button>

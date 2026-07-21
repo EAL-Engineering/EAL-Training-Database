@@ -3,7 +3,7 @@
  * Personnel List (All)
  * 
  * This script displays a table of all personnel and their details, including their
- * name, status, email, and highest certification. The data is fetched from a
+ * name, status, email, staff status, and highest certification. The data is fetched from a
  * MySQL database and displayed using DataTables for enhanced interactivity.
  * 
  * PHP version 5.4+
@@ -43,21 +43,23 @@ $opertor_list = $mysqli->query(
         o.name AS OperatorName, 
         o.status AS OperatorStatus, 
         o.email AS OperatorEmail, 
+        o.is_eal_staff AS IsEalStaff,
+        o.is_senior_staff AS IsSeniorStaff,
         c.certification AS HighestCertification,
         o.seq_nmbr as id
-    FROM operators o 
-    JOIN optraining ot ON o.seq_nmbr = ot.operator 
-    JOIN certifications c ON ot.certification = c.seq_nmbr 
+    FROM operators o
+    JOIN optraining ot ON o.seq_nmbr = ot.operator
+    JOIN certifications c ON ot.certification = c.seq_nmbr
     WHERE o.status IS NOT NULL
-    AND c.seq_nmbr = ( 
-        SELECT MAX(inner_c.seq_nmbr) 
-        FROM optraining inner_ot 
-        JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr 
-        WHERE inner_ot.operator = o.seq_nmbr 
-        AND inner_c.seq_nmbr <= 3 
-    ) 
+    AND c.seq_nmbr = (
+        SELECT MAX(inner_c.seq_nmbr)
+        FROM optraining inner_ot
+        JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr
+        WHERE inner_ot.operator = o.seq_nmbr
+        AND inner_c.seq_nmbr <= 3
+    )
     ORDER BY o.name
-"
+    "
 );
 ?>
 <!doctype html>
@@ -70,7 +72,7 @@ $opertor_list = $mysqli->query(
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-      <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="common.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -86,7 +88,7 @@ $opertor_list = $mysqli->query(
             <a href="personnel_list.php">To Personnel List</a>
             <a href="index.php">To main page</a>
         </div>
-    </div>    
+    </div>
     <table id="personnel" class="display">
         <thead>
             <tr>
@@ -94,6 +96,8 @@ $opertor_list = $mysqli->query(
                 <th>Status</th>
                 <th>Email</th>
                 <th>Certification</th>
+                <th>EAL Staff</th>
+                <th>Senior Staff</th>
                 <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
                     <th>User</th>
                 <?php endif; ?>
@@ -103,7 +107,7 @@ $opertor_list = $mysqli->query(
             <?php
             /**
              * Generate table rows dynamically based on the fetched operator data.
-             * Each row includes the operator's name, status, email, and certification.
+             * Each row includes the operator's name, status, email, certification, and staff indicators.
              */
             $rowCounter = 0; // Unique ID for each row's email
             while ($res = mysqli_fetch_array($opertor_list)) {
@@ -116,9 +120,10 @@ $opertor_list = $mysqli->query(
                 echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
                 echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
                 echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
-
+                echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
+                echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";
                 // Conditionally display "User" column
-                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {            
+                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {
                     echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
                 }
                 echo "</tr>";

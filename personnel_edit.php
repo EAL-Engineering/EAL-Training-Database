@@ -54,7 +54,7 @@ $id = intval($_GET['id']); // Sanitize the ID
  * @var string $query SQL query to fetch operator details.
  * @var mysqli_stmt $operator_stmt Prepared statement for fetching operator details.
  */
-$query = "SELECT * FROM operators WHERE seq_nmbr = ?";
+$query = "SELECT seq_nmbr, name, fname, email, altemail, phones, status, is_eal_staff, is_senior_staff, office, home, updated, comments, entered, addedby FROM operators WHERE seq_nmbr = ?";
 $operator_stmt = $mysqli->prepare($query);
 
 if (!$operator_stmt) {
@@ -63,7 +63,7 @@ if (!$operator_stmt) {
 
 $operator_stmt->bind_param("i", $id);
 $operator_stmt->execute();
-$operator_stmt->bind_result($seq_nmbr, $name, $fname, $email, $altemail, $phones, $status, $office, $home, $updated, $comments, $entered, $addedby);
+$operator_stmt->bind_result($seq_nmbr, $name, $fname, $email, $altemail, $phones, $status, $is_eal_staff, $is_senior_staff, $office, $home, $updated, $comments, $entered, $addedby);
 
 /**
  * Fetch the operator's details into an array for display and editing.
@@ -79,6 +79,8 @@ if ($operator_stmt->fetch()) {
         'altemail' => $altemail,
         'phones' => $phones,
         'status' => $status,
+        'is_eal_staff' => $is_eal_staff,
+        'is_senior_staff' => $is_senior_staff,
         'office' => $office,
         'home' => $home,
         'updated' => $updated,
@@ -186,6 +188,14 @@ $certifications_stmt->close();
                     <option value="Inactive" <?php echo $operator['status'] == 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
                     <option value="Other" <?php echo $operator['status'] == 'Other' ? 'selected' : ''; ?>>Other</option>
                 </select>
+            </div>
+            <div class="form-row">
+                <label for="is_eal_staff">Internal EAL Staff:</label>
+                <input type="checkbox" name="is_eal_staff" id="is_eal_staff" value="1" <?php echo !empty($operator['is_eal_staff']) ? 'checked' : ''; ?>>
+            </div>
+            <div class="form-row">
+                <label for="is_senior_staff">Senior Staff / Lab Management:</label>
+                <input type="checkbox" name="is_senior_staff" id="is_senior_staff" value="1" <?php echo !empty($operator['is_senior_staff']) ? 'checked' : ''; ?>>
             </div>
             <div class="form-row">
                 <label>Office:</label>

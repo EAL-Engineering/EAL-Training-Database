@@ -3,7 +3,7 @@
  * Personnel List
  * 
  * This script displays a table of active personnel and their details, including their
- * name, email, and highest certification. The data is fetched from a
+ * name, email, staff status, and highest certification. The data is fetched from a
  * MySQL database and displayed using DataTables for enhanced interactivity.
  * 
  * PHP version 5.4+
@@ -50,18 +50,20 @@ $opertor_list = $mysqli->query(
         o.name AS OperatorName, 
         o.email AS OperatorEmail, 
         o.seq_nmbr as id,
-        c.certification AS HighestCertification 
-    FROM operators o 
-    JOIN optraining ot ON o.seq_nmbr = ot.operator 
-    JOIN certifications c ON ot.certification = c.seq_nmbr 
-    WHERE o.status = 'Active' 
-    AND c.seq_nmbr = ( 
-        SELECT MAX(inner_c.seq_nmbr) 
-        FROM optraining inner_ot 
-        JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr 
-        WHERE inner_ot.operator = o.seq_nmbr 
-        AND inner_c.seq_nmbr <= 3 
-    ) 
+        o.is_eal_staff AS IsEalStaff,
+        o.is_senior_staff AS IsSeniorStaff,
+        c.certification AS HighestCertification
+    FROM operators o
+    JOIN optraining ot ON o.seq_nmbr = ot.operator
+    JOIN certifications c ON ot.certification = c.seq_nmbr
+    WHERE o.status = 'Active'
+    AND c.seq_nmbr = (
+        SELECT MAX(inner_c.seq_nmbr)
+        FROM optraining inner_ot
+        JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr
+        WHERE inner_ot.operator = o.seq_nmbr
+        AND inner_c.seq_nmbr <= 3
+    )
     ORDER BY o.name
     "
 );
@@ -95,11 +97,13 @@ $opertor_list = $mysqli->query(
     </div>
 
     <table id="personnel" class="display">
-            <thead>
+        <thead>
             <tr>
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Certification</th>
+                <th>EAL Staff</th>
+                <th>Senior Staff</th>
                 <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
                     <th>User</th>
                 <?php endif; ?>
@@ -109,7 +113,7 @@ $opertor_list = $mysqli->query(
             <?php
             /**
              * Generate table rows dynamically based on the fetched operator data.
-             * Each row includes the operator's name, email, and certification.
+             * Each row includes the operator's name, email, certification, and staff indicators.
              */
             $rowCounter = 0; // Unique ID for each row's email
             while ($res = mysqli_fetch_array($opertor_list)) {
@@ -121,7 +125,8 @@ $opertor_list = $mysqli->query(
                 echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
                 echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
                 echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
-
+                echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
+                echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";
                 // Conditionally display "User" column
                 if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {
                     echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
