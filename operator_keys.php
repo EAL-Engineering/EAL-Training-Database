@@ -190,7 +190,6 @@ while ($row = $operators_result->fetch_assoc()) {
                     </td>
                     <td><?php echo $row['issued_date'] ? htmlspecialchars($row['issued_date']) : '-'; ?></td>
                     <td><?php echo $row['returned_date'] ? htmlspecialchars($row['returned_date']) : '-'; ?></td>
-                    <td><?php echo htmlspecialchars($row['notes'] ?? ''); ?></td>
                     <td><?php echo htmlspecialchars($row['entered']); ?></td>
                     <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
                     <td>
@@ -203,8 +202,6 @@ while ($row = $operators_result->fetch_assoc()) {
                 <?php endwhile; ?>
             </tbody>
         </table>
-    </div>
-
     <script>
         $(document).ready(function() {
             new DataTable('#keys', {
