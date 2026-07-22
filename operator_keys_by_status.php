@@ -91,11 +91,11 @@ if (!empty($params)) {
 
     <h1>Keys by Type</h1>
 
-    <form method="get" action="operator_keys_by_type.php" class="filter-form" style="margin-bottom: 20px;">
+    <form method="get" action="operator_keys_by_status.php" class="filter-form" style="margin-bottom: 20px;">
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
             <div>
                 <label for="status">Status:</label>
-                <select name="status" id="status">
+                <select name="status" id="status" onchange="this.form.submit();">
                     <option value="">All</option>
                     <option value="Active" <?php echo ($status_filter === 'Active') ? 'selected' : ''; ?>>Active</option>
                     <option value="Lost" <?php echo ($status_filter === 'Lost') ? 'selected' : ''; ?>>Lost</option>
@@ -104,8 +104,7 @@ if (!empty($params)) {
                 </select>
             </div>
             <div style="display: flex; align-items: flex-end;">
-                <button type="submit">Filter</button>
-                <a href="operator_keys_by_type.php" style="margin-left: 10px;">Clear</a>
+                <a href="operator_keys_by_status.php">Clear</a>
             </div>
         </div>
     </form>

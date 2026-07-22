@@ -89,7 +89,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
             <div>
                 <label for="key_type">Key Type:</label>
-                <select name="key_type" id="key_type">
+                <select name="key_type" id="key_type" onchange="this.form.submit();">
                     <option value="">-- Select Key Type --</option>
                     <?php foreach ($key_type_options as $value => $label): ?>
                         <option value="<?php echo htmlspecialchars($value); ?>"
@@ -100,8 +100,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 </select>
             </div>
             <div style="display: flex; align-items: flex-end;">
-                <button type="submit">View</button>
-                <a href="operator_keys_by_type.php" style="margin-left: 10px;">Clear</a>
+                <a href="operator_keys_by_type.php">Clear</a>
             </div>
         </div>
     </form>
