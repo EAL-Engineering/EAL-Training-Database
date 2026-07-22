@@ -21,6 +21,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Get the current script name to determine if it's login.php
 $currentScript = basename($_SERVER['PHP_SELF']);
+
+// Check if user is logged in (session has user_id)
+$isLoggedIn = isset($_SESSION['user_id']);
 ?>
 <div class="header">
     <div class="header-logo">
@@ -29,16 +32,17 @@ $currentScript = basename($_SERVER['PHP_SELF']);
         </a>
     </div>
     <div class="header-info">
-        <?php if (isset($_SESSION['user_id'])) : ?>
+        <?php if ($isLoggedIn) : ?>
             <!-- Display user information and session countdown for logged-in users -->
-            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span> |
+
+            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span>
+            <span>|</span>
             <span>Session expires in: <span id="countdown"></span></span>
             <a href="logout.php" class="logout-button">Logout</a>
         <?php else: ?>
             <!-- Display welcome message and login button for guests -->
-            <span>Welcome to the OUAL Training Information Portal</span>
+            <span>Session expired</span>
             <?php if ($currentScript !== 'login.php') : ?>
-                <!-- Show login button only if not on login.php -->
                 <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="logout-button">Login</a>
             <?php endif; ?>
         <?php endif; ?>
