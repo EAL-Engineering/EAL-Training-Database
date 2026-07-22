@@ -307,6 +307,7 @@ if ($keys_table_exists) {
                             <td>
                                 <?php if ($key['status'] === 'Active'): ?>
                                     <a href="operator_key_return.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Return</a>
+                                    <a href="operator_key_lost.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Lost</a>
                                 <?php endif; ?>
                             </td>
                             <?php endif; ?>

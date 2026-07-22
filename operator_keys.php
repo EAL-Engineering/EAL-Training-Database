@@ -112,6 +112,7 @@ while ($row = $operators_result->fetch_assoc()) {
     <div class="form-container">
         <div class="back-button-container">
             <a href="personnel_list.php">To Personnel List</a>
+            <a href="operator_keys_by_type.php">By Key Type</a>
             <a href="index.php">To main page</a>
         </div>
     </div>
@@ -196,6 +197,7 @@ while ($row = $operators_result->fetch_assoc()) {
                     <td>
                         <?php if ($row['status'] === 'Active'): ?>
                             <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys.php">Return</a>
+                            <a href="operator_key_lost.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys.php">Lost</a>
                         <?php endif; ?>
                     </td>
                     <?php endif; ?>
