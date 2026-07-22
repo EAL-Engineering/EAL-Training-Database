@@ -1,6 +1,6 @@
 <?php
 /**
- * Operator Keys by Status
+ * Operator Keys by Type
  *
  * Lists all keys grouped by key type, showing which operator holds each.
  *
