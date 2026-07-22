@@ -1,8 +1,8 @@
 <?php
 /**
- * Operator Keys by Status
+ * Operator Keys by Type
  *
- * Lists all keys grouped by key type, showing which operator holds each.
+ * Select a key type and view all keys of that type with operator details.
  *
  * PHP version 5.4+
  *
@@ -22,42 +22,37 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Optional status filter
-$status_filter = isset($_GET['status']) ? $_GET['status'] : '';
-$where_sql = '';
-$params = [];
-$types = '';
+$key_type_options = [
+    'badge'   => 'Badge',
+    '200A2'   => '200A2 (Operator Key)',
+    '200A21'  => '200A21 (Student Lab Key)',
+    '4CA'     => '4CA (Faculty Key)',
+    '4CAB'    => '4CAB (Student Key)',
+];
 
-if ($status_filter !== '') {
-    $where_sql = "WHERE ok.status = ?";
-    $params[] = $status_filter;
-    $types = 's';
-}
+$selected_type = isset($_GET['key_type']) ? $_GET['key_type'] : '';
 
-$query = "
-    SELECT
-        ok.seq_nmbr,
-        ok.key_type,
-        ok.serial_number,
-        ok.status,
-        ok.issued_date,
-        ok.returned_date,
-        ok.entered,
-        o.seq_nmbr AS operator_id,
-        o.fname AS operator_name
-    FROM operator_keys ok
-    JOIN operators o ON ok.operator_id = o.seq_nmbr
-    $where_sql
-    ORDER BY ok.key_type, ok.status = 'Active' DESC, o.fname, ok.serial_number
-";
-
-if (!empty($params)) {
-    $stmt = $mysqli->prepare($query);
-    $stmt->bind_param($types, ...$params);
+if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)) {
+    $stmt = $mysqli->prepare(
+        "SELECT
+            ok.seq_nmbr,
+            ok.serial_number,
+            ok.status,
+            ok.issued_date,
+            ok.returned_date,
+            ok.entered,
+            o.seq_nmbr AS operator_id,
+            o.fname AS operator_name
+        FROM operator_keys ok
+        JOIN operators o ON ok.operator_id = o.seq_nmbr
+        WHERE ok.key_type = ?
+        ORDER BY ok.status = 'Active' DESC, o.fname, ok.serial_number"
+    );
+    $stmt->bind_param("s", $selected_type);
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $result = $mysqli->query($query);
+    $result = null;
 }
 ?>
 <!doctype html>
@@ -71,8 +66,6 @@ if (!empty($params)) {
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.dataTables.css">
-    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js"></script>
     <script src="common.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -85,6 +78,7 @@ if (!empty($params)) {
     <div class="form-container">
         <div class="back-button-container">
             <a href="operator_keys.php">By Operator</a>
+            <a href="operator_keys_by_status.php">By Status</a>
             <a href="index.php">To main page</a>
         </div>
     </div>
@@ -94,26 +88,28 @@ if (!empty($params)) {
     <form method="get" action="operator_keys_by_type.php" class="filter-form" style="margin-bottom: 20px;">
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
             <div>
-                <label for="status">Status:</label>
-                <select name="status" id="status">
-                    <option value="">All</option>
-                    <option value="Active" <?php echo ($status_filter === 'Active') ? 'selected' : ''; ?>>Active</option>
-                    <option value="Lost" <?php echo ($status_filter === 'Lost') ? 'selected' : ''; ?>>Lost</option>
-                    <option value="Returned" <?php echo ($status_filter === 'Returned') ? 'selected' : ''; ?>>Returned</option>
-                    <option value="Obsolete" <?php echo ($status_filter === 'Obsolete') ? 'selected' : ''; ?>>Obsolete</option>
+                <label for="key_type">Key Type:</label>
+                <select name="key_type" id="key_type">
+                    <option value="">-- Select Key Type --</option>
+                    <?php foreach ($key_type_options as $value => $label): ?>
+                        <option value="<?php echo htmlspecialchars($value); ?>"
+                            <?php echo ($selected_type === $value) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div style="display: flex; align-items: flex-end;">
-                <button type="submit">Filter</button>
+                <button type="submit">View</button>
                 <a href="operator_keys_by_type.php" style="margin-left: 10px;">Clear</a>
             </div>
         </div>
     </form>
 
+    <?php if ($result !== null): ?>
     <table id="keys-by-type" class="display">
         <thead>
             <tr>
-                <th>Key Type</th>
                 <th>Serial #</th>
                 <th>Operator</th>
                 <th>Status</th>
@@ -128,7 +124,6 @@ if (!empty($params)) {
         <tbody>
             <?php while ($row = $result->fetch_assoc()): ?>
             <tr>
-                <td><?php echo htmlspecialchars($row['key_type']); ?></td>
                 <td><?php echo htmlspecialchars($row['serial_number']); ?></td>
                 <td>
                     <a href="personnel_edit.php?id=<?php echo urlencode($row['operator_id']); ?>">
@@ -162,15 +157,12 @@ if (!empty($params)) {
                 scrollX: true,
                 pageLength: 25,
                 lengthMenu: [10, 15, 25, 50, 75, 100],
-                order: [[0, 'asc'], [3, 'desc']],
-                rowGroup: {
-                    dataSrc: 0
-                },
-                columnDefs: [
-                    { targets: 0, visible: false }
-                ]
+                order: [[2, 'desc'], [1, 'asc']]
             });
         });
     </script>
+    <?php elseif ($selected_type !== ''): ?>
+        <p>Invalid key type selected.</p>
+    <?php endif; ?>
 </body>
 </html>
