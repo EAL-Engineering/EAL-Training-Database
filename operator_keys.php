@@ -123,7 +123,7 @@ while ($row = $operators_result->fetch_assoc()) {
             <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <div>
                     <label for="status">Status:</label>
-                    <select name="status" id="status">
+                    <select name="status" id="status" onchange="this.form.submit();">
                         <option value="">All</option>
                         <option value="Active" <?php echo (isset($_GET['status']) && $_GET['status'] === 'Active') ? 'selected' : ''; ?>>Active</option>
                         <option value="Lost" <?php echo (isset($_GET['status']) && $_GET['status'] === 'Lost') ? 'selected' : ''; ?>>Lost</option>
@@ -133,7 +133,7 @@ while ($row = $operators_result->fetch_assoc()) {
                 </div>
                 <div>
                     <label for="key_type">Key Type:</label>
-                    <select name="key_type" id="key_type">
+                    <select name="key_type" id="key_type" onchange="this.form.submit();">
                         <option value="">All</option>
                         <?php foreach ($key_types as $kt): ?>
                             <option value="<?php echo htmlspecialchars($kt); ?>" <?php echo (isset($_GET['key_type']) && $_GET['key_type'] === $kt) ? 'selected' : ''; ?>>
@@ -144,7 +144,7 @@ while ($row = $operators_result->fetch_assoc()) {
                 </div>
                 <div>
                     <label for="operator_id">Operator:</label>
-                    <select name="operator_id" id="operator_id">
+                    <select name="operator_id" id="operator_id" onchange="this.form.submit();">
                         <option value="">All</option>
                         <?php foreach ($operators as $op): ?>
                             <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>" <?php echo (isset($_GET['operator_id']) && intval($_GET['operator_id']) === intval($op['seq_nmbr'])) ? 'selected' : ''; ?>>
@@ -154,8 +154,7 @@ while ($row = $operators_result->fetch_assoc()) {
                     </select>
                 </div>
                 <div style="display: flex; align-items: flex-end;">
-                    <button type="submit">Filter</button>
-                    <a href="operator_keys.php" style="margin-left: 10px;">Clear</a>
+                    <a href="operator_keys.php">Clear</a>
                 </div>
             </div>
         </form>
@@ -223,17 +222,6 @@ while ($row = $operators_result->fetch_assoc()) {
         });
     </script>
 
-    <style>
-        .status-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: bold;
-        }
-        .status-active { background-color: #d4edda; color: #155724; }
-        .status-lost { background-color: #f8d7da; color: #721c24; }
-        .status-returned { background-color: #d1ecf1; color: #0c5460; }
-        .status-obsolete { background-color: #e2e3e5; color: #383d41; }
-    </style>
+
 </body>
 </html>
