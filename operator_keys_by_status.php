@@ -47,6 +47,13 @@ $query = "
         o.fname AS operator_name
     FROM operator_keys ok
     JOIN operators o ON ok.operator_id = o.seq_nmbr
+    INNER JOIN (
+        SELECT key_type, serial_number, MAX(seq_nmbr) AS max_seq
+        FROM operator_keys
+        GROUP BY key_type, serial_number
+    ) latest ON ok.key_type = latest.key_type
+             AND ok.serial_number = latest.serial_number
+             AND ok.seq_nmbr = latest.max_seq
     $where_sql
     ORDER BY ok.key_type, ok.status = 'Active' DESC, o.fname, ok.serial_number
 ";
@@ -128,7 +135,11 @@ if (!empty($params)) {
             <?php while ($row = $result->fetch_assoc()): ?>
             <tr>
                 <td><?php echo htmlspecialchars($row['key_type']); ?></td>
-                <td><?php echo htmlspecialchars($row['serial_number']); ?></td>
+                <td>
+                    <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
+                        <?php echo htmlspecialchars($row['serial_number']); ?>
+                    </a>
+                </td>
                 <td>
                     <a href="personnel_edit.php?id=<?php echo urlencode($row['operator_id']); ?>">
                         <?php echo htmlspecialchars($row['operator_name']); ?>

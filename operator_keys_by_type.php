@@ -47,6 +47,13 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
             o.fname AS operator_name
         FROM operator_keys ok
         JOIN operators o ON ok.operator_id = o.seq_nmbr
+        INNER JOIN (
+            SELECT key_type, serial_number, MAX(seq_nmbr) AS max_seq
+            FROM operator_keys
+            GROUP BY key_type, serial_number
+        ) latest ON ok.key_type = latest.key_type
+                 AND ok.serial_number = latest.serial_number
+                 AND ok.seq_nmbr = latest.max_seq
         WHERE ok.key_type = ?
         ORDER BY ok.status = 'Active' DESC, o.fname, ok.serial_number"
     );
@@ -54,7 +61,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
     $stmt->execute();
     $result = $stmt->get_result();
 } elseif ($selected_type === '') {
-    // No key type selected — show all keys
+    // No key type selected — show all keys (most recent record per key)
     $result = $mysqli->query(
         "SELECT
             ok.seq_nmbr,
@@ -68,6 +75,13 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
             o.fname AS operator_name
         FROM operator_keys ok
         JOIN operators o ON ok.operator_id = o.seq_nmbr
+        INNER JOIN (
+            SELECT key_type, serial_number, MAX(seq_nmbr) AS max_seq
+            FROM operator_keys
+            GROUP BY key_type, serial_number
+        ) latest ON ok.key_type = latest.key_type
+                 AND ok.serial_number = latest.serial_number
+                 AND ok.seq_nmbr = latest.max_seq
         ORDER BY ok.status = 'Active' DESC, o.fname, ok.serial_number"
     );
 } else {
@@ -149,7 +163,11 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 <?php if ($selected_type === '') : ?>
                     <td><?php echo htmlspecialchars($row['key_type']); ?></td>
                 <?php endif; ?>
-                <td><?php echo htmlspecialchars($row['serial_number']); ?></td>
+                <td>
+                    <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
+                        <?php echo htmlspecialchars($row['serial_number']); ?>
+                    </a>
+                </td>
                 <td>
                     <a href="personnel_edit.php?id=<?php echo urlencode($row['operator_id']); ?>">
                         <?php echo htmlspecialchars($row['operator_name']); ?>
