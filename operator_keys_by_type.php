@@ -33,9 +33,11 @@ $key_type_options = [
 $selected_type = isset($_GET['key_type']) ? $_GET['key_type'] : '';
 
 if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)) {
+    // Filter by specific key type
     $stmt = $mysqli->prepare(
         "SELECT
             ok.seq_nmbr,
+            ok.key_type,
             ok.serial_number,
             ok.status,
             ok.issued_date,
@@ -51,7 +53,25 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
     $stmt->bind_param("s", $selected_type);
     $stmt->execute();
     $result = $stmt->get_result();
+} elseif ($selected_type === '') {
+    // No key type selected — show all keys
+    $result = $mysqli->query(
+        "SELECT
+            ok.seq_nmbr,
+            ok.key_type,
+            ok.serial_number,
+            ok.status,
+            ok.issued_date,
+            ok.returned_date,
+            ok.entered,
+            o.seq_nmbr AS operator_id,
+            o.fname AS operator_name
+        FROM operator_keys ok
+        JOIN operators o ON ok.operator_id = o.seq_nmbr
+        ORDER BY ok.status = 'Active' DESC, o.fname, ok.serial_number"
+    );
 } else {
+    // Invalid key type selected
     $result = null;
 }
 ?>
@@ -83,7 +103,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
         </div>
     </div>
 
-    <h1>Keys by Type</h1>
+    <h1>Keys by Type<?php if ($selected_type !== '') echo ' — ' . htmlspecialchars($key_type_options[$selected_type]); ?></h1>
 
     <form method="get" action="operator_keys_by_type.php" class="filter-form" style="margin-bottom: 20px;">
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
@@ -109,6 +129,9 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
     <table id="keys-by-type" class="display">
         <thead>
             <tr>
+                <?php if ($selected_type === '') : ?>
+                    <th>Key Type</th>
+                <?php endif; ?>
                 <th>Serial #</th>
                 <th>Operator</th>
                 <th>Status</th>
@@ -123,6 +146,9 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
         <tbody>
             <?php while ($row = $result->fetch_assoc()): ?>
             <tr>
+                <?php if ($selected_type === '') : ?>
+                    <td><?php echo htmlspecialchars($row['key_type']); ?></td>
+                <?php endif; ?>
                 <td><?php echo htmlspecialchars($row['serial_number']); ?></td>
                 <td>
                     <a href="personnel_edit.php?id=<?php echo urlencode($row['operator_id']); ?>">
@@ -156,7 +182,11 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 scrollX: true,
                 pageLength: 25,
                 lengthMenu: [10, 15, 25, 50, 75, 100],
+                <?php if ($selected_type === '') : ?>
+                order: [[3, 'desc'], [2, 'asc']]
+                <?php else: ?>
                 order: [[2, 'desc'], [1, 'asc']]
+                <?php endif; ?>
             });
         });
     </script>
