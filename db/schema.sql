@@ -1,8 +1,8 @@
 -- ========================================================
 -- Tandem Accelerator Database Schema
 -- ========================================================
--- Version: 1.3
--- Last updated: 2026-07-21
+-- Version: 1.4
+-- Last updated: 2026-07-24
 -- 
 -- This schema defines the structure for a particle accelerator
 -- management system, tracking operators, certifications,
@@ -27,7 +27,7 @@ CREATE TABLE `operators` (
   `home` varchar(255) DEFAULT NULL COMMENT 'Home address',
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last record update time',
   `comments` varchar(255) DEFAULT NULL COMMENT 'Additional notes about the operator',
-  `entered` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the operator was first added',
+  `entered` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the operator was first added',
   `addedby` tinytext COMMENT 'Who added this operator record',
   PRIMARY KEY (`seq_nmbr`) COMMENT 'Unique operator identifier'
 ) COMMENT 'Personnel authorized to operate the accelerator';
