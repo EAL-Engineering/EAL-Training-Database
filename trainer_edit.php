@@ -2,9 +2,6 @@
 /**
  * Trainer Certification & Role Management
  *
- * This script allows authorized users to edit certifications and role access levels
- * for a specific trainer.
- *
  * PHP version 8.0+
  *
  * @category Certification
@@ -19,7 +16,6 @@ require_once "auth.php";
 
 $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
-// Require login (Role >= 1 to view)
 checkLogin(1, $_SERVER['REQUEST_URI']);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
@@ -34,7 +30,6 @@ $trainer_id = intval($_GET['id']);
  * Handle POST request to update trainer role_id (Issue #1)
  */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_role') {
-    // Enforce Administrator access (Role 2) for role modification
     if (getUserRole() < 2) {
         $_SESSION['message'] = [
             'type' => 'error',
@@ -44,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit();
     }
 
-    // CSRF Validation
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
         $_SESSION['message'] = [
             'type' => 'error',
@@ -87,17 +81,16 @@ if (!$stmt) {
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
-$stmt->bind_result($current_role_id);
-if (!$stmt->fetch()) {
-    $stmt->close();
-    die("Invalid request. Trainer ID does not exist. <a href='index.php'>Go to Main Page</a>");
-}
+$trainer_row = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+if (!$trainer_row) {
+    die("Invalid request. Trainer ID does not exist. <a href='index.php'>Go to Main Page</a>");
+}
+$current_role_id = $trainer_row['role_id'];
+
 /**
- * Fetch the trainer's name using their ID.
- *
- * @var string $trainer_name The name of the trainer.
+ * Fetch trainer's name
  */
 $query = "SELECT fname FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
@@ -106,16 +99,16 @@ if (!$stmt) {
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
-$stmt->bind_result($trainer_name);
-if (!$stmt->fetch()) {
-    die("Trainer not found. <a href='index.php'>Go to Main Page</a>");
-}
+$op_row = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+if (!$op_row) {
+    die("Trainer not found. <a href='index.php'>Go to Main Page</a>");
+}
+$trainer_name = $op_row['fname'];
+
 /**
- * Fetch the trainer's current certifications.
- *
- * @var array $current_certifications Array of the trainer's current certifications.
+ * Fetch assigned certifications
  */
 $query = "
     SELECT c.certification, c.seq_nmbr AS cert_id
@@ -129,21 +122,19 @@ if (!$stmt) {
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
-$stmt->bind_result($certification, $cert_id);
+$result = $stmt->get_result();
 
 $current_certifications = [];
-while ($stmt->fetch()) {
+while ($row = $result->fetch_assoc()) {
     $current_certifications[] = [
-        'certification' => $certification,
-        'cert_id' => $cert_id
+        'certification' => $row['certification'],
+        'cert_id'       => $row['cert_id']
     ];
 }
 $stmt->close();
 
 /**
- * Fetch all certifications available for assignment to the trainer.
- *
- * @var array $available_certifications Array of certifications not assigned to the trainer.
+ * Fetch available certifications
  */
 $query = "
     SELECT c.certification, c.seq_nmbr AS cert_id
@@ -158,13 +149,13 @@ if (!$stmt) {
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
-$stmt->bind_result($available_certification, $available_cert_id);
+$result = $stmt->get_result();
 
 $available_certifications = [];
-while ($stmt->fetch()) {
+while ($row = $result->fetch_assoc()) {
     $available_certifications[] = [
-        'certification' => $available_certification,
-        'cert_id' => $available_cert_id
+        'certification' => $row['certification'],
+        'cert_id'       => $row['cert_id']
     ];
 }
 $stmt->close();
@@ -181,7 +172,7 @@ if (isset($_SESSION['message'])) {
     . ';">' 
     . htmlspecialchars($_SESSION['message']['text']) 
     . '</p>';
-    unset($_SESSION['message']); // Clear the message after it has been displayed
+    unset($_SESSION['message']);
 }
 ?>
 
@@ -204,10 +195,8 @@ if (isset($_SESSION['message'])) {
         </div>
         <h1>Edit Trainer: <?php echo htmlspecialchars($trainer_name); ?></h1>
 
-        <!-- Display success or error message -->
         <?php echo $message; ?>
 
-        <!-- Role Management Section (Issue #1) -->
         <h2>Access Role</h2>
         <form method="post" action="trainer_edit.php?id=<?php echo htmlspecialchars($trainer_id); ?>" style="margin-bottom: 2em;">
             <input type="hidden" name="action" value="update_role">
@@ -227,7 +216,6 @@ if (isset($_SESSION['message'])) {
             <?php endif; ?>
         </form>
 
-        <!-- Current Certifications -->
         <h2>Current Certifications</h2>
         <?php if (!empty($current_certifications)) : ?>
             <div class="certifications-list">
@@ -251,7 +239,6 @@ if (isset($_SESSION['message'])) {
             <p>No certifications assigned to this trainer.</p>
         <?php endif; ?>
 
-        <!-- Available Certifications -->
         <h2>Available Certifications</h2>
         <?php if (!empty($available_certifications)) : ?>
             <div class="certifications-list">

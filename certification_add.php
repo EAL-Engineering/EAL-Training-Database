@@ -30,12 +30,14 @@ $query = "SELECT fname, name FROM operators WHERE seq_nmbr = ?";
 $stmt = $mysqli->prepare($query);
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
-$stmt->bind_result($op_fname, $op_name);
-if (!$stmt->fetch()) {
-    $stmt->close();
+$op_row = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$op_row) {
     die("Operator not found. <a href='personnel_list.php'>Back to List</a>");
 }
-$stmt->close();
+$op_fname = $op_row['fname'];
+$op_name  = $op_row['name'];
 
 // Fetch current active certifications (Issue #33 UI)
 $query = "
@@ -50,16 +52,16 @@ $query = "
 $stmt = $mysqli->prepare($query);
 $stmt->bind_param("i", $operator_id);
 $stmt->execute();
-$stmt->bind_result($optraining_id, $cert_name, $entered, $expires, $trainer_fname);
+$result = $stmt->get_result();
 
 $current_certs = [];
-while ($stmt->fetch()) {
+while ($row = $result->fetch_assoc()) {
     $current_certs[] = [
-        'id' => $optraining_id,
-        'name' => $cert_name,
-        'entered' => $entered,
-        'expires' => $expires,
-        'trainer' => $trainer_fname
+        'id'      => $row['optraining_id'],
+        'name'    => $row['certification'],
+        'entered' => $row['entered'],
+        'expires' => $row['expires'],
+        'trainer' => $row['trainer_fname']
     ];
 }
 $stmt->close();

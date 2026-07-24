@@ -5,7 +5,7 @@
  * This script retrieves and displays the details of an operator for editing. 
  * It ensures proper authorization and handles operator data securely.
  * 
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -14,42 +14,23 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-/**
- * Database connection and configuration.
- * Includes the `config.php` file to establish a connection with the database.
- */
 require_once "config.php";
 require_once "auth.php";
 
-/**
- * Check if the user is logged in and authorized to edit personnel details.
- * Redirects unauthorized users to the login page.
- */
 checkLogin(1, $_SERVER['REQUEST_URI']);
 
-/**
- * Time until the session expires
- *
- * @var int $timeUntilSessionExpires
- */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-/**
- * Validate and sanitize the `id` parameter from the URL.
- * 
- * @throws Exception If the ID is not set or not numeric.
- */
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid request. No operator ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
-$id = intval($_GET['id']); // Sanitize the ID
+$id = intval($_GET['id']);
 
 /**
  * Retrieve operator details from the database.
- * Explicitly selecting columns ensures parameter binding accuracy.
- * @var string $query SQL query to fetch operator details.
- * @var mysqli_stmt $operator_stmt Prepared statement for fetching operator details.
+ * FIX (Issue #18): Replaced bind_result() with get_result()->fetch_assoc()
+ * to eliminate brittle positional variable binding.
  */
 $query = "SELECT seq_nmbr, name, fname, email, altemail, phones, status, is_eal_staff, is_senior_staff, office, home, updated, comments, entered, addedby FROM operators WHERE seq_nmbr = ?";
 $operator_stmt = $mysqli->prepare($query);
@@ -60,32 +41,9 @@ if (!$operator_stmt) {
 
 $operator_stmt->bind_param("i", $id);
 $operator_stmt->execute();
-$operator_stmt->bind_result($seq_nmbr, $name, $fname, $email, $altemail, $phones, $status, $is_eal_staff, $is_senior_staff, $office, $home, $updated, $comments, $entered, $addedby);
+$result = $operator_stmt->get_result();
 
-/**
- * Fetch the operator's details into an array for display and editing.
- * 
- * @var array $operator Associative array holding operator details.
- */
-if ($operator_stmt->fetch()) {
-    $operator = [
-        'seq_nmbr' => $seq_nmbr,
-        'name' => $name,
-        'fname' => $fname,
-        'email' => $email,
-        'altemail' => $altemail,
-        'phones' => $phones,
-        'status' => $status,
-        'is_eal_staff' => $is_eal_staff,
-        'is_senior_staff' => $is_senior_staff,
-        'office' => $office,
-        'home' => $home,
-        'updated' => $updated,
-        'comments' => $comments,
-        'entered' => $entered,
-        'addedby' => $addedby
-    ];
-} else {
+if (!($operator = $result->fetch_assoc())) {
     die("No operator found with the provided ID.");
 }
 
@@ -93,9 +51,7 @@ $operator_stmt->close();
 
 /**
  * Fetch certifications for the operator.
- * 
- * @var string $certifications_query SQL query to retrieve operator certifications.
- * @var mysqli_stmt $certifications_stmt Prepared statement for fetching certifications.
+ * FIX (Issue #18): Replaced bind_result() with get_result()->fetch_assoc()
  */
 $certifications_query = "
     SELECT c.certification 
@@ -111,25 +67,17 @@ if (!$certifications_stmt) {
 
 $certifications_stmt->bind_param("i", $id);
 $certifications_stmt->execute();
-$certifications_stmt->bind_result($certification);
+$cert_result = $certifications_stmt->get_result();
 
-/**
- * Retrieve certifications into an array.
- * 
- * @var array $certifications List of certifications for the operator.
- */
 $certifications = [];
-while ($certifications_stmt->fetch()) {
-    $certifications[] = $certification;
+while ($row = $cert_result->fetch_assoc()) {
+    $certifications[] = $row['certification'];
 }
 
 $certifications_stmt->close();
 
 /**
  * Fetch keys for the operator.
- * Gracefully handles the case where operator_keys table does not yet exist.
- *
- * @var array $operator_keys List of keys assigned to this operator.
  */
 $operator_keys = [];
 $keys_table_exists = $mysqli->query("SHOW TABLES LIKE 'operator_keys'")->num_rows > 0;

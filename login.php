@@ -42,20 +42,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $mysqli->prepare($query);
         $stmt->bind_param("s", $username);
         $stmt->execute();
-        $stmt->bind_result($id, $fname, $password_hash, $role_id);
+        $trainer = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
 
-        if ($stmt->fetch()) {
+        if ($trainer) {
             // FIX (Issue #3): Use modern password_verify() instead of legacy crypt()
-            if (password_verify($password, $password_hash)) {
-                $stmt->close();
-
+            if (password_verify($password, $trainer['password_hash'])) {
                 // Regenerate session ID and rotate CSRF token on login
                 session_regenerate_id(true);
                 regenerateCSRFToken();
 
-                $_SESSION['user_id'] = $id;
-                $_SESSION['fname'] = $fname;
-                $_SESSION['role_id'] = $role_id;
+                $_SESSION['user_id'] = $trainer['seq_nmbr'];
+                $_SESSION['fname'] = $trainer['login_name'];
+                $_SESSION['role_id'] = $trainer['role_id'];
                 $_SESSION['last_activity'] = time();
 
                 $redirectUrl = 'index.php';
@@ -73,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Always return the same error message to avoid username enumeration
         $error = "Invalid username or password.";
-        $stmt->close();
     }
 }
 

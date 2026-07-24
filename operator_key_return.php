@@ -40,14 +40,18 @@ $stmt = $mysqli->prepare(
 );
 $stmt->bind_param("i", $key_id);
 $stmt->execute();
-$stmt->bind_result($key_type, $serial_number, $operator_name, $operator_id);
-$found = $stmt->fetch();
+$key = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-if (!$found) {
+if (!$key) {
     header("Location: " . $redirect . "?error=not_found");
     exit();
 }
+
+$key_type      = $key['key_type'];
+$serial_number = $key['serial_number'];
+$operator_name = $key['operator_name'];
+$operator_id   = $key['operator_id'];
 
 // Fetch spare pool operators
 $pools_result = $mysqli->query(

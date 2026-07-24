@@ -4,7 +4,7 @@
  *
  * This script handles the resetting of a user's password using a token.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -14,9 +14,9 @@
  */
 require_once "config.php";
 
-// Enable error reporting for debugging (remove in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable inline error display in production
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 // Check if the reset token is provided
@@ -35,21 +35,20 @@ if (!$stmt) {
 
 $stmt->bind_param("s", $reset_token);
 $stmt->execute();
-$stmt->store_result();
-$stmt->bind_result($trainer_id, $reset_expiration, $login_name);
+$trainer = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
-// Check if a valid record exists and the token hasn't expired
-if ($stmt->num_rows === 0) {
+if (!$trainer) {
     die("Invalid or expired token.");
 }
 
-$stmt->fetch();
+$trainer_id       = $trainer['seq_nmbr'];
+$reset_expiration = $trainer['reset_expiration'];
+$login_name       = $trainer['login_name'];
 
 if (time() > strtotime($reset_expiration)) {
     die("This token has expired.");
 }
-
-$stmt->close();
 
 // If the form is submitted, process the password change
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -57,18 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
         die("Invalid CSRF token.");
     }
-    $new_password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $new_password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
     if ($new_password !== $confirm_password) {
         die("Passwords do not match.");
     }
 
-    // Salt generation for bcrypt (bcrypt requires a salt to be passed along)
-    $salt = substr(sha1(rand()), 0, 22);  // Generate a salt with 22 characters
-    
-    // Hash the password with bcrypt
-    $hashed_password = crypt($new_password, '$2y$10$' . $salt);
+    $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
     
     // Store the hashed password in the database
     $update_query = "UPDATE trainers SET password_hash = ?, reset_token = NULL, reset_expiration = NULL WHERE seq_nmbr = ?";
@@ -79,10 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $update_stmt->bind_param("si", $hashed_password, $trainer_id);
     if ($update_stmt->execute()) {
-        // Redirect to login page after successful password change
-        header("Location: login.php?password_reset=success&login_name=".urlencode($login_name));
+        $update_stmt->close();
+        header("Location: login.php?password_reset=success&login_name=" . urlencode($login_name));
         exit();
     } else {
+        $update_stmt->close();
         die("Error updating password.");
     }    
 }

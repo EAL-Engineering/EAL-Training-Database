@@ -41,16 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $completed_by = intval($_POST['completed_by']);
 
     // FIX (Issue #22): Check if user already holds an active certification of this type
-    $check_query = "SELECT COUNT(*) FROM optraining WHERE operator = ? AND certification = ? AND status = 'Active'";
+    $check_query = "SELECT COUNT(*) AS total FROM optraining WHERE operator = ? AND certification = ? AND status = 'Active'";
     $check_stmt = $mysqli->prepare($check_query);
     if ($check_stmt) {
         $check_stmt->bind_param("ii", $operator_id, $cert_id);
         $check_stmt->execute();
-        $check_stmt->bind_result($existing_count);
-        $check_stmt->fetch();
+        $check_row = $check_stmt->get_result()->fetch_assoc();
         $check_stmt->close();
 
-        if ($existing_count > 0) {
+        if ($check_row && intval($check_row['total']) > 0) {
             header("Location: certification_add.php?id=$operator_id&error=duplicate");
             exit;
         }
@@ -67,9 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $stmt->bind_param("i", $cert_id);
     $stmt->execute();
-    $stmt->bind_result($exp_months);
-    $stmt->fetch();
+    $cert_row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
+
+    $exp_months = $cert_row['exp_months'] ?? null;
 
     $expires = null;
     if ($exp_months && is_numeric($exp_months)) {

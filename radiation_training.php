@@ -6,7 +6,7 @@
  * It provides an interface for authorized trainers to select operators and record
  * the training date in the database.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ON DUPLICATE KEY UPDATE entered = VALUES(entered), trainer = VALUES(trainer)"
                 );
                 if ($stmt) {
-                    // FIX (Issue #21): Correct type binding string from "is" to "iis" (operator: int, trainer: int, entered: string)
+                    // FIX (Issue #21): Correct type binding string from "is" to "iis"
                     $stmt->bind_param("iis", $operator, $_SESSION['user_id'], $date);
                     if ($stmt->execute()) {
                         $successCount++;
@@ -130,25 +130,24 @@ function checkCertification($trainerId, $certificationId)
     $stmt = $mysqli->prepare("SELECT optbl_ptr FROM trainers WHERE seq_nmbr = ?");
     $stmt->bind_param("i", $trainerId);
     $stmt->execute();
-    $stmt->bind_result($operatorId);
-    $stmt->fetch();
+    $trainer = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    if (!$operatorId || $operatorId == -1) {
+    if (!$trainer || !isset($trainer['optbl_ptr']) || $trainer['optbl_ptr'] == -1) {
         return false;
     }
 
-    $stmt = $mysqli->prepare("SELECT COUNT(*) FROM can_certify WHERE trainer_ptr = ? AND cert_ptr = ?");
+    $operatorId = $trainer['optbl_ptr'];
+
+    $stmt = $mysqli->prepare("SELECT COUNT(*) AS total FROM can_certify WHERE trainer_ptr = ? AND cert_ptr = ?");
     $stmt->bind_param("ii", $operatorId, $certificationId);
     $stmt->execute();
-    $stmt->bind_result($count);
-    $stmt->fetch();
+    $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    return $count > 0;
+    return $row && intval($row['total']) > 0;
 }
 ?>
-
 <!doctype html>
 <html lang="en">
 <head>

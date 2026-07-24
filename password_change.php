@@ -43,12 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt) {
                 $stmt->bind_param("i", $_SESSION['user_id']);
                 $stmt->execute();
-                $stmt->bind_result($password_hash);
+                $row = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
 
-                if ($stmt->fetch()) {
-                    $stmt->close();
-
-                    if (password_verify($current_password, $password_hash)) {
+                if ($row) {
+                    if (password_verify($current_password, $row['password_hash'])) {
                         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
                         $update_query = "UPDATE trainers SET password_hash = ? WHERE seq_nmbr = ?";
@@ -68,7 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $error_message = "Current password is incorrect.";
                     }
                 } else {
-                    $stmt->close();
                     $error_message = "User account not found.";
                 }
             } else {

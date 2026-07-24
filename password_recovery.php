@@ -43,11 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt->bind_param("ss", $email, $email);
     $stmt->execute();
-    $stmt->bind_result($trainer_id, $username);
+    $trainer = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
     // If an account is found, proceed with token generation and email
-    if ($stmt->fetch()) {
-        $stmt->close(); // Close immediately to allow the subsequent update
+    if ($trainer) {
+        $trainer_id = $trainer['seq_nmbr'];
+        $username   = $trainer['login_name'];
 
         // Generate a secure reset token and expiration time
         $reset_token = bin2hex(openssl_random_pseudo_bytes(16));
@@ -72,10 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             $update_stmt->close();
         }
-    } else {
-        // If not found, close the statement and proceed
-        $stmt->close();
-        // To mitigate timing attacks, you could perform a dummy hash or sleep here
     }
 
     // FIX (Issue #5): Always return the same message to avoid email enumeration
