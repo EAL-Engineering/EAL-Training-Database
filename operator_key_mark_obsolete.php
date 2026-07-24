@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get existing key types
-$key_types_result = $mysqli->query("SELECT DISTINCT key_type FROM operator_keys ORDER BY key_type");
+$key_types_result = $mysqli->query("SELECT DISTINCT key_type FROM operator_keys WHERE LOWER(key_type) != 'badge' ORDER BY key_type");
 $key_types = [];
 while ($row = $key_types_result->fetch_assoc()) {
     $key_types[] = $row['key_type'];
