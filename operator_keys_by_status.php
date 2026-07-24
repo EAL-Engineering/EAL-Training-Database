@@ -136,9 +136,13 @@ if (!empty($params)) {
             <tr>
                 <td><?php echo htmlspecialchars($row['key_type']); ?></td>
                 <td>
-                    <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
+                    <?php if (strtolower($row['key_type']) === 'badge'): ?>
                         <?php echo htmlspecialchars($row['serial_number']); ?>
-                    </a>
+                    <?php else: ?>
+                        <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
+                            <?php echo htmlspecialchars($row['serial_number']); ?>
+                        </a>
+                    <?php endif; ?>
                 </td>
                 <td>
                     <a href="personnel_edit.php?id=<?php echo urlencode($row['operator_id']); ?>">
