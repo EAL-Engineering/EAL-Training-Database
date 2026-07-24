@@ -4,7 +4,7 @@
  *
  * This file contains helper functions used across various parts of the application.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -14,35 +14,56 @@
  */
 
 /**
- * Builds a dropdown (pulldown) menu of active operators for training purposes.
+ * Builds and displays a dropdown (<select>) menu of active operators.
  *
- * This function queries the `operators` table for active operators and generates
- * an HTML `<select>` dropdown menu with their names. Each option corresponds to
- * an operator's unique sequence number.
+ * Queries the `operators` table for active operators and outputs an HTML `<select>`
+ * menu with options corresponding to each operator's sequence number and name.
+ *
+ * @param string   $selectName Optional HTML name/id attribute for the select element. Defaults to 'selname'.
+ * @param int|null $selectedId Optional operator sequence number to pre-select.
  *
  * @return void
- *
- * @throws mysqli_sql_exception If the database query fails.
  */
-function Build_Operator_Training_pulldown()
+function Build_Operator_Training_pulldown($selectName = 'selname', $selectedId = null)
 {
-    $operator_list = mysqli_query($mysqli, "SELECT * FROM operators WHERE status='Active' ORDER BY name");
-    echo "<select name='selname'>";
-    $row = $operator_list -> fetch_array(MYSQL_NUM);
-    printf("%s (%s)\n", $row[0], $row[1]);
+    global $mysqli;
 
-    // while ($operator = $operator_list -> fetch_array(MYSQLI_NUM)) {
-    //     echo '<option value="' . $operator['seq_nmbr'] . '">' .$operator.['name'];
-    // }
+    if (!$mysqli) {
+        error_log("Database connection \$mysqli is not available in Build_Operator_Training_pulldown().");
+        return;
+    }
+
+    $query = "SELECT seq_nmbr, fname, name FROM operators WHERE status = 'Active' ORDER BY name ASC";
+    $result = $mysqli->query($query);
+
+    if (!$result) {
+        error_log("Query failed in Build_Operator_Training_pulldown(): " . $mysqli->error);
+        return;
+    }
+
+    echo '<select name="' . htmlspecialchars($selectName) . '" id="' . htmlspecialchars($selectName) . '">';
+    echo '<option value="">-- Select Operator --</option>';
+
+    while ($row = $result->fetch_assoc()) {
+        $id = $row['seq_nmbr'];
+        $displayName = trim(($row['fname'] ?? '') . ' ' . ($row['name'] ?? ''));
+        if ($displayName === '') {
+            $displayName = $row['name'] ?? "Operator #$id";
+        }
+
+        $isSelected = ($selectedId !== null && (int)$id === (int)$selectedId) ? ' selected' : '';
+
+        echo '<option value="' . htmlspecialchars((string)$id) . '"' . $isSelected . '>';
+        echo htmlspecialchars($displayName);
+        echo '</option>';
+    }
+
+    echo '</select>';
+    $result->close();
 }
 
 /**
  * Validates that a redirect URL is a safe relative path on this site.
- *
- * Rejects absolute URLs (e.g. https://evil.com), protocol-relative URLs
- * (e.g. //evil.com), and anything containing characters not expected in
- * a local path. Falls-through to the caller to use a safe default if
- * this returns false.
  *
  * @param string $url The URL to validate.
  *
@@ -50,6 +71,10 @@ function Build_Operator_Training_pulldown()
  */
 function isSafeRedirect($url)
 {
+    if (!is_string($url) || $url === '') {
+        return false;
+    }
+
     return (bool) preg_match('/^[a-zA-Z0-9_\-][a-zA-Z0-9_\-\/\.]*(?:\?[^#]*)?$/', $url);
 }
 
