@@ -78,7 +78,13 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
         <h2>Key Management</h2>
         <p>The list of all assigned keys can be found at:
-            <a href="operator_keys.php">operator_keys.php</a></p>
+            <a href="operator_keys.php">operator_keys.php</a> (by operator)</p>
+        <p>Keys grouped by type can be found at:
+            <a href="operator_keys_by_type.php">operator_keys_by_type.php</a></p>
+        <p>Keys grouped by status can be found at:
+            <a href="operator_keys_by_status.php">operator_keys_by_status.php</a></p>
+        <p>View the full history of a specific key (all past assignments) at:
+            <a href="key_history.php">key_history.php</a> (requires key type and serial number)</p>
         <p>Assign a single key to an operator at:
             <a href="operator_key_add.php">operator_key_add.php</a></p>
         <p>Assign multiple keys at once (useful for badge audits or re-keying) at:
