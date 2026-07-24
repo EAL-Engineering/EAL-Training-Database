@@ -15,12 +15,10 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start session if not already started
-if (session_status() == PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include necessary files
 require_once "config.php";
 require_once "auth.php";
 
@@ -35,8 +33,6 @@ if ($mysqli->connect_error) {
  */
 $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
-// FIX (Issue #9): call checkLogin() first to ensure session validity and idle
-// timeout enforcement, then apply the cert-specific authorization check below.
 checkLogin(1, $_SERVER['REQUEST_URI']);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
@@ -54,51 +50,43 @@ if (!$authorizedTrainer) {
  * 
  * @var string $message
  */
-$message = ''; // Initialize message
+$message = '';
 
-// Form submission logic
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Verify CSRF token
+    // FIX (Issue #4): Guard clause for CSRF validation
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
-        $message = "Invalid CSRF token.";
-    }
-    /**
-     * The date of the training entered by the user.
-     * 
-     * @var string $dateOfTraining
-     */
-    $dateOfTraining = isset($_POST['date_of_training']) ? trim($_POST['date_of_training']) : '';
-
-    /**
-     * Array of selected operator IDs.
-     * 
-     * @var array $selectedOperators
-     */
-    $selectedOperators = isset($_POST['operators']) ? $_POST['operators'] : [];
-
-    if (!empty($dateOfTraining) && !empty($selectedOperators)) {
-        $date = date('Y-m-d', strtotime($dateOfTraining)); // Validate and format the date
-        $successCount = 0;
-
-        foreach ($selectedOperators as $operator) {
-            $operator = (int)$operator; // Ensure the ID is numeric
-            $stmt = $mysqli->prepare(
-                "INSERT INTO optraining (operator, certification, trainer, entered) 
-                VALUES (?, 18, ?, ?) 
-                ON DUPLICATE KEY UPDATE entered = VALUES(entered)"
-            );
-            $stmt->bind_param("is", $operator, $_SESSION['user_id'], $date);
-            if ($stmt->execute()) {
-                $successCount++;
-            }
-            $stmt->close();
-        }
-
-        $message = $successCount > 0 
-            ? "Successfully registered $successCount operators." 
-            : "No operators were registered.";
+        $message = "Invalid security token. Please refresh the page and try again.";
     } else {
-        $message = "Please select at least one operator and enter a valid date.";
+        $dateOfTraining = isset($_POST['date_of_training']) ? trim($_POST['date_of_training']) : '';
+        $selectedOperators = isset($_POST['operators']) ? $_POST['operators'] : [];
+
+        if (!empty($dateOfTraining) && !empty($selectedOperators)) {
+            $date = date('Y-m-d', strtotime($dateOfTraining));
+            $successCount = 0;
+
+            foreach ($selectedOperators as $operator) {
+                $operator = (int)$operator;
+                $stmt = $mysqli->prepare(
+                    "INSERT INTO optraining (operator, certification, trainer, entered) 
+                    VALUES (?, 18, ?, ?) 
+                    ON DUPLICATE KEY UPDATE entered = VALUES(entered), trainer = VALUES(trainer)"
+                );
+                if ($stmt) {
+                    // FIX (Issue #21): Correct type binding string from "is" to "iis" (operator: int, trainer: int, entered: string)
+                    $stmt->bind_param("iis", $operator, $_SESSION['user_id'], $date);
+                    if ($stmt->execute()) {
+                        $successCount++;
+                    }
+                    $stmt->close();
+                }
+            }
+
+            $message = $successCount > 0 
+                ? "Successfully registered $successCount operators." 
+                : "No operators were registered.";
+        } else {
+            $message = "Please select at least one operator and enter a valid date.";
+        }
     }
 }
 
@@ -109,20 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * @var mysqli_result|false $operatorsResult Result set of eligible operators.
  */
 $operatorsResult = $mysqli->query(
-    "
-    SELECT 
-        o.seq_nmbr AS id, 
-        o.name AS name, 
-        MAX(t.entered) AS last_training 
-    FROM 
-        operators o
-    LEFT JOIN 
-        optraining t ON o.seq_nmbr = t.operator AND t.certification = 18
-    WHERE 
-        o.status = 'Active'
-    GROUP BY 
-        o.seq_nmbr
-"
+    "SELECT o.seq_nmbr AS id, o.name AS name, MAX(t.entered) AS last_training 
+     FROM operators o
+     LEFT JOIN optraining t ON o.seq_nmbr = t.operator AND t.certification = 18
+     WHERE o.status = 'Active'
+     GROUP BY o.seq_nmbr"
 );
 
 if (!$operatorsResult) {
@@ -163,13 +142,7 @@ function checkCertification($trainerId, $certificationId)
         return false;
     }
 
-    $stmt = $mysqli->prepare(
-        "
-        SELECT COUNT(*) 
-        FROM can_certify 
-        WHERE trainer_ptr = ? AND cert_ptr = ?
-        "
-    );
+    $stmt = $mysqli->prepare("SELECT COUNT(*) FROM can_certify WHERE trainer_ptr = ? AND cert_ptr = ?");
     $stmt->bind_param("ii", $operatorId, $certificationId);
     $stmt->execute();
     $stmt->bind_result($count);
@@ -192,12 +165,6 @@ function checkCertification($trainerId, $certificationId)
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="common.js" defer></script>
-    <script>
-        // Pass the session expiration time to the JavaScript function
-        document.addEventListener('DOMContentLoaded', () => {
-            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
-        });
-    </script>
 </head>
 <body>
     <?php require 'header.php'; ?>
@@ -206,7 +173,7 @@ function checkCertification($trainerId, $certificationId)
 
     <div class="form-container">
         <?php if (!empty($message)) : ?>
-            <p class="message"><?php echo htmlspecialchars($message); ?></p>
+            <p class="message" style="font-weight: bold;"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
 
         <form method="post" action="">
