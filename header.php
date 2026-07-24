@@ -2,10 +2,7 @@
 /**
  * Page header for the Training Management System.
  *
- * This file handles session management, displays user information,
- * and includes navigation links based on the user's authentication state.
- *
- * PHP version 5.x
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -14,15 +11,18 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start the session if it hasn't already been started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Get the current script name to determine if it's login.php
-$currentScript = basename($_SERVER['PHP_SELF']);
+// Ensure auth.php functions are available if not already included
+if (function_exists('getTimeUntilSessionExpires')) {
+    $secondsRemaining = getTimeUntilSessionExpires();
+} else {
+    $secondsRemaining = 0;
+}
 
-// Check if user is logged in (session has user_id)
+$currentScript = basename($_SERVER['PHP_SELF']);
 $isLoggedIn = isset($_SESSION['user_id']);
 ?>
 <div class="header">
@@ -31,14 +31,51 @@ $isLoggedIn = isset($_SESSION['user_id']);
             <img src="EALlogoZM.svg" alt="EAL Logo" class="header-logo-img">
         </a>
     </div>
-    <div class="header-info">
+    <div class="header-info" id="header-info-container">
         <?php if ($isLoggedIn) : ?>
             <!-- Display user information and session countdown for logged-in users -->
+            <span id="user-display">Logged in as: <?php echo htmlspecialchars($_SESSION['fname'] ?? 'User'); ?></span>
+            <span class="divider">|</span>
+            <span id="session-status-text">Session expires in: <span id="countdown"></span></span>
+            <a href="logout.php" id="session-button" class="logout-button">Logout</a>
 
-            <span>Logged in as: <?php echo htmlspecialchars($_SESSION['fname']); ?></span>
-            <span>|</span>
-            <span>Session expires in: <span id="countdown"></span></span>
-            <a href="logout.php" class="logout-button">Logout</a>
+            <script>
+            (function() {
+                let timeRemaining = <?php echo (int)$secondsRemaining; ?>;
+                const countdownElem = document.getElementById('countdown');
+                const sessionBtn = document.getElementById('session-button');
+                const statusText = document.getElementById('session-status-text');
+                const userDisplay = document.getElementById('user-display');
+
+                function updateTimer() {
+                    if (timeRemaining <= 0) {
+                        if (countdownElem) countdownElem.textContent = "00:00:00";
+                        if (statusText) statusText.textContent = "Session expired";
+                        if (userDisplay) userDisplay.style.display = "none";
+                        if (sessionBtn) {
+                            sessionBtn.textContent = "Login";
+                            sessionBtn.href = "login.php?return=" + encodeURIComponent(window.location.pathname);
+                        }
+                        return;
+                    }
+
+                    let hours = Math.floor(timeRemaining / 3600);
+                    let minutes = Math.floor((timeRemaining % 3600) / 60);
+                    let seconds = timeRemaining % 60;
+
+                    let formatted = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0');
+
+                    if (countdownElem) countdownElem.textContent = formatted;
+                    timeRemaining--;
+                }
+
+                updateTimer();
+                setInterval(updateTimer, 1000);
+            })();
+            </script>
         <?php else: ?>
             <!-- Display welcome message and login button for guests -->
             <span>Session expired</span>

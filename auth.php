@@ -2,7 +2,7 @@
 /**
  * Authentication and authorization checks for the application.
  *
- * PHP Version 5.4+
+ * PHP Version 8.0+
  *
  * @category Certification
  * @package TrainingManagementSystem
@@ -12,7 +12,7 @@
  */
 
 // Check if a session is already started
-if (session_status() == PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
@@ -22,14 +22,21 @@ if (session_status() == PHP_SESSION_NONE) {
 define('SESSION_TIMEOUT', 2 * 60 * 60);
 
 /**
+ * FIX (Issue #13 / Bug #27): Enforce session idle timeout globally on load.
+ * Purges expired session variables immediately so header.php and checkLogin()
+ * see an unauthenticated state regardless of which page is loaded.
+ */
+if (isset($_SESSION['user_id']) && isset($_SESSION['last_activity'])) {
+    if ((time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
+        session_unset();
+        session_destroy();
+        session_start(); // Start fresh empty session
+    }
+}
+
+/**
  * Check if the user is logged in and has the required access level.
  * Redirects unauthorized users to the login page.
- *
- * Also enforces the session idle timeout (Issue #13): if last_activity is
- * older than SESSION_TIMEOUT, the session is destroyed and the user is sent
- * to the login page with a return URL so they land back where they were after
- * re-authenticating. last_activity is refreshed on every successful check so
- * the timeout is idle-based rather than absolute.
  *
  * @param int    $requiredRole The required access level.
  * @param string $redirectUrl  The current page URI to redirect back after login.
@@ -44,20 +51,10 @@ function checkLogin($requiredRole, $redirectUrl)
         exit();
     }
 
-    // FIX (Issue #13): Enforce session idle timeout on every protected page.
-    // Previously this check only existed in login.php, meaning an authenticated
-    // user could stay active indefinitely on any other page.
-    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
-        session_unset();
-        session_destroy();
-        header("Location: login.php?return=" . urlencode($redirectUrl));
-        exit();
-    }
-
-    // Refresh the idle timer on every valid request.
+    // Refresh the idle timer on every valid request
     $_SESSION['last_activity'] = time();
 
-    $userRole = getUserRole($_SESSION['user_id']);
+    $userRole = getUserRole();
 
     if ($userRole === null) {
         error_log("User role not set. Ensure role_id is correctly set in the database.");
@@ -75,11 +72,15 @@ function checkLogin($requiredRole, $redirectUrl)
 /**
  * Get the role of the currently logged-in user.
  *
- * @return int The role of the user.
+ * @return int|null The role of the user.
  */
 function getUserRole()
 {
     global $mysqli;
+
+    if (!isset($_SESSION['user_id'])) {
+        return null;
+    }
 
     $user_id = $_SESSION['user_id'];
 
@@ -101,17 +102,14 @@ function getUserRole()
 /**
  * Calculate the time remaining until the user's session expires.
  *
- * This function checks the `last_activity` timestamp stored in the session
- * and calculates how much time is left before the session expires.
- * Sessions are set to expire after 2 hours of inactivity.
+ * FIX (Issue #8): Replaced hardcoded (2 * 60 * 60) with SESSION_TIMEOUT constant.
  *
  * @return int The number of seconds remaining until the session expires.
- * Returns 0 if the session has already expired or if `last_activity` is not set.
  */
 function getTimeUntilSessionExpires()
 {
     if (isset($_SESSION['last_activity'])) {
-        $remaining = (2 * 60 * 60) - (time() - $_SESSION['last_activity']);
+        $remaining = SESSION_TIMEOUT - (time() - $_SESSION['last_activity']);
         return max($remaining, 0); // Ensure no negative time is returned
     }
     return 0;
@@ -120,33 +118,23 @@ function getTimeUntilSessionExpires()
 /**
  * Validate that a redirect URL is safe to use (i.e. relative to this app).
  *
- * Accepts only paths that start with a single '/' but not '//' (which browsers
- * treat as protocol-relative and would allow off-site redirects), and rejects
- * anything containing a scheme (e.g. http://, https://).  Anything that does
- * not pass returns false so the caller can fall back to a safe default.
- *
  * @param string $url The candidate redirect URL.
- *
  * @return bool True if the URL is safe to redirect to, false otherwise.
  */
 function isSafeRedirect($url)
 {
-    // Must be a non-empty string
     if (!is_string($url) || $url === '') {
         return false;
     }
 
-    // Reject anything with a scheme (catches http://, https://, javascript:, etc.)
     if (preg_match('/^[a-zA-Z][a-zA-Z0-9+\-.]*:/', $url)) {
         return false;
     }
 
-    // Reject protocol-relative URLs (//evil.com)
     if (strpos($url, '//') === 0) {
         return false;
     }
 
-    // Must start with a single slash — i.e. an absolute path on this server
     if (strpos($url, '/') !== 0) {
         return false;
     }
@@ -156,64 +144,42 @@ function isSafeRedirect($url)
 
 /**
  * Generates or retrieves a CSRF token for the current session.
- * * @return string The CSRF token.
+ * 
+ * @return string The CSRF token.
  */
 function getCSRFToken() {
-    if (session_status() == PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
     if (empty($_SESSION['csrf_token'])) {
-        // Generate a secure random token
-        $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     return $_SESSION['csrf_token'];
 }
 
 /**
  * Regenerate the CSRF token for the current session.
- * Use after login/session id regeneration to reduce the risk of token fixation.
  *
  * @return string The new CSRF token.
  */
 function regenerateCSRFToken()
 {
-    if (session_status() == PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     return $_SESSION['csrf_token'];
 }
 
 /**
  * Validates the CSRF token provided in a POST request.
- * * @param string $token The token from the form submission.
+ * 
+ * @param string $token The token from the form submission.
  * @return bool True if valid, false otherwise.
  */
 function verifyCSRFToken($token) {
-    if (!isset($_SESSION['csrf_token'])) {
+    if (!isset($_SESSION['csrf_token']) || !is_string($token)) {
         return false;
     }
-
-    // Use native hash_equals when available (PHP >= 5.6), otherwise
-    // perform a timing-safe comparison compatible with older PHP versions.
-    if (function_exists('hash_equals')) {
-        return hash_equals($_SESSION['csrf_token'], $token);
-    }
-
-    // Fallback timing-safe comparison
-    $known = $_SESSION['csrf_token'];
-    if (!is_string($known) || !is_string($token)) {
-        return false;
-    }
-    if (strlen($known) !== strlen($token)) {
-        return false;
-    }
-    $res = 0;
-    $len = strlen($known);
-    for ($i = 0; $i < $len; $i++) {
-        $res |= ord($known[$i]) ^ ord($token[$i]);
-    }
-    return $res === 0;
+    return hash_equals($_SESSION['csrf_token'], $token);
 }
-
-?>
