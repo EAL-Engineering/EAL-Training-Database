@@ -2,27 +2,7 @@
 /**
  * Processes the addition of a certification to an operator in the database.
  *
- * This script validates the form input submitted via POST, retrieves the expiration period
- * for the selected certification, and adds a new record to the `optraining` table. On success,
- * it redirects back to the `certification_add.php` page with a success message. If an error occurs,
- * it redirects back with an error message.
- * 
- * PHP version 5.4+
- *
- * Requirements:
- * - Database connection via `config.php`.
- * - `POST` request containing the following required fields:
- *   - `operator_id` (int): The ID of the operator receiving the certification.
- *   - `cert_id` (int): The ID of the certification being assigned.
- *   - `completed_by` (int): The ID of the trainer completing the certification.
- *
- * Error Handling:
- * - If required fields are missing or invalid, the script terminates with an error message.
- * - If database queries fail, the script terminates with a database error message.
- *
- * Redirect Behavior:
- * - On success: Redirects to `certification_add.php` with `success=1`.
- * - On failure: Redirects to `certification_add.php` with `error=1`.
+ * PHP version 8.0+
  *
  * @category Certification
  * @package TrainingManagementSystem
@@ -33,54 +13,55 @@
 
 session_start();
 
-// Include the database connection file
 require_once "config.php";
 require_once "auth.php";
 
-// FIX (Issue #9): enforce authentication before processing any writes
 checkLogin(1, $_SERVER['REQUEST_URI']);
 
-// Enable error reporting for debugging (remove in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// Check if the form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // FIX (Issue #4): CSRF Token Validation
+    // CSRF Token Validation
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
         error_log("CSRF token validation failed in certification_save.php");
         http_response_code(403);
         die("Invalid security token. Please refresh the page and try again.");
     }
-    // Validate required fields
-    if (!isset($_POST['operator_id'])) {
-        die("Error: Operator ID is missing. <a href='index.php'>Go to Main Page</a>");
-    } elseif (!is_numeric($_POST['operator_id'])) {
-        die("Error: Operator ID must be numeric. <a href='index.php'>Go to Main Page</a>");
+
+    if (!isset($_POST['operator_id']) || !is_numeric($_POST['operator_id'])) {
+        die("Error: Operator ID is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
     
-    if (!isset($_POST['cert_id'])) {
-        die("Error: Certification ID is missing. <a href='index.php'>Go to Main Page</a>");
-    } elseif (!is_numeric($_POST['cert_id'])) {
-        die("Error: Certification ID must be numeric. <a href='index.php'>Go to Main Page</a>");
+    if (!isset($_POST['cert_id']) || !is_numeric($_POST['cert_id'])) {
+        die("Error: Certification ID is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
     
-    if (!isset($_POST['completed_by'])) {
-        die("Error: Trainer ID (Completed By) is missing. <a href='index.php'>Go to Main Page</a>");
-    } elseif (!is_numeric($_POST['completed_by'])) {
-        die("Error: Trainer ID (Completed By) must be numeric. <a href='index.php'>Go to Main Page</a>");
+    if (!isset($_POST['completed_by']) || !is_numeric($_POST['completed_by'])) {
+        die("Error: Trainer ID (Completed By) is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
 
     $operator_id = intval($_POST['operator_id']);
     $cert_id = intval($_POST['cert_id']);
     $completed_by = intval($_POST['completed_by']);
 
-    // Default values for status and entered date
+    // FIX (Issue #22): Check if user already holds an active certification of this type
+    $check_query = "SELECT COUNT(*) FROM optraining WHERE operator = ? AND certification = ? AND status = 'Active'";
+    $check_stmt = $mysqli->prepare($check_query);
+    if ($check_stmt) {
+        $check_stmt->bind_param("ii", $operator_id, $cert_id);
+        $check_stmt->execute();
+        $check_stmt->bind_result($existing_count);
+        $check_stmt->fetch();
+        $check_stmt->close();
+
+        if ($existing_count > 0) {
+            header("Location: certification_add.php?id=$operator_id&error=duplicate");
+            exit;
+        }
+    }
+
     $status = 'Active';
     $entered = date('Y-m-d H:i:s');
     
-    // Fetch expiration period for the selected certification
+    // Fetch expiration period
     $query = "SELECT exp_months FROM certifications WHERE seq_nmbr = ?";
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
@@ -92,13 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->fetch();
     $stmt->close();
 
-    // Calculate expiration date if applicable
     $expires = null;
     if ($exp_months && is_numeric($exp_months)) {
         $expires = date('Y-m-d', strtotime("+$exp_months months"));
     }
 
-    // Insert the new certification into the optraining table
     $query = "INSERT INTO optraining (operator, certification, trainer, status, entered, expires)
               VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $mysqli->prepare($query);
@@ -108,15 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("iiisss", $operator_id, $cert_id, $completed_by, $status, $entered, $expires);
 
     if ($stmt->execute()) {
-        // Redirect back to the certification_add.php page with a success message
+        $stmt->close();
         header("Location: certification_add.php?id=$operator_id&success=1");
         exit;
     } else {
-        // Redirect back with an error message
+        $stmt->close();
         header("Location: certification_add.php?id=$operator_id&error=1");
         exit;
     }
 } else {
     die("Invalid request method. <a href='index.php'>Go to Main Page</a>");
 }
-?>
