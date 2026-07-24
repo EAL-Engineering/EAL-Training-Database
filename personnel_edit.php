@@ -272,7 +272,7 @@ if ($keys_table_exists) {
             <h2>Assigned Keys</h2>
             <?php if (!$keys_table_exists) : ?>
                 <p class="alert alert-danger">Key tracking table not found. Please run the database migration (1.2-to-1.3-add-keys.sql).</p>
-            <?php elseif (count($operator_keys) > 0) : ?>
+            <?php elseif (!empty($operator_keys)) : ?>
                 <table class="keys-table">
                     <thead>
                         <tr>
@@ -325,7 +325,7 @@ if ($keys_table_exists) {
 
         <div class="certifications">
             <h2>Certifications</h2>
-            <?php if (count($certifications) > 0) : ?>
+            <?php if (!empty($certifications)) : ?>
                 <ul>
                     <?php foreach ($certifications as $cert): ?>
                         <li><?php echo htmlspecialchars($cert); ?></li>

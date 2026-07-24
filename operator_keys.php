@@ -41,7 +41,7 @@ if (isset($_GET['operator_id']) && is_numeric($_GET['operator_id'])) {
     $types .= 'i';
 }
 
-$where_sql = count($where_clauses) > 0 ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
+$where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
 $query = "
     SELECT
@@ -81,8 +81,19 @@ if (!empty($params)) {
 // Get distinct key types for filter dropdown
 $key_types_result = $mysqli->query("SELECT DISTINCT key_type FROM operator_keys ORDER BY key_type");
 $key_types = [];
-while ($row = $key_types_result->fetch_assoc()) {
-    $key_types[] = $row['key_type'];
+if ($key_types_result) {
+    while ($row = $key_types_result->fetch_assoc()) {
+        $key_types[] = $row['key_type'];
+    }
+}
+
+// Get active operators for filter dropdown
+$operators_result = $mysqli->query("SELECT seq_nmbr, fname FROM operators WHERE status = 'Active' ORDER BY fname");
+$operators = [];
+if ($operators_result) {
+    while ($row = $operators_result->fetch_assoc()) {
+        $operators[] = $row;
+    }
 }
 
 // Get active operators for filter dropdown
