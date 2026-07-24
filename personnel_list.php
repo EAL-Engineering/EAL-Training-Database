@@ -103,7 +103,7 @@ $opertor_list = $mysqli->query(
                 <th>Certification</th>
                 <th>EAL Staff</th>
                 <th>Senior Staff</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
                     <th>User</th>
                 <?php endif; ?>
             </tr>
@@ -126,8 +126,8 @@ $opertor_list = $mysqli->query(
                 echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
                 echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
                 echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";
-                // Conditionally display "User" column
-                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {
+                // Conditionally display "User" column only for Role 1
+                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
                     echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
                 }
                 echo "</tr>";

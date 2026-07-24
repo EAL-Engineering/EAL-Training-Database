@@ -15,10 +15,9 @@
 require_once "config.php";
 require_once "auth.php";
 
-
 /**
- * Check if the user is logged in and authorized to edit personnel details.
- * Redirects unauthorized users to the login page.
+ * Check if the user is logged in and authorized to edit/delete personnel details.
+ * Strictly enforces Role 1. Redirects unauthorized users to the login page.
  */
 checkLogin(1, $_SERVER['REQUEST_URI']);
 
@@ -29,9 +28,9 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
  */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Handle deletion request — only role 1 or 2 may actually delete
+// Handle deletion request — strictly Role 1
 if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
-    if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] > 2) {
+    if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != 1) {
         header("Location: index.php");
         exit();
     }
@@ -118,7 +117,7 @@ $result = $mysqli->query(
         <tr>
             <th>Full Name</th>
             <th>Email</th>
-            <?php if ($_SESSION['role_id'] <= 2) : ?>
+            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
             <th>Delete</th>
             <?php endif; ?>
         </tr>
@@ -133,7 +132,7 @@ $result = $mysqli->query(
                 echo '<a href="mailto:' . $operatorEmail . '">' . $operatorEmail . '</a>';
                 ?>
             </td>
-            <?php if ($_SESSION['role_id'] <= 2) : ?>
+            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
             <td>
                 <?php
                 $operatorId   = $res['id'];

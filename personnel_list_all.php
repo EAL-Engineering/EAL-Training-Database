@@ -100,7 +100,7 @@ $opertor_list = $mysqli->query(
                 <th>Certification</th>
                 <th>EAL Staff</th>
                 <th>Senior Staff</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
                     <th>User</th>
                 <?php endif; ?>
             </tr>
@@ -119,13 +119,13 @@ $opertor_list = $mysqli->query(
                 $rowId = "email-" . $rowCounter++; // Generate a unique ID
                 echo "<tr>";
                 echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
-                echo "<td>" . htmlspecialchars($res['OperatorStatus']) . "</td>\n";
+                echo "<td>" . htmlspecialchars($res['Status']) . "</td>\n";
                 echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
                 echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
                 echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
                 echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";
-                // Conditionally display "User" column
-                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) {
+                // Conditionally display "User" column only for Role 1
+                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
                     echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
                 }
                 echo "</tr>";
