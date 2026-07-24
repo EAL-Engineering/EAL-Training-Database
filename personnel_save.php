@@ -29,9 +29,11 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
 
 // Check if the form is submitted via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Verify CSRF token
+    // FIX (Issue #4): CSRF Token Validation
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
-        die("Invalid CSRF token. <a href='index.php'>Go to Main Page</a>");
+        error_log("CSRF token validation failed in personnel_save.php");
+        http_response_code(403);
+        die("Invalid security token. Please refresh the page and try again.");
     }
     /**
      * Sanitize and validate inputs from the form submission.
