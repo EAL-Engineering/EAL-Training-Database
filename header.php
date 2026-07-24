@@ -32,56 +32,58 @@ $isLoggedIn = isset($_SESSION['user_id']);
         </a>
     </div>
     <div class="header-info" id="header-info-container">
-        <?php if ($isLoggedIn) : ?>
-            <!-- Display user information and session countdown for logged-in users -->
-            <span id="user-display">Logged in as: <?php echo htmlspecialchars($_SESSION['fname'] ?? 'User'); ?></span>
+    <?php if ($isLoggedIn) : ?>
+        <!-- Display user information and session countdown for logged-in users -->
+        <span id="user-display">
+            Logged in as: <?php echo htmlspecialchars($_SESSION['fname'] ?? 'User'); ?>
             <span class="divider">|</span>
-            <span id="session-status-text">Session expires in: <span id="countdown"></span></span>
-            <a href="logout.php" id="session-button" class="logout-button">Logout</a>
+        </span>
+        <span id="session-status-text">Session expires in: <span id="countdown"></span></span>
+        <a href="logout.php" id="session-button" class="logout-button">Logout</a>
 
-            <script>
-            (function() {
-                let timeRemaining = <?php echo (int)$secondsRemaining; ?>;
-                const countdownElem = document.getElementById('countdown');
-                const sessionBtn = document.getElementById('session-button');
-                const statusText = document.getElementById('session-status-text');
-                const userDisplay = document.getElementById('user-display');
+        <script>
+        (function() {
+            let timeRemaining = <?php echo (int)$secondsRemaining; ?>;
+            const countdownElem = document.getElementById('countdown');
+            const sessionBtn = document.getElementById('session-button');
+            const statusText = document.getElementById('session-status-text');
+            const userDisplay = document.getElementById('user-display');
 
-                function updateTimer() {
-                    if (timeRemaining <= 0) {
-                        if (countdownElem) countdownElem.textContent = "00:00:00";
-                        if (statusText) statusText.textContent = "Session expired";
-                        if (userDisplay) userDisplay.style.display = "none";
-                        if (sessionBtn) {
-                            sessionBtn.textContent = "Login";
-                            sessionBtn.href = "login.php?return=" + encodeURIComponent(window.location.pathname);
-                        }
-                        return;
+            function updateTimer() {
+                if (timeRemaining <= 0) {
+                    if (countdownElem) countdownElem.textContent = "00:00:00";
+                    if (statusText) statusText.textContent = "Session expired";
+                    if (userDisplay) userDisplay.style.display = "none"; // Hides username AND pipe together
+                    if (sessionBtn) {
+                        sessionBtn.textContent = "Login";
+                        sessionBtn.href = "login.php?return=" + encodeURIComponent(window.location.pathname);
                     }
-
-                    let hours = Math.floor(timeRemaining / 3600);
-                    let minutes = Math.floor((timeRemaining % 3600) / 60);
-                    let seconds = timeRemaining % 60;
-
-                    let formatted = 
-                        String(hours).padStart(2, '0') + ':' +
-                        String(minutes).padStart(2, '0') + ':' +
-                        String(seconds).padStart(2, '0');
-
-                    if (countdownElem) countdownElem.textContent = formatted;
-                    timeRemaining--;
+                    return;
                 }
 
-                updateTimer();
-                setInterval(updateTimer, 1000);
-            })();
-            </script>
-        <?php else: ?>
-            <!-- Display welcome message and login button for guests -->
-            <span>Session expired</span>
-            <?php if ($currentScript !== 'login.php') : ?>
-                <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="logout-button">Login</a>
-            <?php endif; ?>
+                let hours = Math.floor(timeRemaining / 3600);
+                let minutes = Math.floor((timeRemaining % 3600) / 60);
+                let seconds = timeRemaining % 60;
+
+                let formatted = 
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+
+                if (countdownElem) countdownElem.textContent = formatted;
+                timeRemaining--;
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        })();
+        </script>
+    <?php else: ?>
+        <!-- Display welcome message and login button for guests -->
+        <span>Session expired</span>
+        <?php if ($currentScript !== 'login.php') : ?>
+            <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="logout-button">Login</a>
         <?php endif; ?>
+    <?php endif; ?>
     </div>
 </div>
