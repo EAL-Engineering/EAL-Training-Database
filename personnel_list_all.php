@@ -113,9 +113,9 @@ $opertor_list = $mysqli->query(
              */
             $rowCounter = 0; // Unique ID for each row's email
             while ($res = mysqli_fetch_array($opertor_list)) {
-                $email = explode('@', $res['OperatorEmail']);
+                $email = explode('@', $res['OperatorEmail'] ?? '');
                 $user = $email[0];
-                $domain = $email[1];
+                $domain = $email[1] ?? '';
                 $rowId = "email-" . $rowCounter++; // Generate a unique ID
                 echo "<tr>";
                 echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
