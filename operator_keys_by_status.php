@@ -18,7 +18,7 @@ session_start();
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+$timeUntilSessionExpires = isset($_SESSION['user_id']) ? getTimeUntilSessionExpires() : 0;
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
