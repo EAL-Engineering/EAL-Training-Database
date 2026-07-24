@@ -54,13 +54,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $seq_nmbr = isset($_POST['seq_nmbr']) ? intval($_POST['seq_nmbr']) : null;
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
     $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
-    $email = isset($_POST['email']) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : '';
-    $altemail = isset($_POST['altemail']) ? filter_var(trim($_POST['altemail']), FILTER_SANITIZE_EMAIL) : '';
+    $email    = isset($_POST['email'])    ? trim($_POST['email'])    : '';
+    $altemail = isset($_POST['altemail']) ? trim($_POST['altemail']) : '';
     $phones = isset($_POST['phones']) ? trim($_POST['phones']) : '';
     $status = isset($_POST['status']) ? trim($_POST['status']) : '';
     
     $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
     $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+
+    // Validate raw input directly
+    if (!$seq_nmbr || empty($name) || empty($fname) || empty($email) || empty($status)) {
+        die("Missing required fields. <a href='index.php'>Go to Main Page</a>");
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        die("Invalid email address. <a href='index.php'>Go to Main Page</a>");
+    }
+
+    if (!empty($altemail) && !filter_var($altemail, FILTER_VALIDATE_EMAIL)) {
+        die("Invalid alternate email address. <a href='index.php'>Go to Main Page</a>");
+    }
 
     // Senior staff is a subset of EAL staff
     if ($is_senior_staff) {
