@@ -1,12 +1,11 @@
 <?php
 /**
- * Trainer Certification Management
+ * Trainer Certification & Role Management
  *
- * This script allows authorized users to edit certifications for a specific trainer.
- * Users can view and remove current certifications or add new ones from the list
- * of available certifications.
+ * This script allows authorized users to edit certifications and role access levels
+ * for a specific trainer.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -15,54 +14,87 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start session to access success/error messages
 session_start();
 
-/**
- * Include the database connection file to connect to the database.
- */
 require_once "config.php";
 require_once "auth.php"; 
 
-// Capture the current page URL
-$currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
+$currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
-/**
- * Check if the user is logged in and has the required access level (1 or 2).
- * Redirects unauthorized users to the login page.
- */
+// Require login (Role >= 1 to view)
 checkLogin(1, $_SERVER['REQUEST_URI']);
 
-// Get the session expiration time
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-/**
- * Check if 'id' is provided in the URL.
- * If not, terminate the script with an error message.
- */
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid request. No trainer ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
-$trainer_id = intval($_GET['id']); // Sanitize the trainer ID
+$trainer_id = intval($_GET['id']);
 
 /**
- * Verify if the trainer ID matches a pre-existing optbl_ptr in the trainers table.
+ * Handle POST request to update trainer role_id (Issue #1)
  */
-$query = "SELECT COUNT(*) FROM trainers WHERE optbl_ptr = ?";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_role') {
+    // Enforce Administrator access (Role 2) for role modification
+    if (getUserRole() < 2) {
+        $_SESSION['message'] = [
+            'type' => 'error',
+            'text' => 'Unauthorized: Only Administrators can modify user access roles.'
+        ];
+        header("Location: trainer_edit.php?id=$trainer_id");
+        exit();
+    }
+
+    // CSRF Validation
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        $_SESSION['message'] = [
+            'type' => 'error',
+            'text' => 'Invalid security token. Please try again.'
+        ];
+        header("Location: trainer_edit.php?id=$trainer_id");
+        exit();
+    }
+
+    $new_role_id = isset($_POST['role_id']) ? intval($_POST['role_id']) : 0;
+
+    $update_query = "UPDATE trainers SET role_id = ? WHERE optbl_ptr = ?";
+    $stmt = $mysqli->prepare($update_query);
+    if ($stmt) {
+        $stmt->bind_param("ii", $new_role_id, $trainer_id);
+        if ($stmt->execute()) {
+            $_SESSION['message'] = [
+                'type' => 'success',
+                'text' => 'Trainer access role updated successfully.'
+            ];
+        } else {
+            $_SESSION['message'] = [
+                'type' => 'error',
+                'text' => 'Database error: Unable to update role.'
+            ];
+        }
+        $stmt->close();
+    }
+    header("Location: trainer_edit.php?id=$trainer_id");
+    exit();
+}
+
+/**
+ * Verify trainer existence and fetch role_id
+ */
+$query = "SELECT role_id FROM trainers WHERE optbl_ptr = ?";
 $stmt = $mysqli->prepare($query);
 if (!$stmt) {
     die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
 }
 $stmt->bind_param("i", $trainer_id);
 $stmt->execute();
-$stmt->bind_result($count);
-$stmt->fetch();
-$stmt->close();
-
-if ($count == 0) {
+$stmt->bind_result($current_role_id);
+if (!$stmt->fetch()) {
+    $stmt->close();
     die("Invalid request. Trainer ID does not exist. <a href='index.php'>Go to Main Page</a>");
 }
+$stmt->close();
 
 /**
  * Fetch the trainer's name using their ID.
@@ -159,17 +191,11 @@ if (isset($_SESSION['message'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Trainer Certifications</title>
+    <title>Edit Trainer: <?php echo htmlspecialchars($trainer_name); ?></title>
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="common.css">
     <script src="common.js" defer></script>
-    <script>
-        // Pass the session expiration time to the JavaScript function
-        document.addEventListener('DOMContentLoaded', () => {
-            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
-        });
-    </script>
 </head>
 <body>
     <?php require 'header.php'; ?>
@@ -178,10 +204,30 @@ if (isset($_SESSION['message'])) {
             <a href="trainer_list.php">Back to Trainer List</a>
             <a href="index.php">Back to Main Page</a>
         </div>
-        <h1>Edit Certifications for Trainer: <?php echo htmlspecialchars($trainer_name); ?></h1>
+        <h1>Edit Trainer: <?php echo htmlspecialchars($trainer_name); ?></h1>
 
         <!-- Display success or error message -->
         <?php echo $message; ?>
+
+        <!-- Role Management Section (Issue #1) -->
+        <h2>Access Role</h2>
+        <form method="post" action="trainer_edit.php?id=<?php echo htmlspecialchars($trainer_id); ?>" style="margin-bottom: 2em;">
+            <input type="hidden" name="action" value="update_role">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+            
+            <label for="role_id">Role Level:</label>
+            <select name="role_id" id="role_id" <?php echo (getUserRole() < 2) ? 'disabled' : ''; ?>>
+                <option value="0" <?php echo ($current_role_id === 0 || $current_role_id === null) ? 'selected' : ''; ?>>0 - Unassigned / No Access</option>
+                <option value="1" <?php echo ($current_role_id === 1) ? 'selected' : ''; ?>>1 - Standard Trainer</option>
+                <option value="2" <?php echo ($current_role_id === 2) ? 'selected' : ''; ?>>2 - Administrator</option>
+            </select>
+
+            <?php if (getUserRole() >= 2): ?>
+                <button type="submit">Update Role</button>
+            <?php else: ?>
+                <small style="color: gray;">(Administrator privilege required to change roles)</small>
+            <?php endif; ?>
+        </form>
 
         <!-- Current Certifications -->
         <h2>Current Certifications</h2>
