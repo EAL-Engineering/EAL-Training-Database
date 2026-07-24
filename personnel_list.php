@@ -51,19 +51,22 @@ $opertor_list = $mysqli->query(
         o.seq_nmbr as id,
         o.is_eal_staff AS IsEalStaff,
         o.is_senior_staff AS IsSeniorStaff,
-        c.certification AS HighestCertification
+        COALESCE(c.certification, 'None') AS HighestCertification
     FROM operators o
-    JOIN optraining ot ON o.seq_nmbr = ot.operator
-    JOIN certifications c ON ot.certification = c.seq_nmbr
+    LEFT JOIN optraining ot ON o.seq_nmbr = ot.operator
+    LEFT JOIN certifications c ON ot.certification = c.seq_nmbr
     WHERE o.status = 'Active'
-    AND c.seq_nmbr = (
-        SELECT MAX(inner_c.seq_nmbr)
-        FROM optraining inner_ot
-        JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr
-        WHERE inner_ot.operator = o.seq_nmbr
-        AND inner_c.seq_nmbr <= 3
+    AND (
+        c.seq_nmbr = (
+            SELECT MAX(inner_c.seq_nmbr)
+            FROM optraining inner_ot
+            JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr
+            WHERE inner_ot.operator = o.seq_nmbr
+            AND inner_c.seq_nmbr <= 3
+        )
+        OR c.seq_nmbr IS NULL
     )
-    ORDER BY o.name
+    ORDER BY o.name;
     "
 );
 ?>

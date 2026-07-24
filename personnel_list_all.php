@@ -40,24 +40,30 @@ $opertor_list = $mysqli->query(
     "
     SELECT 
         o.name AS OperatorName, 
-        o.status AS OperatorStatus, 
         o.email AS OperatorEmail, 
+        o.seq_nmbr as id,
+        o.status AS Status,
         o.is_eal_staff AS IsEalStaff,
         o.is_senior_staff AS IsSeniorStaff,
-        c.certification AS HighestCertification,
-        o.seq_nmbr as id
+        COALESCE(c.certification, 'None') AS HighestCertification
     FROM operators o
-    JOIN optraining ot ON o.seq_nmbr = ot.operator
-    JOIN certifications c ON ot.certification = c.seq_nmbr
-    WHERE o.status IS NOT NULL
-    AND c.seq_nmbr = (
-        SELECT MAX(inner_c.seq_nmbr)
-        FROM optraining inner_ot
-        JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr
-        WHERE inner_ot.operator = o.seq_nmbr
-        AND inner_c.seq_nmbr <= 3
+    LEFT JOIN optraining ot ON o.seq_nmbr = ot.operator
+    LEFT JOIN certifications c ON ot.certification = c.seq_nmbr
+    WHERE (
+        c.seq_nmbr = (
+            SELECT MAX(inner_c.seq_nmbr)
+            FROM optraining inner_ot
+            JOIN certifications inner_c ON inner_ot.certification = inner_c.seq_nmbr
+            WHERE inner_ot.operator = o.seq_nmbr
+            AND inner_c.seq_nmbr <= 3
+        )
+        OR NOT EXISTS (
+            SELECT 1 
+            FROM optraining inner_ot 
+            WHERE inner_ot.operator = o.seq_nmbr
+        )
     )
-    ORDER BY o.name
+    ORDER BY o.name;
     "
 );
 ?>
