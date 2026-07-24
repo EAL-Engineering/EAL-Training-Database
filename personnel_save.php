@@ -52,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $seq_nmbr = isset($_POST['seq_nmbr']) ? intval($_POST['seq_nmbr']) : null;
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
     $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
+    // Safely enforce the 64-character schema limit on $name
+    $name = mb_substr($name, 0, 64);
     $email    = isset($_POST['email'])    ? trim($_POST['email'])    : '';
     $altemail = isset($_POST['altemail']) ? trim($_POST['altemail']) : '';
     $phones = isset($_POST['phones']) ? trim($_POST['phones']) : '';

@@ -73,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      * @var string $entered Timestamp of when the personnel was added
      */
     $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
+    // Truncate $name to 64 chars to match DB schema limits
+    $name  = mb_substr($fname, 0, 64);
     $name = isset($_POST['fname']) ? trim($_POST['fname']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $altemail = isset($_POST['altemail']) ? trim($_POST['altemail']) : '';
@@ -222,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post" action="personnel_add.php">
             <div class="form-group">
                 <label for="fname">Full Name:</label>
-                <input type="text" name="fname" id="fname" required>
+                <input type="text" name="fname" id="fname" maxlength="255" required>
             </div>
             <div class="form-group">
                 <label for="email">Email Address:</label>
