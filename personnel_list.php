@@ -15,9 +15,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start the session at the beginning of the page
-session_start();
-
 /**
  * Capture the current page URL for safe use in GET parameters.
  * 

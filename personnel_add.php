@@ -14,9 +14,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start the session
-session_start();
-
 /**
  * Include the database connection file
  */

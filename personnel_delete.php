@@ -11,9 +11,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start the session
-session_start();
-
 // Include configuration and helper files
 require_once "config.php";
 require_once "auth.php";

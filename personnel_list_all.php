@@ -19,9 +19,6 @@
 require_once "config.php";
 require_once "auth.php";
 
-// Start the session
-session_start();
-
 /**
  * Get the remaining time until the session expires.
  * 

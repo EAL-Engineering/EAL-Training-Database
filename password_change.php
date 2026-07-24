@@ -13,8 +13,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-session_start();
-
 require_once "auth.php";
 require_once "config.php";
 

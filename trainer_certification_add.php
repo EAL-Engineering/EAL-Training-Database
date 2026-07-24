@@ -15,8 +15,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-session_start();
-
 // Include the database connection file
 require_once "config.php";
 require_once "auth.php";

@@ -15,8 +15,9 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start the session at the beginning of the page
-session_start();
+// Include the database connection file
+require_once "config.php";
+require_once "auth.php";
 
 /**
  * Capture the current page URL to return the user to this page if redirected.
@@ -24,10 +25,6 @@ session_start();
  * @var string $currentUrl The encoded current page URL.
  */
 $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
-
-// Include the database connection file
-require_once "config.php";
-require_once "auth.php";
 
 /**
  * Get the time remaining until the user's session expires.

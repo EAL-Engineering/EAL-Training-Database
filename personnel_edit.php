@@ -14,9 +14,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start session to access success/error messages
-session_start();
-
 /**
  * Database connection and configuration.
  * Includes the `config.php` file to establish a connection with the database.
