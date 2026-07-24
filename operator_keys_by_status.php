@@ -74,10 +74,10 @@ if (!empty($params)) {
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.dataTables.css">
-    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js" integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.dataTables.css" integrity="sha384-bei2bpb7orBDGkDdrxxnvqdYpRnpXwKe5JxL3It/9i0qLCepqOWVYsKn0NSb47um" crossorigin="anonymous">
+    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js" integrity="sha384-/T8n5YuWFPR9FBZ0KGlsnRvNM5QnSRKP+mxyfECfEyTneU3QJBdNnV5q4jgCFWxH" crossorigin="anonymous"></script>
     <script src="common.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
