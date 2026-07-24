@@ -2,9 +2,9 @@
 /**
  * Password Change Script
  *
- * This script allows authenticated users to change their password.
+ * Allows any authenticated user to change their password.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -13,53 +13,73 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Start the session
 session_start();
 
-require "auth.php";
-require "config.php";
+require_once "auth.php";
+require_once "config.php";
 
-// Check if the user is logged in
-checkLogin(1, $_SERVER['REQUEST_URI']);
+// FIX (Issue #15): Require role >= 0 so any logged-in user can change their password
+checkLogin(0, $_SERVER['REQUEST_URI']);
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
+$error_message = '';
+$success_message = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verify CSRF token
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
-        die("Invalid CSRF token.");
-    }
-    $current_password = $_POST['current_password'];
-    $new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    // Fetch current password hash
-    $query = "SELECT password_hash FROM trainers WHERE seq_nmbr = ?";
-    $stmt = $mysqli->prepare($query);
-    $stmt->bind_param("i", $_SESSION['user_id']);
-    $stmt->execute();
-    $stmt->bind_result($password_hash);
-
-    if ($stmt->fetch() && password_verify($current_password, $password_hash)) {
-        if ($new_password === $confirm_password) {
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-
-            $update_query = "UPDATE trainers SET password_hash = ? WHERE seq_nmbr = ?";
-            $update_stmt = $mysqli->prepare($update_query);
-            $update_stmt->bind_param("si", $hashed_password, $_SESSION['user_id']);
-            $update_stmt->execute();
-
-            echo "Password successfully changed.";
-        } else {
-            echo "New passwords do not match.";
-        }
+        $error_message = "Invalid security token. Please refresh the page and try again.";
     } else {
-        echo "Current password is incorrect.";
+        $current_password = $_POST['current_password'] ?? '';
+        $new_password = $_POST['new_password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
+
+        if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
+            $error_message = "All password fields are required.";
+        } elseif ($new_password !== $confirm_password) {
+            $error_message = "New passwords do not match.";
+        } else {
+            // Fetch current password hash for the logged-in user
+            $query = "SELECT password_hash FROM trainers WHERE seq_nmbr = ?";
+            $stmt = $mysqli->prepare($query);
+            if ($stmt) {
+                $stmt->bind_param("i", $_SESSION['user_id']);
+                $stmt->execute();
+                $stmt->bind_result($password_hash);
+
+                if ($stmt->fetch()) {
+                    $stmt->close();
+
+                    if (password_verify($current_password, $password_hash)) {
+                        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+                        $update_query = "UPDATE trainers SET password_hash = ? WHERE seq_nmbr = ?";
+                        $update_stmt = $mysqli->prepare($update_query);
+                        if ($update_stmt) {
+                            $update_stmt->bind_param("si", $hashed_password, $_SESSION['user_id']);
+                            if ($update_stmt->execute()) {
+                                $success_message = "Password successfully changed.";
+                            } else {
+                                $error_message = "Database error updating password.";
+                            }
+                            $update_stmt->close();
+                        } else {
+                            $error_message = "Database error preparing update statement.";
+                        }
+                    } else {
+                        $error_message = "Current password is incorrect.";
+                    }
+                } else {
+                    $stmt->close();
+                    $error_message = "User account not found.";
+                }
+            } else {
+                $error_message = "Database error verifying current password.";
+            }
+        }
     }
-    $stmt->close();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,16 +89,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="common.js" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize the countdown with the session expiration time from PHP
-            setCountdown(<?php echo $timeUntilSessionExpires; ?>);
-        });
-    </script>
 </head>
 <body>
     <?php require 'header.php'; ?>
     <h1>Change Password</h1>
+
+    <?php if (!empty($error_message)) : ?>
+        <p style="color: red; font-weight: bold;"><?php echo htmlspecialchars($error_message); ?></p>
+    <?php endif; ?>
+
+    <?php if (!empty($success_message)) : ?>
+        <p style="color: green; font-weight: bold;"><?php echo htmlspecialchars($success_message); ?></p>
+    <?php endif; ?>
+
     <form method="post" class="pw_change">
         <label for="current_password">Current Password:</label>
         <input type="password" id="current_password" name="current_password" required><br>
