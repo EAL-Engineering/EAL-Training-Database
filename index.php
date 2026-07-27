@@ -71,6 +71,8 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
             <a href="personnel_add.php">personnel_add.php</a></p>
         <p>New trainers can be added at:
             <a href="trainer_add.php">trainer_add.php</a></p>
+        <p>Record annual radiation safety training at:
+            <a href="radiation_training.php">radiation_training.php</a></p>
         <p>Login at:
             <a href="login.php">login.php</a></p>
         <p>Logout at:
