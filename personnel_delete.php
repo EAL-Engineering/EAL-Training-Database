@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Delete a personnel entry from all related tables
- * 
+ *
  * PHP version 8.0+
  *
  * @category Certification

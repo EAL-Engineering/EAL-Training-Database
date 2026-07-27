@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Password Recovery Script
  *
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Invalid CSRF token. <a href='index.php'>Go to Main Page</a>");
     }
 
-    $email = trim($_POST['email'] ?? ''); 
+    $email = trim($_POST['email'] ?? '');
 
     // Query to find the operator and ensure linkage to a trainer
     $query = "
@@ -59,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $update_query = "UPDATE trainers SET reset_token = ?, reset_expiration = ? WHERE seq_nmbr = ?";
         if ($update_stmt = $mysqli->prepare($update_query)) {
             $update_stmt->bind_param("ssi", $reset_token, $reset_expiration, $trainer_id);
-            
+
             if ($update_stmt->execute()) {
                 // Prepare reset link and email content
                 $reset_link = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token=" . urlencode($reset_token);

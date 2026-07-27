@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Add Trainer Certification
  *
- * This script processes the addition of a certification for a trainer. 
+ * This script processes the addition of a certification for a trainer.
  * It validates the input data, performs the database insertion, and stores
  * success or error messages in the session.
  *

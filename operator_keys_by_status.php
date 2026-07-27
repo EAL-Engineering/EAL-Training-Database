@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Operator Keys Grouped by Status
  *
@@ -128,13 +129,13 @@ if (!empty($params)) {
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php while ($row = $result->fetch_assoc()) : ?>
             <tr>
                 <td><?php echo htmlspecialchars($row['key_type']); ?></td>
                 <td>
-                    <?php if (strtolower($row['key_type']) === 'badge'): ?>
+                    <?php if (strtolower($row['key_type']) === 'badge') : ?>
                         <?php echo htmlspecialchars($row['serial_number']); ?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
                             <?php echo htmlspecialchars($row['serial_number']); ?>
                         </a>
@@ -155,7 +156,7 @@ if (!empty($params)) {
                 <td><?php echo htmlspecialchars($row['entered']); ?></td>
                 <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                 <td>
-                    <?php if ($row['status'] === 'Active'): ?>
+                    <?php if ($row['status'] === 'Active') : ?>
                         <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Return</a>
                         <a href="operator_key_lost.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Lost</a>
                     <?php endif; ?>

@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Edit Operator Details Page
- * 
- * This script retrieves and displays the details of an operator for editing. 
+ *
+ * This script retrieves and displays the details of an operator for editing.
  * It ensures proper authorization and handles operator data securely.
- * 
+ *
  * PHP version 8.0+
  *
  * @category Certification
@@ -237,7 +238,7 @@ if ($keys_table_exists) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($operator_keys as $key): ?>
+                        <?php foreach ($operator_keys as $key) : ?>
                         <tr>
                             <td><?php echo htmlspecialchars($key['key_type']); ?></td>
                             <td><?php echo htmlspecialchars($key['serial_number']); ?></td>
@@ -251,7 +252,7 @@ if ($keys_table_exists) {
                             <td><?php echo htmlspecialchars($key['notes'] ?? ''); ?></td>
                             <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                             <td>
-                                <?php if ($key['status'] === 'Active'): ?>
+                                <?php if ($key['status'] === 'Active') : ?>
                                     <a href="operator_key_return.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Return</a>
                                     <a href="operator_key_lost.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Lost</a>
                                 <?php endif; ?>
@@ -261,7 +262,7 @@ if ($keys_table_exists) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            <?php else: ?>
+            <?php else : ?>
                 <p>No keys assigned to this operator.</p>
             <?php endif; ?>
 
@@ -276,11 +277,11 @@ if ($keys_table_exists) {
             <h2>Certifications</h2>
             <?php if (!empty($certifications)) : ?>
                 <ul>
-                    <?php foreach ($certifications as $cert): ?>
+                    <?php foreach ($certifications as $cert) : ?>
                         <li><?php echo htmlspecialchars($cert); ?></li>
                     <?php endforeach; ?>
                 </ul>
-            <?php else: ?>
+            <?php else : ?>
                 <p>No certifications found for this operator.</p>
             <?php endif; ?>
         </div>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Key History
  *
@@ -90,7 +91,7 @@ $result = $stmt->get_result();
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php while ($row = $result->fetch_assoc()) : ?>
             <tr>
                 <td>
                     <span class="status-badge status-<?php echo strtolower($row['status']); ?>">

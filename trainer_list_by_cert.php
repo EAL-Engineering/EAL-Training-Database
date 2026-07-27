@@ -1,9 +1,10 @@
 <?php
+
 /**
  * Trainer List by Certification Page
  *
  * Fetches and displays trainers grouped by their certifications from the database.
- * 
+ *
  * PHP version 5.4+
  *
  * @category Certification

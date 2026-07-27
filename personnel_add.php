@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Add New Personnel Script
  *
@@ -66,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $home = trim($_POST['home'] ?? '');
         $comments = trim($_POST['comments'] ?? '');
         $status = !empty($_POST['status']) ? trim($_POST['status']) : 'Active';
-        
+
         $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
         $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
 

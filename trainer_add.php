@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Add New Trainer
  *
@@ -16,7 +17,7 @@
  */
 
 require_once "config.php";
-require_once "auth.php"; 
+require_once "auth.php";
 
 /**
  * Check if the user is logged in and authorized to edit personnel details.
@@ -175,7 +176,7 @@ $allCertifications = $mysqli->query(
         <label for="operator_id">Select Operator:</label>
         <select name="operator_id" id="operator_id" required>
             <option value="">-- Select an Operator --</option>
-            <?php while ($operator = $eligibleOperators->fetch_assoc()): ?>
+            <?php while ($operator = $eligibleOperators->fetch_assoc()) : ?>
                 <option value="<?php echo $operator['seq_nmbr']; ?>">
                     <?php echo htmlspecialchars($operator['fname'] . " (" . $operator['email'] . ")"); ?>
                 </option>
@@ -186,7 +187,7 @@ $allCertifications = $mysqli->query(
         <label for="cert_id">Initial Certification to Teach:</label>
         <select name="cert_id" id="cert_id" required>
             <option value="">-- Select Initial Certification --</option>
-            <?php while ($cert = $allCertifications->fetch_assoc()): ?>
+            <?php while ($cert = $allCertifications->fetch_assoc()) : ?>
                 <option value="<?php echo $cert['seq_nmbr']; ?>">
                     <?php echo htmlspecialchars($cert['certification']); ?>
                 </option>

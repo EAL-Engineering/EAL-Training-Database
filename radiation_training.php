@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Register Radiation Safety Training
  *
@@ -24,7 +25,7 @@ if ($mysqli->connect_error) {
 
 /**
  * Encoded URL string of the current page for safe use in GET parameters.
- * 
+ *
  * @var string $currentUrl
  */
 $currentUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
@@ -44,7 +45,7 @@ if (!$authorizedTrainer) {
 
 /**
  * Message to be displayed after form submission.
- * 
+ *
  * @var string $message
  */
 $message = '';
@@ -78,8 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            $message = $successCount > 0 
-                ? "Successfully registered $successCount operators." 
+            $message = $successCount > 0
+                ? "Successfully registered $successCount operators."
                 : "No operators were registered.";
         } else {
             $message = "Please select at least one operator and enter a valid date.";
@@ -110,7 +111,7 @@ while ($row = $operatorsResult->fetch_assoc()) {
  *
  * @param int $trainerId       ID of the trainer (trainers.seq_nmbr)
  * @param int $certificationId Certification ID
- * 
+ *
  * @return bool True if the trainer is authorized, false otherwise.
  */
 function checkCertification($trainerId, $certificationId)
@@ -177,7 +178,7 @@ function checkCertification($trainerId, $certificationId)
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($operators as $operator): ?>
+                        <?php foreach ($operators as $operator) : ?>
                             <tr>
                                 <td>
                                     <input 

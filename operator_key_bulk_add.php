@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Bulk Add Operator Keys
  *
@@ -214,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($
 
         // Operator data for JS filtering
         const operatorsData = [
-            <?php foreach ($operators as $op): ?>
+            <?php foreach ($operators as $op) : ?>
             { id: "<?php echo htmlspecialchars($op['seq_nmbr']); ?>", name: "<?php echo htmlspecialchars($op['fname']); ?>" },
             <?php endforeach; ?>
         ];
@@ -360,7 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($
         <?php if (!empty($errors)) : ?>
             <div class="alert alert-danger">
                 <ul style="margin: 0; padding-left: 20px;">
-                    <?php foreach ($errors as $err): ?>
+                    <?php foreach ($errors as $err) : ?>
                         <li><?php echo htmlspecialchars($err); ?></li>
                     <?php endforeach; ?>
                 </ul>
@@ -372,7 +373,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($
                 <label for="key_type">Key Type:</label>
                 <select name="key_type" id="key_type" required>
                     <option value="">-- Select Key Type --</option>
-                    <?php foreach ($key_type_options as $value => $label): ?>
+                    <?php foreach ($key_type_options as $value => $label) : ?>
                         <option value="<?php echo htmlspecialchars($value); ?>"
                             <?php echo (($_POST['key_type'] ?? '') === $value) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($label); ?>
@@ -395,21 +396,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($
                     </tr>
                 </thead>
                 <tbody id="key-rows">
-                    <?php for ($i = 0; $i < $display_rows; $i++): ?>
+                    <?php for ($i = 0; $i < $display_rows; $i++) : ?>
                     <tr>
                         <td>
                             <div class="searchable-select" data-index="<?php echo $i; ?>">
                                 <input type="text" class="searchable-input" placeholder="Type to search..."
                                     value="<?php
                                         $posted_op_id = $_POST['rows'][$i]['operator_id'] ?? null;
-                                        if ($posted_op_id !== null) {
-                                            foreach ($operators as $op) {
-                                                if (intval($op['seq_nmbr']) === intval($posted_op_id)) {
-                                                    echo htmlspecialchars($op['fname']);
-                                                    break;
-                                                }
+                                    if ($posted_op_id !== null) {
+                                        foreach ($operators as $op) {
+                                            if (intval($op['seq_nmbr']) === intval($posted_op_id)) {
+                                                echo htmlspecialchars($op['fname']);
+                                                break;
                                             }
                                         }
+                                    }
                                     ?>"
                                     autocomplete="off">
                                 <div class="searchable-dropdown"></div>

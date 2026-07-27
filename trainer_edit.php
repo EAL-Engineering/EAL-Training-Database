@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Trainer Certification & Role Management
  *
@@ -12,7 +13,7 @@
  */
 
 require_once "config.php";
-require_once "auth.php"; 
+require_once "auth.php";
 
 $currentUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
 
@@ -170,10 +171,10 @@ $message = '';
 if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
     $msgType = $_SESSION['message']['type'] ?? 'error';
     $msgText = $_SESSION['message']['text'] ?? '';
-    $message = '<p style="color: ' 
-    . ($msgType === 'success' ? 'green' : 'red') 
-    . ';">' 
-    . htmlspecialchars($msgText) 
+    $message = '<p style="color: '
+    . ($msgType === 'success' ? 'green' : 'red')
+    . ';">'
+    . htmlspecialchars($msgText)
     . '</p>';
     unset($_SESSION['message']);
 }
@@ -212,9 +213,9 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
                 <option value="2" <?php echo ($current_role_id === 2) ? 'selected' : ''; ?>>2 - Administrator</option>
             </select>
 
-            <?php if (getUserRole() >= 2): ?>
+            <?php if (getUserRole() >= 2) : ?>
                 <button type="submit">Update Role</button>
-            <?php else: ?>
+            <?php else : ?>
                 <small style="color: gray;">(Administrator privilege required to change roles)</small>
             <?php endif; ?>
         </form>
@@ -223,7 +224,7 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
         <?php if (!empty($current_certifications)) : ?>
             <div class="certifications-list">
                 <ul>
-                    <?php foreach ($current_certifications as $cert): ?>
+                    <?php foreach ($current_certifications as $cert) : ?>
                         <li>
                             <span><?php echo htmlspecialchars($cert['certification']); ?></span>
                             <div class="button-container">
@@ -238,7 +239,7 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
                     <?php endforeach; ?>
                 </ul>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <p>No certifications assigned to this trainer.</p>
         <?php endif; ?>
 
@@ -246,7 +247,7 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
         <?php if (!empty($available_certifications)) : ?>
             <div class="certifications-list">
                 <ul>
-                    <?php foreach ($available_certifications as $cert): ?>
+                    <?php foreach ($available_certifications as $cert) : ?>
                         <li>
                             <span><?php echo htmlspecialchars($cert['certification']); ?></span>
                             <div class="button-container">
@@ -261,7 +262,7 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
                     <?php endforeach; ?>
                 </ul>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <p>No available certifications to assign to this trainer.</p>
         <?php endif; ?>
     </div>

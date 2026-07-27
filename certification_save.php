@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Processes the addition of a certification to an operator in the database.
  *
@@ -28,12 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($raw_operator_id === null || !is_numeric($raw_operator_id)) {
         die("Error: Operator ID is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
-    
+
     $raw_cert_id = $_POST['cert_id'] ?? null;
     if ($raw_cert_id === null || !is_numeric($raw_cert_id)) {
         die("Error: Certification ID is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
-    
+
     $raw_completed_by = $_POST['completed_by'] ?? null;
     if ($raw_completed_by === null || !is_numeric($raw_completed_by)) {
         die("Error: Trainer ID (Completed By) is missing or invalid. <a href='index.php'>Go to Main Page</a>");
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $status = 'Active';
     $entered = date('Y-m-d H:i:s');
-    
+
     // Fetch expiration period
     $query = "SELECT exp_months FROM certifications WHERE seq_nmbr = ?";
     $stmt = $mysqli->prepare($query);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Authentication and authorization checks for the application.
  *
@@ -143,10 +144,11 @@ function isSafeRedirect($url)
 
 /**
  * Generates or retrieves a CSRF token for the current session.
- * 
+ *
  * @return string The CSRF token.
  */
-function getCSRFToken() {
+function getCSRFToken()
+{
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
@@ -172,11 +174,12 @@ function regenerateCSRFToken()
 
 /**
  * Validates the CSRF token provided in a POST request.
- * 
+ *
  * @param string|null $token The token from the form submission.
  * @return bool True if valid, false otherwise.
  */
-function verifyCSRFToken(?string $token) {
+function verifyCSRFToken(?string $token)
+{
     $sessionToken = $_SESSION['csrf_token'] ?? null;
     if ($sessionToken === null || $token === null) {
         return false;

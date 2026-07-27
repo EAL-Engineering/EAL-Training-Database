@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Return Operator Key
  *
@@ -158,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="pool_id">Return to pool:</label>
                 <select name="pool_id" id="pool_id" required>
                     <option value="">-- Select Pool --</option>
-                    <?php foreach ($pools as $pool): ?>
+                    <?php foreach ($pools as $pool) : ?>
                         <option value="<?php echo htmlspecialchars($pool['seq_nmbr']); ?>"
                             <?php echo ($default_pool_id && intval($pool['seq_nmbr']) === $default_pool_id) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($pool['fname']); ?>

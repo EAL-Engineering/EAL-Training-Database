@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Operator Keys by Type
  *
@@ -113,7 +114,9 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
         </div>
     </div>
 
-    <h1>Keys by Type<?php if ($selected_type !== '') echo ' — ' . htmlspecialchars($key_type_options[$selected_type]); ?></h1>
+    <h1>Keys by Type<?php if ($selected_type !== '') {
+        echo ' — ' . htmlspecialchars($key_type_options[$selected_type]);
+                    } ?></h1>
 
     <form method="get" action="operator_keys_by_type.php" class="filter-form" style="margin-bottom: 20px;">
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
@@ -121,7 +124,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 <label for="key_type">Key Type:</label>
                 <select name="key_type" id="key_type" onchange="this.form.submit();">
                     <option value="">-- Select Key Type --</option>
-                    <?php foreach ($key_type_options as $value => $label): ?>
+                    <?php foreach ($key_type_options as $value => $label) : ?>
                         <option value="<?php echo htmlspecialchars($value); ?>"
                             <?php echo ($selected_type === $value) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($label); ?>
@@ -135,7 +138,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
         </div>
     </form>
 
-    <?php if ($result !== null): ?>
+    <?php if ($result !== null) : ?>
     <table id="keys-by-type" class="display">
         <thead>
             <tr>
@@ -154,15 +157,15 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php while ($row = $result->fetch_assoc()) : ?>
             <tr>
                 <?php if ($selected_type === '') : ?>
                     <td><?php echo htmlspecialchars($row['key_type']); ?></td>
                 <?php endif; ?>
                 <td>
-                    <?php if (strtolower($row['key_type']) === 'badge'): ?>
+                    <?php if (strtolower($row['key_type']) === 'badge') : ?>
                         <?php echo htmlspecialchars($row['serial_number']); ?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
                             <?php echo htmlspecialchars($row['serial_number']); ?>
                         </a>
@@ -183,7 +186,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 <td><?php echo htmlspecialchars($row['entered']); ?></td>
                 <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                 <td>
-                    <?php if ($row['status'] === 'Active'): ?>
+                    <?php if ($row['status'] === 'Active') : ?>
                         <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Return</a>
                         <a href="operator_key_lost.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Lost</a>
                     <?php endif; ?>
@@ -202,13 +205,13 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 lengthMenu: [10, 15, 25, 50, 75, 100],
                 <?php if ($selected_type === '') : ?>
                 order: [[3, 'desc'], [2, 'asc']]
-                <?php else: ?>
+                <?php else : ?>
                 order: [[2, 'desc'], [1, 'asc']]
                 <?php endif; ?>
             });
         });
     </script>
-    <?php elseif ($selected_type !== ''): ?>
+    <?php elseif ($selected_type !== '') : ?>
         <p>Invalid key type selected.</p>
     <?php endif; ?>
 </body>

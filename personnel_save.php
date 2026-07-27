@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Save Personnel Data
- * 
+ *
  * This script handles saving personnel data to the database. It updates the
  * operators table with the provided information from a submitted form.
- * 
+ *
  * PHP version 8.0+
  *
  * @category Certification
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $altemail = trim($_POST['altemail'] ?? '');
     $phones   = trim($_POST['phones'] ?? '');
     $status   = trim($_POST['status'] ?? '');
-    
+
     $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
     $is_eal_staff    = isset($_POST['is_eal_staff']) ? 1 : 0;
 
@@ -67,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /**
      * Prepare the SQL statement to update the operator's information in the database.
-     * 
+     *
      * @var string $query SQL update query.
      */
     $query = "

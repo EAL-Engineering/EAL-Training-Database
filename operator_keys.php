@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Operator Keys List
  *
@@ -147,7 +148,7 @@ if ($operators_result) {
                     <label for="key_type">Key Type:</label>
                     <select name="key_type" id="key_type" onchange="this.form.submit();">
                         <option value="">All</option>
-                        <?php foreach ($key_types as $kt): ?>
+                        <?php foreach ($key_types as $kt) : ?>
                             <option value="<?php echo htmlspecialchars($kt); ?>" <?php echo (($key_type_filter) === $kt) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($kt); ?>
                             </option>
@@ -158,7 +159,7 @@ if ($operators_result) {
                     <label for="operator_id">Operator:</label>
                     <select name="operator_id" id="operator_id" onchange="this.form.submit();">
                         <option value="">All</option>
-                        <?php foreach ($operators as $op): ?>
+                        <?php foreach ($operators as $op) : ?>
                             <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>" <?php echo ($operator_id_filter !== null && intval($operator_id_filter) === intval($op['seq_nmbr'])) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($op['fname']); ?>
                             </option>
@@ -187,7 +188,7 @@ if ($operators_result) {
                 </tr>
             </thead>
             <tbody>
-                <?php while ($row = $result->fetch_assoc()): ?>
+                <?php while ($row = $result->fetch_assoc()) : ?>
                 <tr>
                     <td>
                         <a href="personnel_edit.php?id=<?php echo urlencode($row['operator_id']); ?>">
@@ -196,9 +197,9 @@ if ($operators_result) {
                     </td>
                     <td><?php echo htmlspecialchars($row['key_type']); ?></td>
                     <td>
-                        <?php if (strtolower($row['key_type']) === 'badge'): ?>
+                        <?php if (strtolower($row['key_type']) === 'badge') : ?>
                             <?php echo htmlspecialchars($row['serial_number']); ?>
-                        <?php else: ?>
+                        <?php else : ?>
                             <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
                                 <?php echo htmlspecialchars($row['serial_number']); ?>
                             </a>
@@ -214,7 +215,7 @@ if ($operators_result) {
                     <td><?php echo htmlspecialchars($row['entered']); ?></td>
                     <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                     <td>
-                        <?php if ($row['status'] === 'Active'): ?>
+                        <?php if ($row['status'] === 'Active') : ?>
                             <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys.php">Return</a>
                             <a href="operator_key_lost.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys.php">Lost</a>
                         <?php endif; ?>

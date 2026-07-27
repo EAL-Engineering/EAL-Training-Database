@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Password Reset Script
  *
@@ -12,6 +13,7 @@
  * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
+
 require_once "config.php";
 
 // Disable inline error display in production
@@ -63,14 +65,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-    
+
     // Store the hashed password in the database
     $update_query = "UPDATE trainers SET password_hash = ?, reset_token = NULL, reset_expiration = NULL WHERE seq_nmbr = ?";
     $update_stmt = $mysqli->prepare($update_query);
     if (!$update_stmt) {
         die("Database error: " . $mysqli->error);
     }
-    
+
     $update_stmt->bind_param("si", $hashed_password, $trainer_id);
     if ($update_stmt->execute()) {
         $update_stmt->close();
@@ -79,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $update_stmt->close();
         die("Error updating password.");
-    }    
+    }
 }
 ?>
 

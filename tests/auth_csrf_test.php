@@ -1,11 +1,13 @@
 <?php
+
 // Simple CLI tests for CSRF helpers in auth.php
 
 chdir(__DIR__ . '/..'); // make includes work when running from tests dir
 
 require_once 'auth.php';
 
-function assert_true($cond, $msg) {
+function assert_true($cond, $msg)
+{
     if (!$cond) {
         echo "FAIL: $msg\n";
         exit(2);
@@ -15,7 +17,9 @@ function assert_true($cond, $msg) {
 echo "Running CSRF helper tests...\n";
 
 // Ensure session is available
-if (session_status() === PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $t1 = getCSRFToken();
 assert_true(is_string($t1) && strlen($t1) >= 32, "getCSRFToken() must return a token string");
@@ -36,5 +40,3 @@ echo "- rotation validation OK\n";
 
 echo "ALL CSRF HELPER TESTS PASSED\n";
 exit(0);
-
-?>

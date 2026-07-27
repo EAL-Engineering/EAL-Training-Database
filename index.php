@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main entry point for the OUAL Training Management System.
  *

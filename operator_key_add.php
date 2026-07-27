@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Add Operator Key
  *
@@ -121,7 +122,7 @@ while ($row = $operators_result->fetch_assoc()) {
     <div class="form-container">
         <div class="back-button-container">
             <a href="operator_keys.php">To Keys List</a>
-            <?php if ($prefill_operator_id): ?>
+            <?php if ($prefill_operator_id) : ?>
                 <a href="personnel_edit.php?id=<?php echo urlencode($prefill_operator_id); ?>">Back to Operator</a>
             <?php endif; ?>
             <a href="index.php">To main page</a>
@@ -146,7 +147,7 @@ while ($row = $operators_result->fetch_assoc()) {
                 <label for="operator_id">Operator:</label>
                 <select name="operator_id" id="operator_id" required>
                     <option value="">-- Select Operator --</option>
-                    <?php foreach ($operators as $op): ?>
+                    <?php foreach ($operators as $op) : ?>
                         <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>"
                             <?php echo ($prefill_operator_id && intval($op['seq_nmbr']) === $prefill_operator_id) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($op['fname']); ?>
@@ -159,7 +160,7 @@ while ($row = $operators_result->fetch_assoc()) {
                 <label for="key_type">Key Type:</label>
                 <select name="key_type" id="key_type" required>
                     <option value="">-- Select Key Type --</option>
-                    <?php foreach ($key_type_options as $value => $label): ?>
+                    <?php foreach ($key_type_options as $value => $label) : ?>
                         <option value="<?php echo htmlspecialchars($value); ?>">
                             <?php echo htmlspecialchars($label); ?>
                         </option>

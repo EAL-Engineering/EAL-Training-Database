@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Page header for the Training Management System.
  *
@@ -78,7 +79,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
             setInterval(updateTimer, 1000);
         })();
         </script>
-    <?php else: ?>
+    <?php else : ?>
         <!-- Display welcome message and login button for guests -->
         <span>Session expired</span>
         <?php if ($currentScript !== 'login.php') : ?>

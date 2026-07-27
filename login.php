@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Login page for the OUAL Training Management System
  *

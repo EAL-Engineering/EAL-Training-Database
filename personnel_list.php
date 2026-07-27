@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Personnel List
- * 
+ *
  * This script displays a table of active personnel and their details, including their
  * name, email, staff status, and highest certification. The data is fetched from a
  * MySQL database and displayed using DataTables for enhanced interactivity.
- * 
+ *
  * PHP version 8.0+
  *
  * @category Certification
@@ -17,7 +18,7 @@
 
 /**
  * Capture the current page URL for safe use in GET parameters.
- * 
+ *
  * @var string $currentUrl Encoded URL string of the current page.
  */
 $currentUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
@@ -28,7 +29,7 @@ require_once "auth.php";
 
 /**
  * Get the remaining time until the session expires.
- * 
+ *
  * @return int Remaining session time in seconds.
  */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
@@ -37,7 +38,7 @@ $timeUntilSessionExpires = getTimeUntilSessionExpires();
  * Fetch the list of active operators and their highest certifications.
  * The query retrieves the operator's name, email, staff flags, and highest
  * certification, filtering certifications to a maximum seq_nmbr of 3.
- * 
+ *
  * @var mysqli_result $opertor_list Result set of the query.
  */
 $opertor_list = $mysqli->query(

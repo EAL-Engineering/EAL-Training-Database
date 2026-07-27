@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Remove Certification for Trainer
  *
@@ -81,13 +82,13 @@ try {
     if ($stmt->affected_rows > 0) {
         // Store success message in session
         $_SESSION['message'] = [
-            'type' => 'success', 
+            'type' => 'success',
             'text' => 'Certification removed successfully.'
         ];
     } else {
         // Store error message in session
         $_SESSION['message'] = [
-            'type' => 'error', 
+            'type' => 'error',
             'text' => 'Failed to remove certification.'
         ];
     }
@@ -96,7 +97,7 @@ try {
 } catch (Exception $e) {
     // Handle errors and store error message in session
     $_SESSION['message'] = [
-        'type' => 'error', 
+        'type' => 'error',
         'text' => $e->getMessage()
     ];
 }

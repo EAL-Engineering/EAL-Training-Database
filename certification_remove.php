@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Processes the removal or revocation of a certification record from optraining.
  *
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $mysqli->prepare($query);
     if ($stmt) {
         $stmt->bind_param("ii", $optraining_id, $operator_id);
-        
+
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
                 $_SESSION['message'] = [

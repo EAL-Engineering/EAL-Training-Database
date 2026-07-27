@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Mark Keys as Obsolete
  *
@@ -114,7 +115,7 @@ while ($row = $key_types_result->fetch_assoc()) {
                 <label for="key_type">Key Type to Mark Obsolete:</label>
                 <select name="key_type" id="key_type" required>
                     <option value="">-- Select Key Type --</option>
-                    <?php foreach ($key_types as $kt): ?>
+                    <?php foreach ($key_types as $kt) : ?>
                         <option value="<?php echo htmlspecialchars($kt); ?>">
                             <?php echo htmlspecialchars($kt); ?>
                         </option>
