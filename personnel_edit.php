@@ -284,13 +284,13 @@ if ($keys_table_exists) {
                             <td>
                                 <?php if ($key['status'] === 'Active') : ?>
                                     <?php
-                                    $return_url = 'operator_key_return.php?id=' . urlencode($key['seq_nmbr'])
+                                    $ret_url = 'operator_key_return.php?id=' . urlencode($key['seq_nmbr'])
                                         . '&redirect=personnel_edit.php?id=' . urlencode($id);
-                                    $lost_url = 'operator_key_lost.php?id=' . urlencode($key['seq_nmbr'])
+                                    $lst_url = 'operator_key_lost.php?id=' . urlencode($key['seq_nmbr'])
                                         . '&redirect=personnel_edit.php?id=' . urlencode($id);
                                     ?>
-                                    <a href="<?php echo htmlspecialchars($return_url); ?>">Return</a>
-                                    <a href="<?php echo htmlspecialchars($lost_url); ?>">Lost</a>
+                                    <a href="<?php echo htmlspecialchars($ret_url); ?>">Return</a>
+                                    <a href="<?php echo htmlspecialchars($lst_url); ?>">Lost</a>
                                 <?php endif; ?>
                             </td>
                             <?php endif; ?>
@@ -323,7 +323,8 @@ if ($keys_table_exists) {
         </div>
     </div>
     <div class="back-button-container">
-        <a href="certification_add.php?id=<?php echo urlencode($operator['seq_nmbr']); ?>">Add Certification</a>
+        <?php $cert_add_url = 'certification_add.php?id=' . urlencode($operator['seq_nmbr']); ?>
+        <a href="<?php echo htmlspecialchars($cert_add_url); ?>">Add Certification</a>
     </div>
 </body>
 </html>

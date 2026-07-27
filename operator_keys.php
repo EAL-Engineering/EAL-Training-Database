@@ -184,7 +184,8 @@ if ($operators_result) {
                                 ? 'selected'
                                 : '';
                             ?>
-                            <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>" <?php echo $isOpSelected; ?>>
+                            <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>"
+                                <?php echo $isOpSelected; ?>>
                                 <?php echo htmlspecialchars($op['fname']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -245,13 +246,13 @@ if ($operators_result) {
                     <td>
                         <?php if ($row['status'] === 'Active') : ?>
                             <?php
-                            $return_url = 'operator_key_return.php?id=' . urlencode($row['seq_nmbr'])
+                            $ret_url = 'operator_key_return.php?id=' . urlencode($row['seq_nmbr'])
                                 . '&redirect=operator_keys.php';
-                            $lost_url = 'operator_key_lost.php?id=' . urlencode($row['seq_nmbr'])
+                            $lst_url = 'operator_key_lost.php?id=' . urlencode($row['seq_nmbr'])
                                 . '&redirect=operator_keys.php';
                             ?>
-                            <a href="<?php echo htmlspecialchars($return_url); ?>">Return</a>
-                            <a href="<?php echo htmlspecialchars($lost_url); ?>">Lost</a>
+                            <a href="<?php echo htmlspecialchars($ret_url); ?>">Return</a>
+                            <a href="<?php echo htmlspecialchars($lst_url); ?>">Lost</a>
                         <?php endif; ?>
                     </td>
                     <?php endif; ?>

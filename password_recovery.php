@@ -63,9 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($update_stmt->execute()) {
                 // Prepare reset link and email content
-                $reset_link = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token=" . urlencode($reset_token);
+                $reset_link = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token="
+                    . urlencode($reset_token);
                 $subject = "Password Recovery Request";
-                $email_body = "Hello, $username,\n\nClick the following link to reset your password:\n\n$reset_link\n\nThis link is valid for 1 hour.";
+                $email_body = "Hello, $username,\n\n"
+                    . "Click the following link to reset your password:\n\n"
+                    . "$reset_link\n\nThis link is valid for 1 hour.";
                 $headers = "From: no-reply@ohio.edu";
 
                 // Send email, logging any failures internally
@@ -78,7 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // FIX (Issue #5): Always return the same message to avoid email enumeration
-    $message = "If an account is associated with " . htmlspecialchars($email) . ", a password recovery email has been sent.";
+    $message = "If an account is associated with "
+        . htmlspecialchars($email)
+        . ", a password recovery email has been sent.";
 }
 ?>
 

@@ -52,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     . "'\nMarked obsolete during re-keying to ', ?, ' by ', ?, ' on ', NOW()"
                     . ") "
                     . "WHERE key_type = ? AND status = 'Active'";
-                
                 $stmt = $mysqli->prepare($update_sql);
                 $stmt->bind_param("sss", $new_key_type, $entered_by, $key_type);
                 $stmt->execute();

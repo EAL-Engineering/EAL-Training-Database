@@ -173,7 +173,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ? 'selected'
                             : '';
                         ?>
-                        <option value="<?php echo htmlspecialchars($pool['seq_nmbr']); ?>" <?php echo $isPoolSelected; ?>>
+                        <option value="<?php echo htmlspecialchars($pool['seq_nmbr']); ?>"
+                            <?php echo $isPoolSelected; ?>>
                             <?php echo htmlspecialchars($pool['fname']); ?>
                         </option>
                     <?php endforeach; ?>
