@@ -167,7 +167,7 @@ $trainer_result = $mysqli->query($query);
                 <option value="">-- Select Trainer --</option>
                 <?php while ($row = $trainer_result->fetch_assoc()) : ?>
                     <!-- FIX (Issue #25): Default selection to currently logged-in user -->
-                    <option value="<?php echo $row['trainer_id']; ?>" <?php echo ($row['trainer_id'] == $logged_in_user_id) ? 'selected' : ''; ?>>
+                    <option value="<?php echo $row['trainer_id']; ?>" <?php echo ((int)$row['trainer_id'] === (int)$logged_in_user_id) ? 'selected' : ''; ?>>
                         <?php echo htmlspecialchars($row['fname'] . ' ' . $row['name']); ?>
                     </option>
                 <?php endwhile; ?>

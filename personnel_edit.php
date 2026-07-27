@@ -176,9 +176,9 @@ if ($keys_table_exists) {
             <div class="form-row">
                 <label>Status:</label>
                 <select name="status">
-                    <option value="Active" <?php echo $operator['status'] == 'Active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="Inactive" <?php echo $operator['status'] == 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
-                    <option value="Other" <?php echo $operator['status'] == 'Other' ? 'selected' : ''; ?>>Other</option>
+                    <option value="Active" <?php echo $operator['status'] === 'Active' ? 'selected' : ''; ?>>Active</option>
+                    <option value="Inactive" <?php echo $operator['status'] === 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
+                    <option value="Other" <?php echo $operator['status'] === 'Other' ? 'selected' : ''; ?>>Other</option>
                 </select>
             </div>
             <div class="form-row">

@@ -123,7 +123,7 @@ function checkCertification($trainerId, $certificationId)
     $trainer = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    if (!$trainer || !isset($trainer['optbl_ptr']) || $trainer['optbl_ptr'] == -1) {
+    if (!$trainer || !isset($trainer['optbl_ptr']) || (int)$trainer['optbl_ptr'] === -1) {
         return false;
     }
 

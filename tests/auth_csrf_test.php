@@ -15,7 +15,7 @@ function assert_true($cond, $msg) {
 echo "Running CSRF helper tests...\n";
 
 // Ensure session is available
-if (session_status() == PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 $t1 = getCSRFToken();
 assert_true(is_string($t1) && strlen($t1) >= 32, "getCSRFToken() must return a token string");

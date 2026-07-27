@@ -33,7 +33,7 @@ $delete_id = $_GET['id'] ?? null;
 $confirm   = $_GET['confirm'] ?? null;
 
 if ($delete_id !== null && $confirm == 1) {
-    if (($_SESSION['role_id'] ?? null) != 1) {
+    if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
         header("Location: index.php");
         exit();
     }
@@ -120,7 +120,7 @@ $result = $mysqli->query(
         <tr>
             <th>Full Name</th>
             <th>Email</th>
-            <?php if (($_SESSION['role_id'] ?? null) == 1) : ?>
+            <?php if ((int)($_SESSION['role_id'] ?? 0) === 1) : ?>
             <th>Delete</th>
             <?php endif; ?>
         </tr>
@@ -135,7 +135,7 @@ $result = $mysqli->query(
                 echo '<a href="mailto:' . $operatorEmail . '">' . $operatorEmail . '</a>';
                 ?>
             </td>
-            <?php if (($_SESSION['role_id'] ?? null) == 1) : ?>
+            <?php if ((int)($_SESSION['role_id'] ?? 0) === 1) : ?>
             <td>
                 <?php
                 $operatorId   = $res['id'];
