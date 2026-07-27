@@ -115,8 +115,8 @@ function isSafeRedirect(string $url): bool
 /**
  * Check if a trainer is authorized to certify a specific certification.
  *
- * @param integer $trainerId       ID of the trainer (trainers.seq_nmbr)
- * @param integer $certificationId Certification ID
+ * @param integer $trainerId       ID of the trainer (trainers.seq_nmbr).
+ * @param integer $certificationId Certification ID.
  *
  * @return boolean True if the trainer is authorized, false otherwise.
  */
