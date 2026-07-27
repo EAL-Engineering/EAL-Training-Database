@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Common utility functions for the Training Management System.
  *
@@ -24,7 +26,7 @@
  *
  * @return void
  */
-function Build_Operator_Training_pulldown($selectName = 'selname', $selectedId = null)
+function Build_Operator_Training_pulldown(string $selectName = 'selname', ?int $selectedId = null): void
 {
     global $mysqli;
 
@@ -45,13 +47,13 @@ function Build_Operator_Training_pulldown($selectName = 'selname', $selectedId =
     echo '<option value="">-- Select Operator --</option>';
 
     while ($row = $result->fetch_assoc()) {
-        $id = $row['seq_nmbr'];
+        $id = (int)$row['seq_nmbr'];
         $displayName = trim(($row['fname'] ?? '') . ' ' . ($row['name'] ?? ''));
         if ($displayName === '') {
             $displayName = $row['name'] ?? "Operator #$id";
         }
 
-        $isSelected = ($selectedId !== null && (int)$id === (int)$selectedId) ? ' selected' : '';
+        $isSelected = ($selectedId !== null && $id === $selectedId) ? ' selected' : '';
 
         echo '<option value="' . htmlspecialchars((string)$id) . '"' . $isSelected . '>';
         echo htmlspecialchars($displayName);
@@ -65,17 +67,15 @@ function Build_Operator_Training_pulldown($selectName = 'selname', $selectedId =
 /**
  * Validates that a redirect URL is a safe relative path on this site.
  *
- * @param string $url The URL to validate.
+ * @param string|null $url The URL to validate.
  *
  * @return bool True if the URL is safe to redirect to, false otherwise.
  */
-function isSafeRedirect($url)
+function isSafeRedirect(?string $url): bool
 {
-    if (!is_string($url) || $url === '') {
+    if ($url === null || $url === '') {
         return false;
     }
 
     return (bool) preg_match('/^[a-zA-Z0-9_\-][a-zA-Z0-9_\-\/\.]*(?:\?[^#]*)?$/', $url);
 }
-
-?>
