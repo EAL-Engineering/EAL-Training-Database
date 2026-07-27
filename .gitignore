@@ -4,3 +4,5 @@ test.html
 docs
 config.php
 tests/config.php
+phpcbf.phar
+phpcs.phar
