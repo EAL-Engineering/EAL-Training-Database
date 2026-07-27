@@ -34,7 +34,9 @@ $id = intval($id_param);
  * FIX (Issue #18): Replaced bind_result() with get_result()->fetch_assoc()
  * to eliminate brittle positional variable binding.
  */
-$query = "SELECT seq_nmbr, name, fname, email, altemail, phones, status, is_eal_staff, is_senior_staff, office, home, updated, comments, entered, addedby FROM operators WHERE seq_nmbr = ?";
+$query = "SELECT seq_nmbr, name, fname, email, altemail, phones, status, is_eal_staff, "
+    . "is_senior_staff, office, home, updated, comments, entered, addedby "
+    . "FROM operators WHERE seq_nmbr = ?";
 $operator_stmt = $mysqli->prepare($query);
 
 if (!$operator_stmt) {
@@ -151,7 +153,10 @@ if ($keys_table_exists) {
         <form method="post" action="personnel_save.php">
             <div class="form-row">
                 <label>Seq Number:</label>
-                <input type="text" class="readonly-field" value="<?php echo htmlspecialchars($operator['seq_nmbr']); ?>" readonly>
+                <input type="text"
+                    class="readonly-field"
+                    value="<?php echo htmlspecialchars($operator['seq_nmbr']); ?>"
+                    readonly>
                 <input type="hidden" name="seq_nmbr" value="<?php echo htmlspecialchars($operator['seq_nmbr']); ?>">
             </div>
             <div class="form-row">
@@ -177,18 +182,32 @@ if ($keys_table_exists) {
             <div class="form-row">
                 <label>Status:</label>
                 <select name="status">
-                    <option value="Active" <?php echo $operator['status'] === 'Active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="Inactive" <?php echo $operator['status'] === 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
-                    <option value="Other" <?php echo $operator['status'] === 'Other' ? 'selected' : ''; ?>>Other</option>
+                    <option value="Active" <?php echo $operator['status'] === 'Active' ? 'selected' : ''; ?>>
+                        Active
+                    </option>
+                    <option value="Inactive" <?php echo $operator['status'] === 'Inactive' ? 'selected' : ''; ?>>
+                        Inactive
+                    </option>
+                    <option value="Other" <?php echo $operator['status'] === 'Other' ? 'selected' : ''; ?>>
+                        Other
+                    </option>
                 </select>
             </div>
             <div class="form-row">
                 <label for="is_eal_staff">EAL Staff:</label>
-                <input type="checkbox" name="is_eal_staff" id="is_eal_staff" value="1" <?php echo !empty($operator['is_eal_staff']) ? 'checked' : ''; ?>>
+                <input type="checkbox"
+                    name="is_eal_staff"
+                    id="is_eal_staff"
+                    value="1"
+                    <?php echo !empty($operator['is_eal_staff']) ? 'checked' : ''; ?>>
             </div>
             <div class="form-row">
                 <label for="is_senior_staff">Senior Staff:</label>
-                <input type="checkbox" name="is_senior_staff" id="is_senior_staff" value="1" <?php echo !empty($operator['is_senior_staff']) ? 'checked' : ''; ?>>
+                <input type="checkbox"
+                    name="is_senior_staff"
+                    id="is_senior_staff"
+                    value="1"
+                    <?php echo !empty($operator['is_senior_staff']) ? 'checked' : ''; ?>>
             </div>
             <div class="form-row">
                 <label>Office:</label>
@@ -200,15 +219,24 @@ if ($keys_table_exists) {
             </div>
             <div class="form-row">
                 <label>Updated:</label>
-                <input type="text" class="readonly-field" value="<?php echo htmlspecialchars($operator['updated']); ?>" readonly>
+                <input type="text"
+                    class="readonly-field"
+                    value="<?php echo htmlspecialchars($operator['updated']); ?>"
+                    readonly>
             </div>
             <div class="form-row">
                 <label>Entered:</label>
-                <input type="text" class="readonly-field" value="<?php echo htmlspecialchars($operator['entered']); ?>" readonly>
+                <input type="text"
+                    class="readonly-field"
+                    value="<?php echo htmlspecialchars($operator['entered']); ?>"
+                    readonly>
             </div>
             <div class="form-row">
                 <label>Added By:</label>
-                <input type="text" class="readonly-field" value="<?php echo htmlspecialchars($operator['addedby']); ?>" readonly>
+                <input type="text"
+                    class="readonly-field"
+                    value="<?php echo htmlspecialchars($operator['addedby']); ?>"
+                    readonly>
             </div>
             <div class="form-row">
                 <label>Comments:</label>
@@ -221,7 +249,9 @@ if ($keys_table_exists) {
         <div class="keys-section">
             <h2>Assigned Keys</h2>
             <?php if (!$keys_table_exists) : ?>
-                <p class="alert alert-danger">Key tracking table not found. Please run the database migration (1.2-to-1.3-add-keys.sql).</p>
+                <p class="alert alert-danger">
+                    Key tracking table not found. Please run the database migration (1.2-to-1.3-add-keys.sql).
+                </p>
             <?php elseif (!empty($operator_keys)) : ?>
                 <table class="keys-table">
                     <thead>
@@ -253,8 +283,14 @@ if ($keys_table_exists) {
                             <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                             <td>
                                 <?php if ($key['status'] === 'Active') : ?>
-                                    <a href="operator_key_return.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Return</a>
-                                    <a href="operator_key_lost.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Lost</a>
+                                    <?php
+                                    $return_url = 'operator_key_return.php?id=' . urlencode($key['seq_nmbr'])
+                                        . '&redirect=personnel_edit.php?id=' . urlencode($id);
+                                    $lost_url = 'operator_key_lost.php?id=' . urlencode($key['seq_nmbr'])
+                                        . '&redirect=personnel_edit.php?id=' . urlencode($id);
+                                    ?>
+                                    <a href="<?php echo htmlspecialchars($return_url); ?>">Return</a>
+                                    <a href="<?php echo htmlspecialchars($lost_url); ?>">Lost</a>
                                 <?php endif; ?>
                             </td>
                             <?php endif; ?>

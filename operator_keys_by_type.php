@@ -95,8 +95,12 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js" integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"
+            integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG"
+            crossorigin="anonymous"></script>
     <script src="common.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -114,9 +118,12 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
         </div>
     </div>
 
-    <h1>Keys by Type<?php if ($selected_type !== '') {
-        echo ' — ' . htmlspecialchars($key_type_options[$selected_type]);
-                    } ?></h1>
+    <h1>
+        Keys by Type
+        <?php if ($selected_type !== '') : ?>
+            <?php echo ' — ' . htmlspecialchars($key_type_options[$selected_type]); ?>
+        <?php endif; ?>
+    </h1>
 
     <form method="get" action="operator_keys_by_type.php" class="filter-form" style="margin-bottom: 20px;">
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
@@ -166,7 +173,11 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                     <?php if (strtolower($row['key_type']) === 'badge') : ?>
                         <?php echo htmlspecialchars($row['serial_number']); ?>
                     <?php else : ?>
-                        <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
+                        <?php
+                        $history_url = 'key_history.php?key_type=' . urlencode($row['key_type'])
+                            . '&serial=' . urlencode($row['serial_number']);
+                        ?>
+                        <a href="<?php echo htmlspecialchars($history_url); ?>">
                             <?php echo htmlspecialchars($row['serial_number']); ?>
                         </a>
                     <?php endif; ?>
@@ -187,8 +198,14 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                 <td>
                     <?php if ($row['status'] === 'Active') : ?>
-                        <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Return</a>
-                        <a href="operator_key_lost.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Lost</a>
+                        <?php
+                        $return_url = 'operator_key_return.php?id=' . urlencode($row['seq_nmbr'])
+                            . '&redirect=operator_keys_by_type.php';
+                        $lost_url = 'operator_key_lost.php?id=' . urlencode($row['seq_nmbr'])
+                            . '&redirect=operator_keys_by_type.php';
+                        ?>
+                        <a href="<?php echo htmlspecialchars($return_url); ?>">Return</a>
+                        <a href="<?php echo htmlspecialchars($lost_url); ?>">Lost</a>
                     <?php endif; ?>
                 </td>
                 <?php endif; ?>

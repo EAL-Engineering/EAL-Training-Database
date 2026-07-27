@@ -108,7 +108,9 @@ $trainer_result = $mysqli->query($query);
             <p style="color: green; font-weight: bold;">Certification removed successfully.</p>
         <?php endif; ?>
         <?php if (($_GET['error'] ?? '') === 'duplicate') : ?>
-            <p style="color: red; font-weight: bold;">Error: Operator already has an active record for this certification.</p>
+            <p style="color: red; font-weight: bold;">
+                Error: Operator already has an active record for this certification.
+            </p>
         <?php endif; ?>
 
         <!-- Active Certifications List & Removal Form (Issue #33) -->
@@ -132,10 +134,15 @@ $trainer_result = $mysqli->query($query);
                             <td><?php echo htmlspecialchars($cert['expires'] ?? 'Never'); ?></td>
                             <td><?php echo htmlspecialchars($cert['trainer'] ?? 'Unknown'); ?></td>
                             <td>
-                                <form method="post" action="certification_remove.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this certification?');">
+                                <form method="post"
+                                    action="certification_remove.php"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to remove this certification?');">
                                     <input type="hidden" name="optraining_id" value="<?php echo $cert['id']; ?>">
                                     <input type="hidden" name="operator_id" value="<?php echo $operator_id; ?>">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+                                    <input type="hidden"
+                                        name="csrf_token"
+                                        value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
                                     <button type="submit" style="color: red;">Remove</button>
                                 </form>
                             </td>
@@ -159,7 +166,9 @@ $trainer_result = $mysqli->query($query);
             <select name="cert_id" id="cert_id" required>
                 <option value="">-- Select Certification --</option>
                 <?php while ($row = $cert_result->fetch_assoc()) : ?>
-                    <option value="<?php echo $row['seq_nmbr']; ?>"><?php echo htmlspecialchars($row['certification']); ?></option>
+                    <option value="<?php echo $row['seq_nmbr']; ?>">
+                        <?php echo htmlspecialchars($row['certification']); ?>
+                    </option>
                 <?php endwhile; ?>
             </select><br><br>
 
@@ -168,8 +177,12 @@ $trainer_result = $mysqli->query($query);
                 <option value="">-- Select Trainer --</option>
                 <?php while ($row = $trainer_result->fetch_assoc()) : ?>
                     <!-- FIX (Issue #25): Default selection to currently logged-in user -->
-                    <option value="<?php echo $row['trainer_id']; ?>" <?php echo ((int)$row['trainer_id'] === (int)$logged_in_user_id) ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($row['fname'] . ' ' . $row['name']); ?>
+                    <?php
+                    $isSelected = ((int)$row['trainer_id'] === (int)$logged_in_user_id) ? 'selected' : '';
+                    $trainerName = $row['fname'] . ' ' . $row['name'];
+                    ?>
+                    <option value="<?php echo $row['trainer_id']; ?>" <?php echo $isSelected; ?>>
+                        <?php echo htmlspecialchars($trainerName); ?>
                     </option>
                 <?php endwhile; ?>
             </select><br><br>

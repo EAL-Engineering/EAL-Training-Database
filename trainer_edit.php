@@ -202,15 +202,21 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
         <?php echo $message; ?>
 
         <h2>Access Role</h2>
-        <form method="post" action="trainer_edit.php?id=<?php echo htmlspecialchars($trainer_id); ?>" style="margin-bottom: 2em;">
+        <?php $form_action = "trainer_edit.php?id=" . urlencode($trainer_id); ?>
+        <form method="post" action="<?php echo htmlspecialchars($form_action); ?>" style="margin-bottom: 2em;">
             <input type="hidden" name="action" value="update_role">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
             
             <label for="role_id">Role Level:</label>
             <select name="role_id" id="role_id" <?php echo (getUserRole() < 2) ? 'disabled' : ''; ?>>
-                <option value="0" <?php echo ($current_role_id === 0 || $current_role_id === null) ? 'selected' : ''; ?>>0 - Unassigned / No Access</option>
-                <option value="1" <?php echo ($current_role_id === 1) ? 'selected' : ''; ?>>1 - Standard Trainer</option>
-                <option value="2" <?php echo ($current_role_id === 2) ? 'selected' : ''; ?>>2 - Administrator</option>
+                <?php
+                $isRole0 = ($current_role_id === 0 || $current_role_id === null) ? 'selected' : '';
+                $isRole1 = ($current_role_id === 1) ? 'selected' : '';
+                $isRole2 = ($current_role_id === 2) ? 'selected' : '';
+                ?>
+                <option value="0" <?php echo $isRole0; ?>>0 - Unassigned / No Access</option>
+                <option value="1" <?php echo $isRole1; ?>>1 - Standard Trainer</option>
+                <option value="2" <?php echo $isRole2; ?>>2 - Administrator</option>
             </select>
 
             <?php if (getUserRole() >= 2) : ?>
@@ -229,9 +235,15 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
                             <span><?php echo htmlspecialchars($cert['certification']); ?></span>
                             <div class="button-container">
                                 <form method="post" action="trainer_certification_remove.php" style="display:inline;">
-                                    <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
-                                    <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+                                    <input type="hidden"
+                                        name="trainer_id"
+                                        value="<?php echo htmlspecialchars($trainer_id); ?>">
+                                    <input type="hidden"
+                                        name="cert_id"
+                                        value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                                    <input type="hidden"
+                                        name="csrf_token"
+                                        value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
                                     <button type="submit">Remove Certification</button>
                                 </form>
                             </div>
@@ -252,9 +264,15 @@ if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
                             <span><?php echo htmlspecialchars($cert['certification']); ?></span>
                             <div class="button-container">
                                 <form method="post" action="trainer_certification_add.php" style="display:inline;">
-                                    <input type="hidden" name="trainer_id" value="<?php echo htmlspecialchars($trainer_id); ?>">
-                                    <input type="hidden" name="cert_id" value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+                                    <input type="hidden"
+                                        name="trainer_id"
+                                        value="<?php echo htmlspecialchars($trainer_id); ?>">
+                                    <input type="hidden"
+                                        name="cert_id"
+                                        value="<?php echo htmlspecialchars($cert['cert_id']); ?>">
+                                    <input type="hidden"
+                                        name="csrf_token"
+                                        value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
                                     <button type="submit">Add Certification</button>
                                 </form>
                             </div>

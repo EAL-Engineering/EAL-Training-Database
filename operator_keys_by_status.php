@@ -73,10 +73,19 @@ if (!empty($params)) {
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js" integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.dataTables.css" integrity="sha384-bei2bpb7orBDGkDdrxxnvqdYpRnpXwKe5JxL3It/9i0qLCepqOWVYsKn0NSb47um" crossorigin="anonymous">
-    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js" integrity="sha384-/T8n5YuWFPR9FBZ0KGlsnRvNM5QnSRKP+mxyfECfEyTneU3QJBdNnV5q4jgCFWxH" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"
+            integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.dataTables.css"
+          integrity="sha384-bei2bpb7orBDGkDdrxxnvqdYpRnpXwKe5JxL3It/9i0qLCepqOWVYsKn0NSb47um"
+          crossorigin="anonymous">
+    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js"
+            integrity="sha384-/T8n5YuWFPR9FBZ0KGlsnRvNM5QnSRKP+mxyfECfEyTneU3QJBdNnV5q4jgCFWxH"
+            crossorigin="anonymous"></script>
     <script src="common.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -101,10 +110,18 @@ if (!empty($params)) {
                 <label for="status">Status:</label>
                 <select name="status" id="status" onchange="this.form.submit();">
                     <option value="">All</option>
-                    <option value="Active" <?php echo ($status_filter === 'Active') ? 'selected' : ''; ?>>Active</option>
-                    <option value="Lost" <?php echo ($status_filter === 'Lost') ? 'selected' : ''; ?>>Lost</option>
-                    <option value="Returned" <?php echo ($status_filter === 'Returned') ? 'selected' : ''; ?>>Returned</option>
-                    <option value="Obsolete" <?php echo ($status_filter === 'Obsolete') ? 'selected' : ''; ?>>Obsolete</option>
+                    <option value="Active" <?php echo ($status_filter === 'Active') ? 'selected' : ''; ?>>
+                        Active
+                    </option>
+                    <option value="Lost" <?php echo ($status_filter === 'Lost') ? 'selected' : ''; ?>>
+                        Lost
+                    </option>
+                    <option value="Returned" <?php echo ($status_filter === 'Returned') ? 'selected' : ''; ?>>
+                        Returned
+                    </option>
+                    <option value="Obsolete" <?php echo ($status_filter === 'Obsolete') ? 'selected' : ''; ?>>
+                        Obsolete
+                    </option>
                 </select>
             </div>
             <div style="display: flex; align-items: flex-end;">
@@ -136,7 +153,11 @@ if (!empty($params)) {
                     <?php if (strtolower($row['key_type']) === 'badge') : ?>
                         <?php echo htmlspecialchars($row['serial_number']); ?>
                     <?php else : ?>
-                        <a href="key_history.php?key_type=<?php echo urlencode($row['key_type']); ?>&serial=<?php echo urlencode($row['serial_number']); ?>">
+                        <?php
+                        $history_url = 'key_history.php?key_type=' . urlencode($row['key_type'])
+                            . '&serial=' . urlencode($row['serial_number']);
+                        ?>
+                        <a href="<?php echo htmlspecialchars($history_url); ?>">
                             <?php echo htmlspecialchars($row['serial_number']); ?>
                         </a>
                     <?php endif; ?>
@@ -157,8 +178,14 @@ if (!empty($params)) {
                 <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                 <td>
                     <?php if ($row['status'] === 'Active') : ?>
-                        <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Return</a>
-                        <a href="operator_key_lost.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Lost</a>
+                        <?php
+                        $return_url = 'operator_key_return.php?id=' . urlencode($row['seq_nmbr'])
+                            . '&redirect=operator_keys_by_type.php';
+                        $lost_url = 'operator_key_lost.php?id=' . urlencode($row['seq_nmbr'])
+                            . '&redirect=operator_keys_by_type.php';
+                        ?>
+                        <a href="<?php echo htmlspecialchars($return_url); ?>">Return</a>
+                        <a href="<?php echo htmlspecialchars($lost_url); ?>">Lost</a>
                     <?php endif; ?>
                 </td>
                 <?php endif; ?>

@@ -83,7 +83,8 @@ $isLoggedIn = isset($_SESSION['user_id']);
         <!-- Display welcome message and login button for guests -->
         <span>Session expired</span>
         <?php if ($currentScript !== 'login.php') : ?>
-            <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI'] ?? ''); ?>" class="logout-button">Login</a>
+            <?php $loginUrl = 'login.php?return=' . urlencode($_SERVER['REQUEST_URI'] ?? ''); ?>
+            <a href="<?php echo htmlspecialchars($loginUrl); ?>" class="logout-button">Login</a>
         <?php endif; ?>
     <?php endif; ?>
     </div>

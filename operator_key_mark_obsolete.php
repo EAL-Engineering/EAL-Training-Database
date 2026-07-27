@@ -45,18 +45,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 // Mark all active keys of this type as obsolete
-                $stmt = $mysqli->prepare(
-                    "UPDATE operator_keys
-                     SET status = 'Obsolete', notes = CONCAT(IFNULL(notes, ''), '\nMarked obsolete during re-keying to ', ?, ' by ', ?, ' on ', NOW())
-                     WHERE key_type = ? AND status = 'Active'"
-                );
+                $update_sql = "UPDATE operator_keys "
+                    . "SET status = 'Obsolete', "
+                    . "notes = CONCAT("
+                    . "IFNULL(notes, ''), "
+                    . "'\nMarked obsolete during re-keying to ', ?, ' by ', ?, ' on ', NOW()"
+                    . ") "
+                    . "WHERE key_type = ? AND status = 'Active'";
+                
+                $stmt = $mysqli->prepare($update_sql);
                 $stmt->bind_param("sss", $new_key_type, $entered_by, $key_type);
                 $stmt->execute();
                 $affected = $stmt->affected_rows;
                 $stmt->close();
 
                 $mysqli->commit();
-                $success_message = "Marked " . $affected . " key(s) of type '" . htmlspecialchars($key_type) . "' as obsolete.";
+                $success_message = "Marked "
+                    . $affected
+                    . " key(s) of type '"
+                    . htmlspecialchars($key_type)
+                    . "' as obsolete.";
             } catch (Exception $e) {
                 $mysqli->rollback();
                 $error_message = "Error: " . $e->getMessage();
@@ -66,7 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get existing key types
-$key_types_result = $mysqli->query("SELECT DISTINCT key_type FROM operator_keys WHERE LOWER(key_type) != 'badge' ORDER BY key_type");
+$select_sql = "SELECT DISTINCT key_type "
+    . "FROM operator_keys "
+    . "WHERE LOWER(key_type) != 'badge' "
+    . "ORDER BY key_type";
+
+$key_types_result = $mysqli->query($select_sql);
 $key_types = [];
 while ($row = $key_types_result->fetch_assoc()) {
     $key_types[] = $row['key_type'];
@@ -98,7 +111,10 @@ while ($row = $key_types_result->fetch_assoc()) {
 
     <div class="container">
         <h1>Mark Keys as Obsolete</h1>
-        <p><strong>Warning:</strong> This will mark <em>all active keys</em> of the selected type as obsolete. Use this during building re-keying events.</p>
+        <p>
+            <strong>Warning:</strong> This will mark <em>all active keys</em> of the selected type as obsolete.
+            Use this during building re-keying events.
+        </p>
 
         <?php if (!empty($error_message)) : ?>
             <div class="alert alert-danger">
@@ -125,7 +141,10 @@ while ($row = $key_types_result->fetch_assoc()) {
 
             <div class="form-group">
                 <label for="new_key_type">New Key Type (Re-key Number):</label>
-                <input type="text" name="new_key_type" id="new_key_type" required
+                <input type="text"
+                    name="new_key_type"
+                    id="new_key_type"
+                    required
                     placeholder="e.g., 200A22">
             </div>
 
@@ -135,7 +154,11 @@ while ($row = $key_types_result->fetch_assoc()) {
             </div>
 
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
-            <button type="submit" class="danger-button" onclick="return confirm('Are you sure? This will mark ALL active keys of this type as obsolete.');">
+            <button type="submit"
+                class="danger-button"
+                onclick="return confirm(
+                    'Are you sure? This will mark ALL active keys of this type as obsolete.'
+                );">
                 Mark Obsolete
             </button>
         </form>

@@ -28,7 +28,7 @@ require_once "auth.php";
 $currentUrl = urlencode($_SERVER['REQUEST_URI']); // Encodes the URL for safe use in GET parameters
 
 /**
- * Get the time remaining until the user's session expires.
+ * Get the time remaining until the session expires.
  *
  * @var int $timeUntilSessionExpires Time in seconds until the session expires.
  */
@@ -66,8 +66,12 @@ $trainer_list = $mysqli->query(
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js" integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"
+            integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG"
+            crossorigin="anonymous"></script>
     <script src="common.js" defer></script>
     <script>
         // Pass the session expiration time to the JavaScript function
@@ -107,7 +111,9 @@ $trainer_list = $mysqli->query(
             $rowId = "email-" . $rowCounter++; // Generate a unique ID
             echo "<tr>";
             echo "<td>" . htmlspecialchars($res['TrainerName']) . "</td>\n";
-            echo "<td id='" . $rowId . "' data-user='" . htmlspecialchars($user) . "' data-domain='" . htmlspecialchars($domain) . "'></td>\n";
+            echo "<td id='" . $rowId . "' "
+                . "data-user='" . htmlspecialchars($user) . "' "
+                . "data-domain='" . htmlspecialchars($domain) . "'></td>\n";
             echo "<td>" . htmlspecialchars($res['Certifications']) . "</td>\n";
             echo "<td><a href=\"trainer_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
             echo "</tr>";

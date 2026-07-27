@@ -26,7 +26,9 @@ $error_message = "";
 $success_message = "";
 
 // Pre-fill operator if passed via URL
-$prefill_operator_id = isset($_GET['operator_id']) && is_numeric($_GET['operator_id']) ? intval($_GET['operator_id']) : null;
+$prefill_operator_id = isset($_GET['operator_id']) && is_numeric($_GET['operator_id'])
+    ? intval($_GET['operator_id'])
+    : null;
 
 // Define available key types: DB value => UI label
 $key_type_options = [
@@ -70,8 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check_stmt->close();
 
             if ($has_existing) {
-                $error_message = "This key is already active and assigned to " . htmlspecialchars($existing_operator_name) .
-                    ". Return it first before reassigning.";
+                $error_message = "This key is already active and assigned to "
+                    . htmlspecialchars($existing_operator_name)
+                    . ". Return it first before reassigning.";
             } else {
                 $stmt = $mysqli->prepare(
                     "INSERT INTO operator_keys
@@ -79,7 +82,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      VALUES (?, ?, ?, 'Active', ?, ?, ?)"
                 );
                 if ($stmt) {
-                    $stmt->bind_param("isssss", $operator_id, $key_type, $serial_number, $issued_date, $notes, $entered_by);
+                    $stmt->bind_param(
+                        "isssss",
+                        $operator_id,
+                        $key_type,
+                        $serial_number,
+                        $issued_date,
+                        $notes,
+                        $entered_by
+                    );
                     if ($stmt->execute()) {
                         $success_message = "Key assigned successfully.";
                         // Keep same operator for batch entry
@@ -96,7 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch active operators for dropdown
-$operators_result = $mysqli->query("SELECT seq_nmbr, fname FROM operators WHERE status = 'Active' ORDER BY fname");
+$operators_result = $mysqli->query(
+    "SELECT seq_nmbr, fname FROM operators WHERE status = 'Active' ORDER BY fname"
+);
 $operators = [];
 while ($row = $operators_result->fetch_assoc()) {
     $operators[] = $row;
@@ -142,14 +155,22 @@ while ($row = $operators_result->fetch_assoc()) {
             </div>
         <?php endif; ?>
 
-        <form method="post" action="operator_key_add.php<?php echo $prefill_operator_id ? '?operator_id=' . urlencode($prefill_operator_id) : ''; ?>">
+        <?php
+        $form_action = 'operator_key_add.php'
+            . ($prefill_operator_id ? '?operator_id=' . urlencode($prefill_operator_id) : '');
+        ?>
+        <form method="post" action="<?php echo htmlspecialchars($form_action); ?>">
             <div class="form-group">
                 <label for="operator_id">Operator:</label>
                 <select name="operator_id" id="operator_id" required>
                     <option value="">-- Select Operator --</option>
                     <?php foreach ($operators as $op) : ?>
-                        <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>"
-                            <?php echo ($prefill_operator_id && intval($op['seq_nmbr']) === $prefill_operator_id) ? 'selected' : ''; ?>>
+                        <?php
+                        $isSelected = ($prefill_operator_id && intval($op['seq_nmbr']) === $prefill_operator_id)
+                            ? 'selected'
+                            : '';
+                        ?>
+                        <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>" <?php echo $isSelected; ?>>
                             <?php echo htmlspecialchars($op['fname']); ?>
                         </option>
                     <?php endforeach; ?>
@@ -170,13 +191,18 @@ while ($row = $operators_result->fetch_assoc()) {
 
             <div class="form-group">
                 <label for="serial_number">Serial Number:</label>
-                <input type="text" name="serial_number" id="serial_number" required
+                <input type="text"
+                    name="serial_number"
+                    id="serial_number"
+                    required
                     placeholder="e.g., 101019511 or 05">
             </div>
 
             <div class="form-group">
                 <label for="issued_date">Issued Date:</label>
-                <input type="date" name="issued_date" id="issued_date"
+                <input type="date"
+                    name="issued_date"
+                    id="issued_date"
                     value="<?php echo date('Y-m-d'); ?>">
             </div>
 

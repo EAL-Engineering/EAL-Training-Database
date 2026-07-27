@@ -6,10 +6,10 @@
  * PHP version 8.0+
  *
  * @category Certification
- * @package TrainingManagementSystem
- * @author Gregory Leblanc <leblanc+php@ohio.edu>
- * @license AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
- * @link https://inpp.ohio.edu/~leblanc/eal_2024
+ * @package  TrainingManagementSystem
+ * @author   Gregory Leblanc <leblanc+php@ohio.edu>
+ * @license  AGPLv3 http://www.gnu.org/licenses/agpl-3.0.html
+ * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
 require_once "config.php";
@@ -45,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $completed_by = intval($raw_completed_by);
 
     // FIX (Issue #22): Check if user already holds an active certification of this type
-    $check_query = "SELECT COUNT(*) AS total FROM optraining WHERE operator = ? AND certification = ? AND status = 'Active'";
+    $check_query = "SELECT COUNT(*) AS total "
+        . "FROM optraining "
+        . "WHERE operator = ? AND certification = ? AND status = 'Active'";
     $check_stmt = $mysqli->prepare($check_query);
     if ($check_stmt) {
         $check_stmt->bind_param("ii", $operator_id, $cert_id);

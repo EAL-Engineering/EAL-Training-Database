@@ -62,7 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cert_id     = intval($_POST['cert_id']);
 
         // Check if operator exists and is active
-        $operatorCheckQuery = $mysqli->prepare("SELECT fname, email FROM operators WHERE seq_nmbr = ? AND status = 'Active'");
+        $operatorCheckQuery = $mysqli->prepare(
+            "SELECT fname, email FROM operators WHERE seq_nmbr = ? AND status = 'Active'"
+        );
         if (!$operatorCheckQuery) {
             error_log("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
             die("Database error. Please try again later.");
@@ -84,7 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 // FIX (Issue #17): Include required cert_ptr column in can_certify query
-                $addCanCertifyQuery = $mysqli->prepare("INSERT INTO can_certify (trainer_ptr, cert_ptr) VALUES (?, ?)");
+                $addCanCertifyQuery = $mysqli->prepare(
+                    "INSERT INTO can_certify (trainer_ptr, cert_ptr) VALUES (?, ?)"
+                );
                 if (!$addCanCertifyQuery) {
                     throw new Exception("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
                 }
@@ -96,7 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $token = bin2hex(random_bytes(16));
                 $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-                $addTrainerEntry = $mysqli->prepare("INSERT INTO trainers (optbl_ptr, login_name, reset_token, reset_expiration) VALUES (?, ?, ?, ?)");
+                $addTrainerEntry = $mysqli->prepare(
+                    "INSERT INTO trainers (optbl_ptr, login_name, reset_token, reset_expiration) VALUES (?, ?, ?, ?)"
+                );
                 if (!$addTrainerEntry) {
                     throw new Exception("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
                 }
@@ -109,7 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $resetLink = "https://inpp.ohio.edu/~leblanc/eal_2024/password_reset.php?token=" . urlencode($token);
                 $subject = "Set Your Password for the Training Portal";
-                $message = "Hello $fname,\n\nYou have been added as a trainer in the Training Information Portal.\nPlease set your password using the following link:\n\n$resetLink\n\nThank you.";
+                $message = "Hello $fname,\n\n"
+                    . "You have been added as a trainer in the Training Information Portal.\n"
+                    . "Please set your password using the following link:\n\n"
+                    . "$resetLink\n\nThank you.";
 
                 mail($email, $subject, $message, "From: no-reply@ohio.edu");
 
@@ -151,8 +160,12 @@ $allCertifications = $mysqli->query(
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js" integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"
+            integrity="sha384-cDXquhvkdBprgcpTQsrhfhxXRN4wfwmWauQ3wR5ZTyYtGrET2jd68wvJ1LlDqlQG"
+            crossorigin="anonymous"></script>
     <script src="common.js" defer></script>
 </head>
 <body>

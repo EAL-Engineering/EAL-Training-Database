@@ -67,7 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
     // Store the hashed password in the database
-    $update_query = "UPDATE trainers SET password_hash = ?, reset_token = NULL, reset_expiration = NULL WHERE seq_nmbr = ?";
+    $update_query = "UPDATE trainers "
+        . "SET password_hash = ?, reset_token = NULL, reset_expiration = NULL "
+        . "WHERE seq_nmbr = ?";
     $update_stmt = $mysqli->prepare($update_query);
     if (!$update_stmt) {
         die("Database error: " . $mysqli->error);
@@ -76,7 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update_stmt->bind_param("si", $hashed_password, $trainer_id);
     if ($update_stmt->execute()) {
         $update_stmt->close();
-        header("Location: login.php?password_reset=success&login_name=" . urlencode($login_name));
+        $redirect_url = "login.php?password_reset=success&login_name=" . urlencode($login_name);
+        header("Location: " . $redirect_url);
         exit();
     } else {
         $update_stmt->close();
@@ -94,7 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <h1>Reset Your Password</h1>
 
-    <form action="password_reset.php?token=<?php echo htmlspecialchars($reset_token); ?>" method="POST">
+    <?php $form_action = "password_reset.php?token=" . urlencode($reset_token); ?>
+    <form action="<?php echo htmlspecialchars($form_action); ?>" method="POST">
         <label for="password">New Password:</label>
         <input type="password" name="password" required>
         <br><br>

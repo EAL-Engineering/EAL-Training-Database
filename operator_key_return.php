@@ -152,16 +152,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <p>Returning <strong><?php echo htmlspecialchars($key_type); ?></strong> key <strong>#<?php echo htmlspecialchars($serial_number); ?></strong> from <strong><?php echo htmlspecialchars($operator_name); ?></strong>.</p>
+        <p>
+            Returning <strong><?php echo htmlspecialchars($key_type); ?></strong>
+            key <strong>#<?php echo htmlspecialchars($serial_number); ?></strong>
+            from <strong><?php echo htmlspecialchars($operator_name); ?></strong>.
+        </p>
 
-        <form method="post" action="operator_key_return.php?id=<?php echo urlencode($key_id); ?>&redirect=<?php echo urlencode($redirect); ?>">
+        <?php
+        $return_action = 'operator_key_return.php?id=' . urlencode($key_id)
+            . '&redirect=' . urlencode($redirect);
+        ?>
+        <form method="post" action="<?php echo htmlspecialchars($return_action); ?>">
             <div class="form-group">
                 <label for="pool_id">Return to pool:</label>
                 <select name="pool_id" id="pool_id" required>
                     <option value="">-- Select Pool --</option>
                     <?php foreach ($pools as $pool) : ?>
-                        <option value="<?php echo htmlspecialchars($pool['seq_nmbr']); ?>"
-                            <?php echo ($default_pool_id && intval($pool['seq_nmbr']) === $default_pool_id) ? 'selected' : ''; ?>>
+                        <?php
+                        $isPoolSelected = ($default_pool_id && intval($pool['seq_nmbr']) === $default_pool_id)
+                            ? 'selected'
+                            : '';
+                        ?>
+                        <option value="<?php echo htmlspecialchars($pool['seq_nmbr']); ?>" <?php echo $isPoolSelected; ?>>
                             <?php echo htmlspecialchars($pool['fname']); ?>
                         </option>
                     <?php endforeach; ?>

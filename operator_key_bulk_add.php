@@ -42,7 +42,9 @@ $key_type_options = [
 ];
 
 // Fetch active operators for dropdown
-$operators_result = $mysqli->query("SELECT seq_nmbr, fname FROM operators WHERE status = 'Active' ORDER BY fname");
+$operators_result = $mysqli->query(
+    "SELECT seq_nmbr, fname FROM operators WHERE status = 'Active' ORDER BY fname"
+);
 $operators = [];
 while ($row = $operators_result->fetch_assoc()) {
     $operators[] = $row;
@@ -97,7 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $check_stmt->close();
 
                 if ($has_existing) {
-                    $errors[] = "Row " . ($idx + 1) . ": Key already active and assigned to " . htmlspecialchars($existing_operator_name) . ".";
+                    $errors[] = "Row " . ($idx + 1) . ": Key already active and assigned to "
+                        . htmlspecialchars($existing_operator_name) . ".";
                     $all_ok = false;
                     continue;
                 }
@@ -216,7 +219,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($
         // Operator data for JS filtering
         const operatorsData = [
             <?php foreach ($operators as $op) : ?>
-            { id: "<?php echo htmlspecialchars($op['seq_nmbr']); ?>", name: "<?php echo htmlspecialchars($op['fname']); ?>" },
+            {
+                id: "<?php echo htmlspecialchars($op['seq_nmbr']); ?>",
+                name: "<?php echo htmlspecialchars($op['fname']); ?>"
+            },
             <?php endforeach; ?>
         ];
 
@@ -271,12 +277,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($
                     highlightedItem = null;
                     dropdown.style.display = 'none';
                 }
-                // Tab is NOT intercepted; blur will handle selection
             });
 
             function filterAndRender(term) {
                 const t = term.toLowerCase().trim();
-                const filtered = t === '' ? operatorsData : operatorsData.filter(op => op.name.toLowerCase().includes(t));
+                const filtered = t === ''
+                    ? operatorsData
+                    : operatorsData.filter(op => op.name.toLowerCase().includes(t));
 
                 if (filtered.length === 0) {
                     dropdown.innerHTML = '<div class="searchable-no-results">No matches</div>';
