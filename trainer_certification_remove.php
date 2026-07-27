@@ -45,7 +45,8 @@ try {
     $raw_trainer_id = $_POST['trainer_id'] ?? null;
     $raw_cert_id    = $_POST['cert_id'] ?? null;
 
-    if ($raw_trainer_id === null
+    if (
+        $raw_trainer_id === null
         || $raw_cert_id === null
         || !is_numeric($raw_trainer_id)
         || !is_numeric($raw_cert_id)

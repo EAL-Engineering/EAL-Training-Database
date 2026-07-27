@@ -22,8 +22,8 @@ declare(strict_types=1);
  * Queries the `operators` table for active operators and outputs an HTML `<select>`
  * menu with options corresponding to each operator's sequence number and name.
  *
- * @param string   $selectName Optional HTML name/id attribute for the select element. Defaults to 'selname'.
- * @param int|null $selectedId Optional operator sequence number to pre-select.
+ * @param string       $selectName Optional HTML name/id attribute for the select element. Defaults to 'selname'.
+ * @param integer|null $selectedId Optional operator sequence number to pre-select.
  *
  * @return void
  */
@@ -70,7 +70,7 @@ function Build_Operator_Training_pulldown(string $selectName = 'selname', ?int $
  *
  * @param string|null $url The URL to validate.
  *
- * @return bool True if the URL is safe to redirect to, false otherwise.
+ * @return boolean True if the URL is safe to redirect to, false otherwise.
  */
 function isSafeRedirect(?string $url): bool
 {

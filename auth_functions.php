@@ -17,7 +17,7 @@
  *
  * @param string|null $token Submitted CSRF token.
  *
- * @return bool True if valid, false otherwise.
+ * @return boolean True if valid, false otherwise.
  */
 function verifyCSRFToken(?string $token): bool
 {
@@ -50,8 +50,8 @@ function regenerateCSRFToken(): void
 /**
  * Checks if the user is logged in and meets the minimum role requirement.
  *
- * @param int    $requiredRole   Minimum role_id required (e.g., 1 for trainer, 2 for admin).
- * @param string $currentUri     URI to return to after login.
+ * @param integer $requiredRole Minimum role_id required (e.g., 1 for trainer, 2 for admin).
+ * @param string  $currentUri   URI to return to after login.
  *
  * @return void
  */
@@ -76,7 +76,7 @@ function checkLogin(int $requiredRole = 1, string $currentUri = ''): void
 /**
  * Gets the current user's role ID.
  *
- * @return int Role ID or 0 if guest.
+ * @return integer Role ID or 0 if guest.
  */
 function getUserRole(): int
 {
@@ -86,7 +86,7 @@ function getUserRole(): int
 /**
  * Calculates remaining session time in seconds.
  *
- * @return int Seconds until session expiration.
+ * @return integer Seconds until session expiration.
  */
 function getTimeUntilSessionExpires(): int
 {
@@ -101,7 +101,7 @@ function getTimeUntilSessionExpires(): int
  *
  * @param string $url URL candidate.
  *
- * @return bool True if safe.
+ * @return boolean True if safe.
  */
 function isSafeRedirect(string $url): bool
 {
@@ -115,10 +115,10 @@ function isSafeRedirect(string $url): bool
 /**
  * Check if a trainer is authorized to certify a specific certification.
  *
- * @param int $trainerId       ID of the trainer (trainers.seq_nmbr)
- * @param int $certificationId Certification ID
+ * @param integer $trainerId       ID of the trainer (trainers.seq_nmbr)
+ * @param integer $certificationId Certification ID
  *
- * @return bool True if the trainer is authorized, false otherwise.
+ * @return boolean True if the trainer is authorized, false otherwise.
  */
 function checkCertification(int $trainerId, int $certificationId): bool
 {
