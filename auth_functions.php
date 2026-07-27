@@ -111,3 +111,36 @@ function isSafeRedirect(string $url): bool
     // Prevent open redirects (must start with / or be a relative page script)
     return str_starts_with($url, '/') || !preg_match('#^https?://#i', $url);
 }
+
+/**
+ * Check if a trainer is authorized to certify a specific certification.
+ *
+ * @param int $trainerId       ID of the trainer (trainers.seq_nmbr)
+ * @param int $certificationId Certification ID
+ *
+ * @return bool True if the trainer is authorized, false otherwise.
+ */
+function checkCertification(int $trainerId, int $certificationId): bool
+{
+    global $mysqli;
+
+    $stmt = $mysqli->prepare("SELECT optbl_ptr FROM trainers WHERE seq_nmbr = ?");
+    $stmt->bind_param("i", $trainerId);
+    $stmt->execute();
+    $trainer = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$trainer || !isset($trainer['optbl_ptr']) || (int)$trainer['optbl_ptr'] === -1) {
+        return false;
+    }
+
+    $operatorId = $trainer['optbl_ptr'];
+
+    $stmt = $mysqli->prepare("SELECT COUNT(*) AS total FROM can_certify WHERE trainer_ptr = ? AND cert_ptr = ?");
+    $stmt->bind_param("ii", $operatorId, $certificationId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    return $row && intval($row['total']) > 0;
+}

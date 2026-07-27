@@ -29,33 +29,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-/**
- * Validate and retrieve the required POST parameters.
- *
- * @throws Exception If required parameters are missing or invalid.
- *  Trainer ID and Certification ID must be provided and numeric.
- *
- * @return array Associative array with sanitized 'trainer_id' and 'cert_id'.
- */
-function validatePostParameters()
-{
-    $raw_trainer_id = $_POST['trainer_id'] ?? null;
-    $raw_cert_id    = $_POST['cert_id'] ?? null;
-
-    if ($raw_trainer_id === null
-        || $raw_cert_id === null
-        || !is_numeric($raw_trainer_id)
-        || !is_numeric($raw_cert_id)
-    ) {
-        throw new Exception("Invalid request. Missing trainer or certification information.");
-    }
-
-    return [
-        'trainer_id' => intval($raw_trainer_id),
-        'cert_id'    => intval($raw_cert_id),
-    ];
-}
-
 try {
     // Verify CSRF token
     if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
@@ -67,10 +40,21 @@ try {
         header("Location: trainer_edit.php?id=" . urlencode($redirectId));
         exit;
     }
-    // Validate input
-    $params = validatePostParameters();
-    $trainer_id = $params['trainer_id'];
-    $cert_id = $params['cert_id'];
+
+    // Validate inputs inline to adhere to PSR-12 side-effects standard
+    $raw_trainer_id = $_POST['trainer_id'] ?? null;
+    $raw_cert_id    = $_POST['cert_id'] ?? null;
+
+    if ($raw_trainer_id === null
+        || $raw_cert_id === null
+        || !is_numeric($raw_trainer_id)
+        || !is_numeric($raw_cert_id)
+    ) {
+        throw new Exception("Invalid request. Missing trainer or certification information.");
+    }
+
+    $trainer_id = intval($raw_trainer_id);
+    $cert_id    = intval($raw_cert_id);
 
     // Perform the removal operation
     $query = "DELETE FROM can_certify WHERE trainer_ptr = ? AND cert_ptr = ?";
