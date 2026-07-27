@@ -278,7 +278,9 @@ if ($keys_table_exists) {
                                 </span>
                             </td>
                             <td><?php echo $key['issued_date'] ? htmlspecialchars($key['issued_date']) : '-'; ?></td>
-                            <td><?php echo $key['returned_date'] ? htmlspecialchars($key['returned_date']) : '-'; ?></td>
+                            <td>
+                                <?php echo $key['returned_date'] ? htmlspecialchars($key['returned_date']) : '-'; ?>
+                            </td>
                             <td><?php echo htmlspecialchars($key['notes'] ?? ''); ?></td>
                             <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                             <td>
