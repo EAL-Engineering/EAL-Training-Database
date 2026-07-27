@@ -1,12 +1,47 @@
 <?xml version="1.0"?>
-<ruleset name="PHP_CodeSniffer">
+<ruleset name="EAL_Training_Database">
+    <description>PSR-12 standard with modern PHPDoc rules for EAL Training Database</description>
 
-    <rule ref="PEAR" /> <!-- ruleset standard -->
-    <rule ref="Generic.Files.LineLength"> <!-- rule to override -->
+    <!-- 1. Core Base Standard -->
+    <rule ref="PSR12"/>
+
+    <!-- 2. Configure Line Length Limit -->
+    <rule ref="Generic.Files.LineLength">
         <properties>
-            <property name="lineLimit" value="150"/> <!-- maximum line length -->
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
         </properties>
     </rule>
-    <file>app</file> <!-- directory you want to analyze -->
+
+    <!-- 3. Modern DocBlock & Documentation Sniffs -->
+    
+    <!-- Enforce valid DocBlock syntax and formatting -->
+    <rule ref="Generic.Commenting.DocComment"/>
+
+    <!-- Require function comments with @param, @return, and descriptions -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <!-- Don't force redundant scalar type tags if PHP 8 type hints are in code -->
+        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+    </rule>
+
+    <!-- Require @throws tags for any explicit exceptions thrown in functions -->
+    <rule ref="Squiz.Commenting.FunctionCommentThrowTag"/>
+
+    <!-- 4. CLI Arguments -->
+    <arg value="p"/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
     <arg name="encoding" value="utf-8"/>
+
+    <!-- 5. Directories to Scan -->
+    <file>.</file>
+
+    <!-- 6. Exclusions -->
+    <exclude-pattern>*/.git/*</exclude-pattern>
+    <exclude-pattern>*/.phive/*</exclude-pattern>
+    <exclude-pattern>*/.phpdoc/*</exclude-pattern>
+    <exclude-pattern>*/db/*</exclude-pattern>
+    <exclude-pattern>*/docs/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
 </ruleset>
