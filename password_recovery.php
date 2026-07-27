@@ -4,7 +4,7 @@
  *
  * This script handles user password recovery requests.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -18,13 +18,13 @@ require_once "auth.php";
 
 $message = "";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         die("Invalid CSRF token. <a href='index.php'>Go to Main Page</a>");
     }
 
-    $email = trim($_POST['email']); 
+    $email = trim($_POST['email'] ?? ''); 
 
     // Query to find the operator and ensure linkage to a trainer
     $query = "

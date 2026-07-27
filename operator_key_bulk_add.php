@@ -5,7 +5,7 @@
  * Batch-assign keys to multiple operators. Starts with 5 rows
  * and auto-expands when the last row is filled.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -17,18 +17,19 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
-$entered_by = isset($_SESSION['fname']) ? $_SESSION['fname'] : 'Unknown';
+$entered_by = $_SESSION['fname'] ?? 'Unknown';
 
 $error_message = "";
 $success_message = "";
 $errors = [];
 $success_count = 0;
 
-if (isset($_GET['success']) && is_numeric($_GET['success'])) {
-    $success_message = "Successfully assigned " . intval($_GET['success']) . " key(s).";
+$success_param = $_GET['success'] ?? null;
+if ($success_param !== null && is_numeric($success_param)) {
+    $success_message = "Successfully assigned " . intval($success_param) . " key(s).";
 }
 
 $key_type_options = [
@@ -48,11 +49,11 @@ while ($row = $operators_result->fetch_assoc()) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error_message = "Invalid CSRF token.";
     } else {
-        $key_type = isset($_POST['key_type']) ? trim($_POST['key_type']) : '';
-        $issued_date = isset($_POST['issued_date']) && $_POST['issued_date'] !== '' ? $_POST['issued_date'] : date('Y-m-d');
+        $key_type = trim($_POST['key_type'] ?? '');
+        $issued_date = !empty($_POST['issued_date']) ? $_POST['issued_date'] : date('Y-m-d');
 
         if (empty($key_type) || !array_key_exists($key_type, $key_type_options)) {
             $error_message = "Please select a valid key type.";
@@ -60,10 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mysqli->begin_transaction();
             $all_ok = true;
 
-            $rows = isset($_POST['rows']) ? $_POST['rows'] : [];
+            $rows = is_array($_POST['rows'] ?? null) ? $_POST['rows'] : [];
             foreach ($rows as $idx => $row) {
-                $operator_id = isset($row['operator_id']) ? intval($row['operator_id']) : 0;
-                $serial_number = isset($row['serial_number']) ? trim($row['serial_number']) : '';
+                $operator_id = intval($row['operator_id'] ?? 0);
+                $serial_number = trim($row['serial_number'] ?? '');
 
                 // Skip completely empty rows
                 if ($operator_id <= 0 && empty($serial_number)) {
@@ -137,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Determine how many rows to show: at least 5, or enough to hold submitted data
 $display_rows = 5;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows']) && is_array($_POST['rows'])) {
     $display_rows = max(5, count($_POST['rows']) + 1);
 }
 ?>
@@ -373,7 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                     <option value="">-- Select Key Type --</option>
                     <?php foreach ($key_type_options as $value => $label): ?>
                         <option value="<?php echo htmlspecialchars($value); ?>"
-                            <?php echo (isset($_POST['key_type']) && $_POST['key_type'] === $value) ? 'selected' : ''; ?>>
+                            <?php echo (($_POST['key_type'] ?? '') === $value) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($label); ?>
                         </option>
                     <?php endforeach; ?>
@@ -383,7 +384,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
             <div class="form-group">
                 <label for="issued_date">Issued Date:</label>
                 <input type="date" name="issued_date" id="issued_date"
-                    value="<?php echo isset($_POST['issued_date']) ? htmlspecialchars($_POST['issued_date']) : date('Y-m-d'); ?>">
+                    value="<?php echo htmlspecialchars($_POST['issued_date'] ?? date('Y-m-d')); ?>">
             </div>
 
             <table class="keys-table bulk-keys-table">
@@ -400,9 +401,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                             <div class="searchable-select" data-index="<?php echo $i; ?>">
                                 <input type="text" class="searchable-input" placeholder="Type to search..."
                                     value="<?php
-                                        if (isset($_POST['rows'][$i]['operator_id'])) {
+                                        $posted_op_id = $_POST['rows'][$i]['operator_id'] ?? null;
+                                        if ($posted_op_id !== null) {
                                             foreach ($operators as $op) {
-                                                if (intval($op['seq_nmbr']) === intval($_POST['rows'][$i]['operator_id'])) {
+                                                if (intval($op['seq_nmbr']) === intval($posted_op_id)) {
                                                     echo htmlspecialchars($op['fname']);
                                                     break;
                                                 }
@@ -412,13 +414,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rows'])) {
                                     autocomplete="off">
                                 <div class="searchable-dropdown"></div>
                                 <input type="hidden" name="rows[<?php echo $i; ?>][operator_id]"
-                                    value="<?php echo isset($_POST['rows'][$i]['operator_id']) ? htmlspecialchars($_POST['rows'][$i]['operator_id']) : ''; ?>">
+                                    value="<?php echo htmlspecialchars($_POST['rows'][$i]['operator_id'] ?? ''); ?>">
                             </div>
                         </td>
                         <td>
                             <input type="text" name="rows[<?php echo $i; ?>][serial_number]"
                                 placeholder="Serial #"
-                                value="<?php echo isset($_POST['rows'][$i]['serial_number']) ? htmlspecialchars($_POST['rows'][$i]['serial_number']) : ''; ?>">
+                                value="<?php echo htmlspecialchars($_POST['rows'][$i]['serial_number'] ?? ''); ?>">
                         </td>
                     </tr>
                     <?php endfor; ?>

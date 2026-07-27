@@ -4,7 +4,7 @@
  *
  * Removes a certification from a trainer in the "can_certify" table.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -21,7 +21,7 @@ require_once "auth.php";
  * Check if the user is logged in and authorized to edit personnel details.
  * Redirects unauthorized users to the login page.
  */
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 // Enable error reporting for debugging (remove in production)
 ini_set('display_errors', 1);
@@ -38,26 +38,27 @@ error_reporting(E_ALL);
  */
 function validatePostParameters()
 {
-    if (!isset($_POST['trainer_id']) || !isset($_POST['cert_id']) 
-        || !is_numeric($_POST['trainer_id']) || !is_numeric($_POST['cert_id'])
-    ) {
+    $raw_trainer_id = $_POST['trainer_id'] ?? null;
+    $raw_cert_id    = $_POST['cert_id'] ?? null;
+
+    if ($raw_trainer_id === null || $raw_cert_id === null || !is_numeric($raw_trainer_id) || !is_numeric($raw_cert_id)) {
         throw new Exception("Invalid request. Missing trainer or certification information.");
     }
 
     return [
-        'trainer_id' => intval($_POST['trainer_id']),
-        'cert_id' => intval($_POST['cert_id']),
+        'trainer_id' => intval($raw_trainer_id),
+        'cert_id'    => intval($raw_cert_id),
     ];
 }
 
 try {
     // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $_SESSION['message'] = [
             'type' => 'error',
             'text' => 'Invalid CSRF token.'
         ];
-        $redirectId = isset($_POST['trainer_id']) ? intval($_POST['trainer_id']) : 0;
+        $redirectId = intval($_POST['trainer_id'] ?? 0);
         header("Location: trainer_edit.php?id=" . urlencode($redirectId));
         exit;
     }
@@ -101,6 +102,6 @@ try {
 }
 
 // Ensure we always have a trainer id to redirect to
-$redirectId = isset($trainer_id) ? $trainer_id : (isset($_POST['trainer_id']) ? intval($_POST['trainer_id']) : 0);
+$redirectId = $trainer_id ?? intval($_POST['trainer_id'] ?? 0);
 header("Location: trainer_edit.php?id=" . urlencode($redirectId));
 exit();

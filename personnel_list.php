@@ -6,7 +6,7 @@
  * name, email, staff status, and highest certification. The data is fetched from a
  * MySQL database and displayed using DataTables for enhanced interactivity.
  * 
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -20,7 +20,7 @@
  * 
  * @var string $currentUrl Encoded URL string of the current page.
  */
-$currentUrl = urlencode($_SERVER['REQUEST_URI']);
+$currentUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
 
 // Include the database connection file
 require_once "config.php";
@@ -103,7 +103,7 @@ $opertor_list = $mysqli->query(
                 <th>Certification</th>
                 <th>EAL Staff</th>
                 <th>Senior Staff</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
+                <?php if (($_SESSION['role_id'] ?? null) == 1) : ?>
                     <th>User</th>
                 <?php endif; ?>
             </tr>
@@ -127,7 +127,7 @@ $opertor_list = $mysqli->query(
                 echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
                 echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";
                 // Conditionally display "User" column only for Role 1
-                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
+                if (($_SESSION['role_id'] ?? null) == 1) {
                     echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
                 }
                 echo "</tr>";

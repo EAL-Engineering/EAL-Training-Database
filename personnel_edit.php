@@ -17,15 +17,16 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+$id_param = $_GET['id'] ?? null;
+if ($id_param === null || !is_numeric($id_param)) {
     die("Invalid request. No operator ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
-$id = intval($_GET['id']);
+$id = intval($id_param);
 
 /**
  * Retrieve operator details from the database.
@@ -230,7 +231,7 @@ if ($keys_table_exists) {
                             <th>Issued</th>
                             <th>Returned</th>
                             <th>Notes</th>
-                            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                            <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                                 <th>Actions</th>
                             <?php endif; ?>
                         </tr>
@@ -248,7 +249,7 @@ if ($keys_table_exists) {
                             <td><?php echo $key['issued_date'] ? htmlspecialchars($key['issued_date']) : '-'; ?></td>
                             <td><?php echo $key['returned_date'] ? htmlspecialchars($key['returned_date']) : '-'; ?></td>
                             <td><?php echo htmlspecialchars($key['notes'] ?? ''); ?></td>
-                            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                            <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                             <td>
                                 <?php if ($key['status'] === 'Active'): ?>
                                     <a href="operator_key_return.php?id=<?php echo urlencode($key['seq_nmbr']); ?>&redirect=personnel_edit.php?id=<?php echo urlencode($id); ?>">Return</a>
@@ -264,7 +265,7 @@ if ($keys_table_exists) {
                 <p>No keys assigned to this operator.</p>
             <?php endif; ?>
 
-            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2 && $keys_table_exists) : ?>
+            <?php if (($_SESSION['role_id'] ?? 99) <= 2 && $keys_table_exists) : ?>
                 <div class="add-key-link">
                     <a href="operator_key_add.php?operator_id=<?php echo urlencode($id); ?>">+ Add Key</a>
                 </div>

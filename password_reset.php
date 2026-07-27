@@ -20,11 +20,10 @@ ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 // Check if the reset token is provided
-if (!isset($_GET['token'])) {
+$reset_token = $_GET['token'] ?? null;
+if ($reset_token === null) {
     die("Invalid or expired token.");
 }
-
-$reset_token = $_GET['token'];
 
 // Verify the reset token in the database
 $query = "SELECT seq_nmbr, reset_expiration, login_name FROM trainers WHERE reset_token = ?";
@@ -53,7 +52,7 @@ if (time() > strtotime($reset_expiration)) {
 // If the form is submitted, process the password change
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         die("Invalid CSRF token.");
     }
     $new_password = $_POST['password'] ?? '';

@@ -1,10 +1,10 @@
 <?php
 /**
- * Operator Keys by Type
+ * Operator Keys Grouped by Status
  *
- * Lists all keys grouped by key type, showing which operator holds each.
+ * Lists all keys filtered by status, showing which operator holds each.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -16,12 +16,10 @@
 require_once "config.php";
 require_once "auth.php";
 
-$timeUntilSessionExpires = isset($_SESSION['user_id']) ? getTimeUntilSessionExpires() : 0;
-
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Optional status filter
-$status_filter = isset($_GET['status']) ? $_GET['status'] : '';
+$status_filter = $_GET['status'] ?? '';
 $where_sql = '';
 $params = [];
 $types = '';
@@ -69,7 +67,7 @@ if (!empty($params)) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Keys by Type</title>
+    <title>Keys by Status</title>
     <link rel="stylesheet" href="dataTables.dataTables.css">
     <link rel="stylesheet" href="common.css">
     <link rel="icon" type="image/svg+xml" href="EALlogoZM.svg">
@@ -94,7 +92,7 @@ if (!empty($params)) {
         </div>
     </div>
 
-    <h1>Keys by Type</h1>
+    <h1>Keys by Status</h1>
 
     <form method="get" action="operator_keys_by_status.php" class="filter-form" style="margin-bottom: 20px;">
         <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
@@ -124,7 +122,7 @@ if (!empty($params)) {
                 <th>Issued</th>
                 <th>Returned</th>
                 <th>Entered</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                     <th>Actions</th>
                 <?php endif; ?>
             </tr>
@@ -155,7 +153,7 @@ if (!empty($params)) {
                 <td><?php echo $row['issued_date'] ? htmlspecialchars($row['issued_date']) : '-'; ?></td>
                 <td><?php echo $row['returned_date'] ? htmlspecialchars($row['returned_date']) : '-'; ?></td>
                 <td><?php echo htmlspecialchars($row['entered']); ?></td>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                 <td>
                     <?php if ($row['status'] === 'Active'): ?>
                         <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Return</a>

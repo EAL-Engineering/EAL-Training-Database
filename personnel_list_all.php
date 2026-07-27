@@ -6,7 +6,7 @@
  * name, status, email, staff status, and highest certification. The data is fetched from a
  * MySQL database and displayed using DataTables for enhanced interactivity.
  * 
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -100,7 +100,7 @@ $opertor_list = $mysqli->query(
                 <th>Certification</th>
                 <th>EAL Staff</th>
                 <th>Senior Staff</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
+                <?php if (($_SESSION['role_id'] ?? null) == 1) : ?>
                     <th>User</th>
                 <?php endif; ?>
             </tr>
@@ -114,7 +114,7 @@ $opertor_list = $mysqli->query(
             $rowCounter = 0; // Unique ID for each row's email
             while ($res = mysqli_fetch_array($opertor_list)) {
                 $email = explode('@', $res['OperatorEmail'] ?? '');
-                $user = $email[0];
+                $user = $email[0] ?? '';
                 $domain = $email[1] ?? '';
                 $rowId = "email-" . $rowCounter++; // Generate a unique ID
                 echo "<tr>";
@@ -125,7 +125,7 @@ $opertor_list = $mysqli->query(
                 echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
                 echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";
                 // Conditionally display "User" column only for Role 1
-                if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
+                if (($_SESSION['role_id'] ?? null) == 1) {
                     echo "<td><a href=\"personnel_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
                 }
                 echo "</tr>";

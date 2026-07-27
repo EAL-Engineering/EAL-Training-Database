@@ -5,7 +5,7 @@
  * This script handles the addition of new personnel into the database.
  * It validates the form inputs, performs database insertion, and handles errors.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -21,12 +21,12 @@ require_once "config.php";
 require_once "auth.php";
 
 // Check if the user is logged in and authorized to edit personnel details
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 /**
  * Create the added by variable to enter into the database.
  */
-$addedby = isset($_SESSION['fname']) ? $_SESSION['fname'] : 'Unknown';
+$addedby = $_SESSION['fname'] ?? 'Unknown';
 
 /**
  * Time until the session expires
@@ -53,113 +53,97 @@ $success_message = "";
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error_message = "Invalid CSRF token.";
-    }
-    /**
-     * Form input variables
-     *
-     * @var string $fname Full name of the personnel
-     * @var string $name Full name (duplicate of $fname for legacy reasons)
-     * @var string $email Email address of the personnel
-     * @var string $altemail Alternate email address
-     * @var string $phone Phone number
-     * @var string $office Office number
-     * @var string $home Home address
-     * @var string $comments Additional comments
-     * @var string $status Status of the personnel (Active/Inactive)
-     * @var int    $is_eal_staff Internal EAL staff indicator (1 or 0)
-     * @var int    $is_senior_staff Senior staff indicator (1 or 0)
-     * @var string $entered Timestamp of when the personnel was added
-     */
-    $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
-    // Truncate $name to 64 chars to match DB schema limits
-    $name  = mb_substr($fname, 0, 64);
-    $name = isset($_POST['fname']) ? trim($_POST['fname']) : '';
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $altemail = isset($_POST['altemail']) ? trim($_POST['altemail']) : '';
-    $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
-    $office = isset($_POST['office']) ? trim($_POST['office']) : '';
-    $home = isset($_POST['home']) ? trim($_POST['home']) : '';
-    $comments = isset($_POST['comments']) ? trim($_POST['comments']) : '';
-    $status = isset($_POST['status']) && $_POST['status'] !== '' ? trim($_POST['status']) : 'Active';
-    
-    $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
-    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
-
-    // Senior staff is a subset of EAL staff
-    if ($is_senior_staff) {
-        $is_eal_staff = 1;
-    }
-
-    $entered = date('Y-m-d H:i:s'); // Get current date and time in 'YYYY-MM-DD HH:MM:SS' format
-
-    // Validate inputs
-    if (empty($fname) || empty($email)) {
-        $error_message = "Full Name and Email are required.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error_message = "Invalid email address.";
-    } elseif (!empty($altemail) && !filter_var($altemail, FILTER_VALIDATE_EMAIL)) {
-        $error_message = "Invalid alternate email address.";
     } else {
-        // Insert into the database
-        $stmt = $mysqli->prepare(
-            "
-            INSERT INTO operators (
-                fname, name, email, altemail, phones,
-                office, home, comments, status, is_eal_staff,
-                is_senior_staff, entered, addedby
-            ) 
-            VALUES 
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            "
-        );
-        if ($stmt) {
-            $stmt->bind_param(
-                "sssssssssiiss",
-                $fname,
-                $name,
-                $email,
-                $altemail,
-                $phone,
-                $office,
-                $home,
-                $comments,
-                $status,
-                $is_eal_staff,
-                $is_senior_staff,
-                $entered,
-                $addedby
-            );
-            if ($stmt->execute()) {
-                $operator_id = $stmt->insert_id;
+        $fname = trim($_POST['fname'] ?? '');
+        // Truncate $name to 64 chars to match DB schema limits
+        $name  = mb_substr($fname, 0, 64);
+        $email = trim($_POST['email'] ?? '');
+        $altemail = trim($_POST['altemail'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $office = trim($_POST['office'] ?? '');
+        $home = trim($_POST['home'] ?? '');
+        $comments = trim($_POST['comments'] ?? '');
+        $status = !empty($_POST['status']) ? trim($_POST['status']) : 'Active';
+        
+        $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
+        $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
 
-                // Insert default certification with trainer and status
-                $default_certification = 1; // Replace with actual certification ID
-                $trainer_id = $_SESSION['user_id']; // Currently logged-in user
-                $status = 'Active';
+        // Senior staff is a subset of EAL staff
+        if ($is_senior_staff) {
+            $is_eal_staff = 1;
+        }
 
-                $stmt_cert = $mysqli->prepare(
-                    "
-                    INSERT INTO optraining (operator, certification, trainer, status) 
-                    VALUES (?, ?, ?, ?)
-                    "
-                );
-                if ($stmt_cert) {
-                    $stmt_cert->bind_param("iiis", $operator_id, $default_certification, $trainer_id, $status);
-                    $stmt_cert->execute();
-                    $stmt_cert->close();
-                }
+        $entered = date('Y-m-d H:i:s'); // Get current date and time in 'YYYY-MM-DD HH:MM:SS' format
 
-                // Redirect to personnel_list.php
-                header("Location: personnel_list.php");
-                exit;
-            } else {
-                $error_message = "Database error: " . $stmt->error;
-            }
-            $stmt->close();
+        // Validate inputs
+        if (empty($fname) || empty($email)) {
+            $error_message = "Full Name and Email are required.";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error_message = "Invalid email address.";
+        } elseif (!empty($altemail) && !filter_var($altemail, FILTER_VALIDATE_EMAIL)) {
+            $error_message = "Invalid alternate email address.";
         } else {
-            $error_message = "Database error: " . $mysqli->error;
+            // Insert into the database
+            $stmt = $mysqli->prepare(
+                "
+                INSERT INTO operators (
+                    fname, name, email, altemail, phones,
+                    office, home, comments, status, is_eal_staff,
+                    is_senior_staff, entered, addedby
+                ) 
+                VALUES 
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                "
+            );
+            if ($stmt) {
+                $stmt->bind_param(
+                    "sssssssssiiss",
+                    $fname,
+                    $name,
+                    $email,
+                    $altemail,
+                    $phone,
+                    $office,
+                    $home,
+                    $comments,
+                    $status,
+                    $is_eal_staff,
+                    $is_senior_staff,
+                    $entered,
+                    $addedby
+                );
+                if ($stmt->execute()) {
+                    $operator_id = $stmt->insert_id;
+
+                    // Insert default certification with trainer and status
+                    $default_certification = 1; // Replace with actual certification ID
+                    $trainer_id = $_SESSION['user_id'] ?? 0; // Currently logged-in user
+                    $status = 'Active';
+
+                    $stmt_cert = $mysqli->prepare(
+                        "
+                        INSERT INTO optraining (operator, certification, trainer, status) 
+                        VALUES (?, ?, ?, ?)
+                        "
+                    );
+                    if ($stmt_cert) {
+                        $stmt_cert->bind_param("iiis", $operator_id, $default_certification, $trainer_id, $status);
+                        $stmt_cert->execute();
+                        $stmt_cert->close();
+                    }
+
+                    // Redirect to personnel_list.php
+                    header("Location: personnel_list.php");
+                    exit;
+                } else {
+                    $error_message = "Database error: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                $error_message = "Database error: " . $mysqli->error;
+            }
         }
     }
 }

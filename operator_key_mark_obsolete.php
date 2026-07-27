@@ -5,7 +5,7 @@
  * Batch operation to mark all keys of a given type as obsolete.
  * Used during building re-keying events.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -17,21 +17,21 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
-$entered_by = isset($_SESSION['fname']) ? $_SESSION['fname'] : 'Unknown';
+$entered_by = $_SESSION['fname'] ?? 'Unknown';
 
 $error_message = "";
 $success_message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error_message = "Invalid CSRF token.";
     } else {
-        $key_type = isset($_POST['key_type']) ? trim($_POST['key_type']) : '';
-        $new_key_type = isset($_POST['new_key_type']) ? trim($_POST['new_key_type']) : '';
-        $notes = isset($_POST['notes']) ? trim($_POST['notes']) : '';
+        $key_type = trim($_POST['key_type'] ?? '');
+        $new_key_type = trim($_POST['new_key_type'] ?? '');
+        $notes = trim($_POST['notes'] ?? '');
 
         if (empty($key_type)) {
             $error_message = "Please select a key type to mark obsolete.";

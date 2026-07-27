@@ -4,7 +4,7 @@
  *
  * Displays the full history of a specific key (all assignments over time).
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -16,12 +16,10 @@
 require_once "config.php";
 require_once "auth.php";
 
-$timeUntilSessionExpires = isset($_SESSION['user_id']) ? getTimeUntilSessionExpires() : 0;
-
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-$key_type = isset($_GET['key_type']) ? $_GET['key_type'] : '';
-$serial = isset($_GET['serial']) ? $_GET['serial'] : '';
+$key_type = $_GET['key_type'] ?? '';
+$serial = $_GET['serial'] ?? '';
 
 if ($key_type === '' || $serial === '') {
     header('Location: operator_keys.php');

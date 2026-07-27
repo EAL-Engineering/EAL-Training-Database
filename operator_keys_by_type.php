@@ -4,7 +4,7 @@
  *
  * Select a key type and view all keys of that type with operator details.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -16,8 +16,6 @@
 require_once "config.php";
 require_once "auth.php";
 
-$timeUntilSessionExpires = isset($_SESSION['user_id']) ? getTimeUntilSessionExpires() : 0;
-
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 $key_type_options = [
@@ -28,7 +26,7 @@ $key_type_options = [
     '4CAB'    => '4CAB (Student Key)',
 ];
 
-$selected_type = isset($_GET['key_type']) ? $_GET['key_type'] : '';
+$selected_type = $_GET['key_type'] ?? '';
 
 if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)) {
     // Filter by specific key type
@@ -150,7 +148,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 <th>Issued</th>
                 <th>Returned</th>
                 <th>Entered</th>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                     <th>Actions</th>
                 <?php endif; ?>
             </tr>
@@ -183,7 +181,7 @@ if ($selected_type !== '' && array_key_exists($selected_type, $key_type_options)
                 <td><?php echo $row['issued_date'] ? htmlspecialchars($row['issued_date']) : '-'; ?></td>
                 <td><?php echo $row['returned_date'] ? htmlspecialchars($row['returned_date']) : '-'; ?></td>
                 <td><?php echo htmlspecialchars($row['entered']); ?></td>
-                <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                 <td>
                     <?php if ($row['status'] === 'Active'): ?>
                         <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys_by_type.php">Return</a>

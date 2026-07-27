@@ -27,14 +27,15 @@ if ($mysqli->connect_error) {
  * 
  * @var string $currentUrl
  */
-$currentUrl = urlencode($_SERVER['REQUEST_URI']);
+$currentUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Check authorization: user must hold certification #18 to record this training
-$authorizedTrainer = checkCertification($_SESSION['user_id'], 18);
+$user_id = $_SESSION['user_id'] ?? 0;
+$authorizedTrainer = checkCertification($user_id, 18);
 
 if (!$authorizedTrainer) {
     header("Location: login.php?return=$currentUrl");
@@ -50,11 +51,11 @@ $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // FIX (Issue #4): Guard clause for CSRF validation
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $message = "Invalid security token. Please refresh the page and try again.";
     } else {
-        $dateOfTraining = isset($_POST['date_of_training']) ? trim($_POST['date_of_training']) : '';
-        $selectedOperators = isset($_POST['operators']) ? $_POST['operators'] : [];
+        $dateOfTraining = trim($_POST['date_of_training'] ?? '');
+        $selectedOperators = is_array($_POST['operators'] ?? null) ? $_POST['operators'] : [];
 
         if (!empty($dateOfTraining) && !empty($selectedOperators)) {
             $date = date('Y-m-d', strtotime($dateOfTraining));
@@ -69,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 if ($stmt) {
                     // FIX (Issue #21): Correct type binding string from "is" to "iis"
-                    $stmt->bind_param("iis", $operator, $_SESSION['user_id'], $date);
+                    $stmt->bind_param("iis", $operator, $user_id, $date);
                     if ($stmt->execute()) {
                         $successCount++;
                     }
@@ -87,11 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch operators eligible for training and their most recent training date
-/**
- * Fetch the list of active operators and their last training date.
- * 
- * @var mysqli_result|false $operatorsResult Result set of eligible operators.
- */
 $operatorsResult = $mysqli->query(
     "SELECT o.seq_nmbr AS id, o.name AS name, MAX(t.entered) AS last_training 
      FROM operators o
@@ -104,12 +100,6 @@ if (!$operatorsResult) {
     die("Query failed: " . $mysqli->error);
 }
 
-// Fetch data using a loop since `fetch_all` is unavailable in PHP 5.4
-/**
- * Array of operators with their details.
- * 
- * @var array $operators
- */
 $operators = [];
 while ($row = $operatorsResult->fetch_assoc()) {
     $operators[] = $row;

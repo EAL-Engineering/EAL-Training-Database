@@ -4,7 +4,7 @@
  *
  * Changes a key's status to 'Lost'.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -16,16 +16,17 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
-$redirect = isset($_GET['redirect']) ? $_GET['redirect'] : 'operator_keys.php';
+$redirect = $_GET['redirect'] ?? 'operator_keys.php';
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+$key_id_param = $_GET['id'] ?? null;
+if ($key_id_param === null || !is_numeric($key_id_param)) {
     header("Location: " . $redirect);
     exit();
 }
 
-$key_id = intval($_GET['id']);
+$key_id = intval($key_id_param);
 
 $stmt = $mysqli->prepare(
     "UPDATE operator_keys SET status = 'Lost' WHERE seq_nmbr = ? AND status = 'Active'"

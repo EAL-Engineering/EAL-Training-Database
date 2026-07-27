@@ -14,15 +14,16 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+$operator_id_param = $_GET['id'] ?? null;
+if ($operator_id_param === null || !is_numeric($operator_id_param)) {
     die("Invalid operator ID. <a href='personnel_list.php'>Back to List</a>");
 }
 
-$operator_id = intval($_GET['id']);
+$operator_id = intval($operator_id_param);
 $logged_in_user_id = $_SESSION['user_id'] ?? 0;
 
 // Fetch operator details
@@ -105,7 +106,7 @@ $trainer_result = $mysqli->query($query);
         <?php if (isset($_GET['removed'])) : ?>
             <p style="color: green; font-weight: bold;">Certification removed successfully.</p>
         <?php endif; ?>
-        <?php if (isset($_GET['error']) && $_GET['error'] === 'duplicate') : ?>
+        <?php if (($_GET['error'] ?? '') === 'duplicate') : ?>
             <p style="color: red; font-weight: bold;">Error: Operator already has an active record for this certification.</p>
         <?php endif; ?>
 

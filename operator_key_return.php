@@ -4,7 +4,7 @@
  *
  * Returns a key from an operator and assigns it to a spare pool.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -16,20 +16,21 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
-$entered_by = isset($_SESSION['fname']) ? $_SESSION['fname'] : 'Unknown';
+$entered_by = $_SESSION['fname'] ?? 'Unknown';
 
-$redirect = isset($_GET['redirect']) ? $_GET['redirect'] : 'operator_keys.php';
+$redirect = $_GET['redirect'] ?? 'operator_keys.php';
 $error_message = "";
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+$raw_id = $_GET['id'] ?? null;
+if ($raw_id === null || !is_numeric($raw_id)) {
     header("Location: " . $redirect);
     exit();
 }
 
-$key_id = intval($_GET['id']);
+$key_id = intval($raw_id);
 
 // Fetch the key details
 $stmt = $mysqli->prepare(
@@ -76,10 +77,10 @@ if (!$default_pool_id && count($pools) > 0) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error_message = "Invalid CSRF token.";
     } else {
-        $pool_id = isset($_POST['pool_id']) ? intval($_POST['pool_id']) : 0;
+        $pool_id = intval($_POST['pool_id'] ?? 0);
 
         if ($pool_id <= 0) {
             $error_message = "Please select a pool.";

@@ -15,18 +15,18 @@ require_once "config.php";
 require_once "auth.php";
 
 // Enforce login requirement (Role >= 1)
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Token Protection
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         error_log("CSRF token validation failed in certification_remove.php");
         http_response_code(403);
         die("Invalid security token. Please refresh the page and try again.");
     }
 
-    $optraining_id = isset($_POST['optraining_id']) ? intval($_POST['optraining_id']) : 0;
-    $operator_id   = isset($_POST['operator_id'])   ? intval($_POST['operator_id'])   : 0;
+    $optraining_id = intval($_POST['optraining_id'] ?? 0);
+    $operator_id   = intval($_POST['operator_id'] ?? 0);
 
     if ($optraining_id <= 0 || $operator_id <= 0) {
         $_SESSION['message'] = [
@@ -39,9 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Option A: Hard Delete (Permanently delete record from database)
     $query = "DELETE FROM optraining WHERE seq_nmbr = ? AND operator = ?";
-
-    // Option B: Soft Delete / Revoke (Uncomment to preserve audit/training history)
-    // $query = "UPDATE optraining SET status = 'Revoked' WHERE seq_nmbr = ? AND operator = ?";
 
     $stmt = $mysqli->prepare($query);
     if ($stmt) {

@@ -17,7 +17,7 @@ require_once "auth.php";
 require_once "config.php";
 
 // FIX (Issue #15): Require role >= 0 so any logged-in user can change their password
-checkLogin(0, $_SERVER['REQUEST_URI']);
+checkLogin(0, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 $error_message = '';
@@ -25,7 +25,7 @@ $success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error_message = "Invalid security token. Please refresh the page and try again.";
     } else {
         $current_password = $_POST['current_password'] ?? '';
@@ -37,40 +37,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($new_password !== $confirm_password) {
             $error_message = "New passwords do not match.";
         } else {
-            // Fetch current password hash for the logged-in user
-            $query = "SELECT password_hash FROM trainers WHERE seq_nmbr = ?";
-            $stmt = $mysqli->prepare($query);
-            if ($stmt) {
-                $stmt->bind_param("i", $_SESSION['user_id']);
-                $stmt->execute();
-                $row = $stmt->get_result()->fetch_assoc();
-                $stmt->close();
+            $user_id = $_SESSION['user_id'] ?? null;
+            if ($user_id === null) {
+                $error_message = "User session expired or invalid.";
+            } else {
+                // Fetch current password hash for the logged-in user
+                $query = "SELECT password_hash FROM trainers WHERE seq_nmbr = ?";
+                $stmt = $mysqli->prepare($query);
+                if ($stmt) {
+                    $stmt->bind_param("i", $user_id);
+                    $stmt->execute();
+                    $row = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
 
-                if ($row) {
-                    if (password_verify($current_password, $row['password_hash'])) {
-                        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                    if ($row) {
+                        if (password_verify($current_password, $row['password_hash'])) {
+                            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
-                        $update_query = "UPDATE trainers SET password_hash = ? WHERE seq_nmbr = ?";
-                        $update_stmt = $mysqli->prepare($update_query);
-                        if ($update_stmt) {
-                            $update_stmt->bind_param("si", $hashed_password, $_SESSION['user_id']);
-                            if ($update_stmt->execute()) {
-                                $success_message = "Password successfully changed.";
+                            $update_query = "UPDATE trainers SET password_hash = ? WHERE seq_nmbr = ?";
+                            $update_stmt = $mysqli->prepare($update_query);
+                            if ($update_stmt) {
+                                $update_stmt->bind_param("si", $hashed_password, $user_id);
+                                if ($update_stmt->execute()) {
+                                    $success_message = "Password successfully changed.";
+                                } else {
+                                    $error_message = "Database error updating password.";
+                                }
+                                $update_stmt->close();
                             } else {
-                                $error_message = "Database error updating password.";
+                                $error_message = "Database error preparing update statement.";
                             }
-                            $update_stmt->close();
                         } else {
-                            $error_message = "Database error preparing update statement.";
+                            $error_message = "Current password is incorrect.";
                         }
                     } else {
-                        $error_message = "Current password is incorrect.";
+                        $error_message = "User account not found.";
                     }
                 } else {
-                    $error_message = "User account not found.";
+                    $error_message = "Database error verifying current password.";
                 }
-            } else {
-                $error_message = "Database error verifying current password.";
             }
         }
     }

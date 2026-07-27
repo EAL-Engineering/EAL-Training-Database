@@ -14,22 +14,23 @@
 require_once "config.php";
 require_once "auth.php"; 
 
-$currentUrl = urlencode($_SERVER['REQUEST_URI']);
+$currentUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+$id_param = $_GET['id'] ?? null;
+if ($id_param === null || !is_numeric($id_param)) {
     die("Invalid request. No trainer ID provided. <a href='index.php'>Go to Main Page</a>");
 }
 
-$trainer_id = intval($_GET['id']);
+$trainer_id = intval($id_param);
 
 /**
  * Handle POST request to update trainer role_id (Issue #1)
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_role') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_role') {
     if (getUserRole() < 2) {
         $_SESSION['message'] = [
             'type' => 'error',
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit();
     }
 
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $_SESSION['message'] = [
             'type' => 'error',
             'text' => 'Invalid security token. Please try again.'
@@ -48,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit();
     }
 
-    $new_role_id = isset($_POST['role_id']) ? intval($_POST['role_id']) : 0;
+    $new_role_id = intval($_POST['role_id'] ?? 0);
 
     $update_query = "UPDATE trainers SET role_id = ? WHERE optbl_ptr = ?";
     $stmt = $mysqli->prepare($update_query);
@@ -166,11 +167,13 @@ $stmt->close();
  * @var string $message HTML string containing the message to display.
  */
 $message = '';
-if (isset($_SESSION['message'])) {
+if (isset($_SESSION['message']) && is_array($_SESSION['message'])) {
+    $msgType = $_SESSION['message']['type'] ?? 'error';
+    $msgText = $_SESSION['message']['text'] ?? '';
     $message = '<p style="color: ' 
-    . ($_SESSION['message']['type'] == 'success' ? 'green' : 'red') 
+    . ($msgType === 'success' ? 'green' : 'red') 
     . ';">' 
-    . htmlspecialchars($_SESSION['message']['text']) 
+    . htmlspecialchars($msgText) 
     . '</p>';
     unset($_SESSION['message']);
 }

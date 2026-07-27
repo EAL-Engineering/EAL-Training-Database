@@ -27,11 +27,11 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-$username = isset($_GET['login_name']) ? htmlspecialchars($_GET['login_name']) : '';
+$username = htmlspecialchars($_GET['login_name'] ?? '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // FIX (Issue #4): Guard clause — halt execution immediately if CSRF fails
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error = "Invalid security token. Please refresh the page and try again.";
     } else {
         $username = $_POST['username'] ?? '';
@@ -58,8 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['last_activity'] = time();
 
                 $redirectUrl = 'index.php';
-                if (isset($_GET['return'])) {
-                    $candidate = urldecode($_GET['return']);
+                $returnParam = $_GET['return'] ?? null;
+                if ($returnParam !== null) {
+                    $candidate = urldecode($returnParam);
                     if (isSafeRedirect($candidate)) {
                         $redirectUrl = $candidate;
                     }

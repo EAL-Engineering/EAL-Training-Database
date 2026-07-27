@@ -26,7 +26,7 @@ define('SESSION_TIMEOUT', 2 * 60 * 60);
  * Purges expired session variables immediately so header.php and checkLogin()
  * see an unauthenticated state regardless of which page is loaded.
  */
-if (isset($_SESSION['user_id']) && isset($_SESSION['last_activity'])) {
+if (isset($_SESSION['user_id'], $_SESSION['last_activity'])) {
     if ((time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
         session_unset();
         session_destroy();
@@ -78,11 +78,10 @@ function getUserRole()
 {
     global $mysqli;
 
-    if (!isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if ($user_id === null) {
         return null;
     }
-
-    $user_id = $_SESSION['user_id'];
 
     $query = $mysqli->prepare("SELECT role_id FROM trainers WHERE seq_nmbr = ?");
     if (!$query) {
@@ -174,12 +173,13 @@ function regenerateCSRFToken()
 /**
  * Validates the CSRF token provided in a POST request.
  * 
- * @param string $token The token from the form submission.
+ * @param string|null $token The token from the form submission.
  * @return bool True if valid, false otherwise.
  */
-function verifyCSRFToken($token) {
-    if (!isset($_SESSION['csrf_token']) || !is_string($token)) {
+function verifyCSRFToken(?string $token) {
+    $sessionToken = $_SESSION['csrf_token'] ?? null;
+    if ($sessionToken === null || $token === null) {
         return false;
     }
-    return hash_equals($_SESSION['csrf_token'], $token);
+    return hash_equals($sessionToken, $token);
 }

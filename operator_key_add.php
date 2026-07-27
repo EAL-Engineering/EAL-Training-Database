@@ -4,7 +4,7 @@
  *
  * Assigns a new key to an operator.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -13,20 +13,19 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
-$entered_by = isset($_SESSION['fname']) ? $_SESSION['fname'] : 'Unknown';
+$entered_by = $_SESSION['fname'] ?? 'Unknown';
 
 $error_message = "";
 $success_message = "";
 
 // Pre-fill operator if passed via URL
-$prefill_operator_id = isset($_GET['operator_id']) ? intval($_GET['operator_id']) : null;
+$prefill_operator_id = isset($_GET['operator_id']) && is_numeric($_GET['operator_id']) ? intval($_GET['operator_id']) : null;
 
 // Define available key types: DB value => UI label
 $key_type_options = [
@@ -39,14 +38,14 @@ $key_type_options = [
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error_message = "Invalid CSRF token.";
     } else {
-        $operator_id = isset($_POST['operator_id']) ? intval($_POST['operator_id']) : 0;
-        $key_type = isset($_POST['key_type']) ? trim($_POST['key_type']) : '';
-        $serial_number = isset($_POST['serial_number']) ? trim($_POST['serial_number']) : '';
-        $issued_date = isset($_POST['issued_date']) && $_POST['issued_date'] !== '' ? $_POST['issued_date'] : null;
-        $notes = isset($_POST['notes']) ? trim($_POST['notes']) : '';
+        $operator_id = intval($_POST['operator_id'] ?? 0);
+        $key_type = trim($_POST['key_type'] ?? '');
+        $serial_number = trim($_POST['serial_number'] ?? '');
+        $issued_date = !empty($_POST['issued_date']) ? $_POST['issued_date'] : null;
+        $notes = trim($_POST['notes'] ?? '');
 
         // Validate
         if ($operator_id <= 0) {

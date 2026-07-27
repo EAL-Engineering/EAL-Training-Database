@@ -22,7 +22,7 @@ if (function_exists('getTimeUntilSessionExpires')) {
     $secondsRemaining = 0;
 }
 
-$currentScript = basename($_SERVER['PHP_SELF']);
+$currentScript = basename($_SERVER['PHP_SELF'] ?? '');
 $isLoggedIn = isset($_SESSION['user_id']);
 ?>
 <div class="header">
@@ -82,7 +82,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
         <!-- Display welcome message and login button for guests -->
         <span>Session expired</span>
         <?php if ($currentScript !== 'login.php') : ?>
-            <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="logout-button">Login</a>
+            <a href="login.php?return=<?php echo urlencode($_SERVER['REQUEST_URI'] ?? ''); ?>" class="logout-button">Login</a>
         <?php endif; ?>
     <?php endif; ?>
     </div>

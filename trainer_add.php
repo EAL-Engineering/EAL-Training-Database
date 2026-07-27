@@ -15,12 +15,6 @@
  * @link     https://inpp.ohio.edu/~leblanc/eal_2024
  */
 
-// Enable error reporting for debugging
-
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
-
 require_once "config.php";
 require_once "auth.php"; 
 
@@ -28,7 +22,7 @@ require_once "auth.php";
  * Check if the user is logged in and authorized to edit personnel details.
  * Redirects unauthorized users to the login page.
  */
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 /**
  * Remaining session time in seconds.
@@ -38,12 +32,13 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Verify currently logged-in user is a trainer
+$user_id = $_SESSION['user_id'] ?? 0;
 $trainerCheckQuery = $mysqli->prepare("SELECT COUNT(*) FROM trainers WHERE seq_nmbr = ?");
 if (!$trainerCheckQuery) {
     error_log("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
     die("Database error. Please try again later.");
 }
-$trainerCheckQuery->bind_param("i", $_SESSION['user_id']);
+$trainerCheckQuery->bind_param("i", $user_id);
 $trainerCheckQuery->execute();
 $trainerCheckQuery->bind_result($isTrainer);
 $trainerCheckQuery->fetch();
@@ -57,9 +52,9 @@ if (!$isTrainer) {
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // FIX (Issue #4): CSRF guard clause
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         $error = "Invalid security token. Please refresh the page and try again.";
-    } elseif (!isset($_POST['operator_id']) || !isset($_POST['cert_id'])) {
+    } elseif (!isset($_POST['operator_id'], $_POST['cert_id'])) {
         $error = "Operator and initial certification selection are required.";
     } else {
         $operator_id = intval($_POST['operator_id']);
@@ -129,16 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch eligible operators
-/**
- * Query to fetch eligible operators for trainer addition.
- * Operators are eligible if they:
- *   - Are Active
- *   - Have an email address
- *   - Have completed certification #3 (trainer qualification)
- *   - Are not already registered in the trainers table
- *
- * @var mysqli_result|false $eligibleOperators Result set of eligible operators.
- */
 $eligibleOperators = $mysqli->query(
     "SELECT o.seq_nmbr, o.fname, o.email
      FROM operators o

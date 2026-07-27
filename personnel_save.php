@@ -5,7 +5,7 @@
  * This script handles saving personnel data to the database. It updates the
  * operators table with the provided information from a submitted form.
  * 
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -18,49 +18,30 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
-
-// // Enable error reporting for debugging (remove in production)
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 // Check if the form is submitted via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // FIX (Issue #4): CSRF Token Validation
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         error_log("CSRF token validation failed in personnel_save.php");
         http_response_code(403);
         die("Invalid security token. Please refresh the page and try again.");
     }
-    /**
-     * Sanitize and validate inputs from the form submission.
-     *
-     * @var int    $seq_nmbr        Sequence number of the operator (required)
-     * @var string $name            Name of the operator (required)
-     * @var string $fname           First name of the operator (required)
-     * @var string $email           Email address of the operator (required)
-     * @var string $altemail        Alternate email address of the operator (optional)
-     * @var string $phones          Phone numbers of the operator (optional)
-     * @var string $status          Status of the operator (required)
-     * @var int    $is_eal_staff    Internal EAL staff flag (1 or 0)
-     * @var int    $is_senior_staff Senior staff flag (1 or 0)
-     * @var string $office          Office address of the operator (optional)
-     * @var string $home            Home address of the operator (optional)
-     * @var string $comments        Additional comments about the operator (optional)
-     */
-    $seq_nmbr = isset($_POST['seq_nmbr']) ? intval($_POST['seq_nmbr']) : null;
-    $name = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $fname = isset($_POST['fname']) ? trim($_POST['fname']) : '';
+
+    $raw_seq_nmbr = $_POST['seq_nmbr'] ?? null;
+    $seq_nmbr = ($raw_seq_nmbr !== null && is_numeric($raw_seq_nmbr)) ? intval($raw_seq_nmbr) : null;
+    $name     = trim($_POST['name'] ?? '');
+    $fname    = trim($_POST['fname'] ?? '');
     // Safely enforce the 64-character schema limit on $name
-    $name = mb_substr($name, 0, 64);
-    $email    = isset($_POST['email'])    ? trim($_POST['email'])    : '';
-    $altemail = isset($_POST['altemail']) ? trim($_POST['altemail']) : '';
-    $phones = isset($_POST['phones']) ? trim($_POST['phones']) : '';
-    $status = isset($_POST['status']) ? trim($_POST['status']) : '';
+    $name     = mb_substr($name, 0, 64);
+    $email    = trim($_POST['email'] ?? '');
+    $altemail = trim($_POST['altemail'] ?? '');
+    $phones   = trim($_POST['phones'] ?? '');
+    $status   = trim($_POST['status'] ?? '');
     
     $is_senior_staff = isset($_POST['is_senior_staff']) ? 1 : 0;
-    $is_eal_staff = isset($_POST['is_eal_staff']) ? 1 : 0;
+    $is_eal_staff    = isset($_POST['is_eal_staff']) ? 1 : 0;
 
     // Validate raw input directly
     if (!$seq_nmbr || empty($name) || empty($fname) || empty($email) || empty($status)) {
@@ -80,22 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_eal_staff = 1;
     }
 
-    $office = isset($_POST['office']) ? trim($_POST['office']) : '';
-    $home = isset($_POST['home']) ? trim($_POST['home']) : '';
-    $comments = isset($_POST['comments']) ? trim($_POST['comments']) : '';
-
-    // Validate required fields
-    if (!$seq_nmbr || empty($name) || empty($fname) || empty($email) || empty($status)) {
-        die("Missing required fields. <a href='index.php'>Go to Main Page</a>");
-    }
-
-    // Check email validity
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die("Invalid email address. <a href='index.php'>Go to Main Page</a>");
-    }
-    if (!empty($altemail) && !filter_var($altemail, FILTER_VALIDATE_EMAIL)) {
-        die("Invalid alternate email address. <a href='index.php'>Go to Main Page</a>");
-    }
+    $office   = trim($_POST['office'] ?? '');
+    $home     = trim($_POST['home'] ?? '');
+    $comments = trim($_POST['comments'] ?? '');
 
     /**
      * Prepare the SQL statement to update the operator's information in the database.
@@ -124,22 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
     }
 
-    /**
-     * Bind the parameters to the prepared SQL statement.
-     *
-     * @param string $name            Name of the operator.
-     * @param string $fname           First name of the operator.
-     * @param string $email           Email address of the operator.
-     * @param string $altemail        Alternate email address of the operator.
-     * @param string $phones          Phone numbers of the operator.
-     * @param string $status          Status of the operator.
-     * @param int    $is_eal_staff    Internal EAL staff flag.
-     * @param int    $is_senior_staff Senior staff flag.
-     * @param string $office          Office address of the operator.
-     * @param string $home            Home address of the operator.
-     * @param string $comments        Additional comments about the operator.
-     * @param int    $seq_nmbr        Sequence number of the operator.
-     */
     $stmt->bind_param(
         "ssssssiisssi",
         $name,

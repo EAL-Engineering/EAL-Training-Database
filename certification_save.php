@@ -14,31 +14,34 @@
 require_once "config.php";
 require_once "auth.php";
 
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Token Validation
-    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
         error_log("CSRF token validation failed in certification_save.php");
         http_response_code(403);
         die("Invalid security token. Please refresh the page and try again.");
     }
 
-    if (!isset($_POST['operator_id']) || !is_numeric($_POST['operator_id'])) {
+    $raw_operator_id = $_POST['operator_id'] ?? null;
+    if ($raw_operator_id === null || !is_numeric($raw_operator_id)) {
         die("Error: Operator ID is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
     
-    if (!isset($_POST['cert_id']) || !is_numeric($_POST['cert_id'])) {
+    $raw_cert_id = $_POST['cert_id'] ?? null;
+    if ($raw_cert_id === null || !is_numeric($raw_cert_id)) {
         die("Error: Certification ID is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
     
-    if (!isset($_POST['completed_by']) || !is_numeric($_POST['completed_by'])) {
+    $raw_completed_by = $_POST['completed_by'] ?? null;
+    if ($raw_completed_by === null || !is_numeric($raw_completed_by)) {
         die("Error: Trainer ID (Completed By) is missing or invalid. <a href='index.php'>Go to Main Page</a>");
     }
 
-    $operator_id = intval($_POST['operator_id']);
-    $cert_id = intval($_POST['cert_id']);
-    $completed_by = intval($_POST['completed_by']);
+    $operator_id = intval($raw_operator_id);
+    $cert_id = intval($raw_cert_id);
+    $completed_by = intval($raw_completed_by);
 
     // FIX (Issue #22): Check if user already holds an active certification of this type
     $check_query = "SELECT COUNT(*) AS total FROM optraining WHERE operator = ? AND certification = ? AND status = 'Active'";

@@ -2,7 +2,7 @@
 /**
  * Delete a personnel entry from all related tables
  * 
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -19,7 +19,7 @@ require_once "auth.php";
  * Check if the user is logged in and authorized to edit/delete personnel details.
  * Strictly enforces Role 1. Redirects unauthorized users to the login page.
  */
-checkLogin(1, $_SERVER['REQUEST_URI']);
+checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
 /**
  * Get the time remaining until the user's session expires.
@@ -29,13 +29,16 @@ checkLogin(1, $_SERVER['REQUEST_URI']);
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Handle deletion request — strictly Role 1
-if (isset($_GET['id']) && isset($_GET['confirm']) && $_GET['confirm'] == 1) {
-    if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != 1) {
+$delete_id = $_GET['id'] ?? null;
+$confirm   = $_GET['confirm'] ?? null;
+
+if ($delete_id !== null && $confirm == 1) {
+    if (($_SESSION['role_id'] ?? null) != 1) {
         header("Location: index.php");
         exit();
     }
 
-    $id = intval($_GET['id']);
+    $id = intval($delete_id);
 
     $mysqli->autocommit(false);
     $deleteSuccess = true;
@@ -117,7 +120,7 @@ $result = $mysqli->query(
         <tr>
             <th>Full Name</th>
             <th>Email</th>
-            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
+            <?php if (($_SESSION['role_id'] ?? null) == 1) : ?>
             <th>Delete</th>
             <?php endif; ?>
         </tr>
@@ -132,7 +135,7 @@ $result = $mysqli->query(
                 echo '<a href="mailto:' . $operatorEmail . '">' . $operatorEmail . '</a>';
                 ?>
             </td>
-            <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) : ?>
+            <?php if (($_SESSION['role_id'] ?? null) == 1) : ?>
             <td>
                 <?php
                 $operatorId   = $res['id'];

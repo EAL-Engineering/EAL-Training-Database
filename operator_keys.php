@@ -4,7 +4,7 @@
  *
  * Displays all keys assigned to operators with filtering and DataTables.
  *
- * PHP version 5.4+
+ * PHP version 8.0+
  *
  * @category Certification
  * @package  TrainingManagementSystem
@@ -16,8 +16,6 @@
 require_once "config.php";
 require_once "auth.php";
 
-$timeUntilSessionExpires = isset($_SESSION['user_id']) ? getTimeUntilSessionExpires() : 0;
-
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
 // Build query with optional filters
@@ -25,19 +23,24 @@ $where_clauses = [];
 $params = [];
 $types = '';
 
-if (isset($_GET['status']) && $_GET['status'] !== '') {
+$status_filter = $_GET['status'] ?? '';
+if ($status_filter !== '') {
     $where_clauses[] = "ok.status = ?";
-    $params[] = $_GET['status'];
+    $params[] = $status_filter;
     $types .= 's';
 }
-if (isset($_GET['key_type']) && $_GET['key_type'] !== '') {
+
+$key_type_filter = $_GET['key_type'] ?? '';
+if ($key_type_filter !== '') {
     $where_clauses[] = "ok.key_type = ?";
-    $params[] = $_GET['key_type'];
+    $params[] = $key_type_filter;
     $types .= 's';
 }
-if (isset($_GET['operator_id']) && is_numeric($_GET['operator_id'])) {
+
+$operator_id_filter = $_GET['operator_id'] ?? null;
+if ($operator_id_filter !== null && is_numeric($operator_id_filter)) {
     $where_clauses[] = "ok.operator_id = ?";
-    $params[] = intval($_GET['operator_id']);
+    $params[] = intval($operator_id_filter);
     $types .= 'i';
 }
 
@@ -95,13 +98,6 @@ if ($operators_result) {
         $operators[] = $row;
     }
 }
-
-// Get active operators for filter dropdown
-$operators_result = $mysqli->query("SELECT seq_nmbr, fname FROM operators WHERE status = 'Active' ORDER BY fname");
-$operators = [];
-while ($row = $operators_result->fetch_assoc()) {
-    $operators[] = $row;
-}
 ?>
 <!doctype html>
 <html lang="en">
@@ -141,10 +137,10 @@ while ($row = $operators_result->fetch_assoc()) {
                     <label for="status">Status:</label>
                     <select name="status" id="status" onchange="this.form.submit();">
                         <option value="">All</option>
-                        <option value="Active" <?php echo (isset($_GET['status']) && $_GET['status'] === 'Active') ? 'selected' : ''; ?>>Active</option>
-                        <option value="Lost" <?php echo (isset($_GET['status']) && $_GET['status'] === 'Lost') ? 'selected' : ''; ?>>Lost</option>
-                        <option value="Returned" <?php echo (isset($_GET['status']) && $_GET['status'] === 'Returned') ? 'selected' : ''; ?>>Returned</option>
-                        <option value="Obsolete" <?php echo (isset($_GET['status']) && $_GET['status'] === 'Obsolete') ? 'selected' : ''; ?>>Obsolete</option>
+                        <option value="Active" <?php echo (($status_filter) === 'Active') ? 'selected' : ''; ?>>Active</option>
+                        <option value="Lost" <?php echo (($status_filter) === 'Lost') ? 'selected' : ''; ?>>Lost</option>
+                        <option value="Returned" <?php echo (($status_filter) === 'Returned') ? 'selected' : ''; ?>>Returned</option>
+                        <option value="Obsolete" <?php echo (($status_filter) === 'Obsolete') ? 'selected' : ''; ?>>Obsolete</option>
                     </select>
                 </div>
                 <div>
@@ -152,7 +148,7 @@ while ($row = $operators_result->fetch_assoc()) {
                     <select name="key_type" id="key_type" onchange="this.form.submit();">
                         <option value="">All</option>
                         <?php foreach ($key_types as $kt): ?>
-                            <option value="<?php echo htmlspecialchars($kt); ?>" <?php echo (isset($_GET['key_type']) && $_GET['key_type'] === $kt) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($kt); ?>" <?php echo (($key_type_filter) === $kt) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($kt); ?>
                             </option>
                         <?php endforeach; ?>
@@ -163,7 +159,7 @@ while ($row = $operators_result->fetch_assoc()) {
                     <select name="operator_id" id="operator_id" onchange="this.form.submit();">
                         <option value="">All</option>
                         <?php foreach ($operators as $op): ?>
-                            <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>" <?php echo (isset($_GET['operator_id']) && intval($_GET['operator_id']) === intval($op['seq_nmbr'])) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($op['seq_nmbr']); ?>" <?php echo ($operator_id_filter !== null && intval($operator_id_filter) === intval($op['seq_nmbr'])) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($op['fname']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -185,7 +181,7 @@ while ($row = $operators_result->fetch_assoc()) {
                     <th>Issued</th>
                     <th>Returned</th>
                     <th>Entered</th>
-                    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                    <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                         <th>Actions</th>
                     <?php endif; ?>
                 </tr>
@@ -216,7 +212,7 @@ while ($row = $operators_result->fetch_assoc()) {
                     <td><?php echo $row['issued_date'] ? htmlspecialchars($row['issued_date']) : '-'; ?></td>
                     <td><?php echo $row['returned_date'] ? htmlspecialchars($row['returned_date']) : '-'; ?></td>
                     <td><?php echo htmlspecialchars($row['entered']); ?></td>
-                    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2) : ?>
+                    <?php if (($_SESSION['role_id'] ?? 99) <= 2) : ?>
                     <td>
                         <?php if ($row['status'] === 'Active'): ?>
                             <a href="operator_key_return.php?id=<?php echo urlencode($row['seq_nmbr']); ?>&redirect=operator_keys.php">Return</a>
@@ -245,7 +241,5 @@ while ($row = $operators_result->fetch_assoc()) {
             });
         });
     </script>
-
-
 </body>
 </html>
