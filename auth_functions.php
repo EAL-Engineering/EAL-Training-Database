@@ -90,7 +90,7 @@ function getUserRole(): int
  */
 function getTimeUntilSessionExpires(): int
 {
-    $maxLifetime = ini_get('session.gc_maxlifetime') ?: 1440;
+    $maxLifetime = ini_get('session.gc_maxlifetime') ?: 7200;
     $lastActivity = $_SESSION['last_activity'] ?? time();
     $elapsed = time() - $lastActivity;
     return max(0, (int)$maxLifetime - $elapsed);
