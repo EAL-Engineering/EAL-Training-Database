@@ -391,20 +391,17 @@ textarea {
     font-style: italic;
 }
 
-/* 1. Explicitly define the global color for both links and link-buttons */
-a, .link-button {
-    color: #0056b3; /* A universally safe, accessible hyperlink blue */
+/* 1. Force unvisited links, visited links, and buttons to use the exact same blue */
+a, a:visited, .link-button {
+    color: #0056b3; 
 }
 
-a:visited {
-    color: #551A8B; /* Explicit standard visited purple, if desired */
-}
-
+/* 2. Keep the hover effect for interactivity */
 a:hover, .link-button:hover {
-    color: #003d82; /* Slightly darker on hover for clear interactivity */
+    color: #003d82; 
 }
 
-/* 2. Strip the structural button styling so it mimics text */
+/* 3. Strip structural button styling */
 .link-button {
     background: none;
     border: none;
