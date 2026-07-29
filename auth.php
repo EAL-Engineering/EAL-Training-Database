@@ -24,7 +24,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Session activity timeout handling
-$maxLifetime = ini_get('session.gc_maxlifetime') ?: 1440;
+$maxLifetime = ini_get('session.gc_maxlifetime') ?: 7200;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $maxLifetime)) {
     session_unset();
     session_destroy();
