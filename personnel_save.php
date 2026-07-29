@@ -90,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
-        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
+        error_log("Database prepare error in personnel_save.php: " . $mysqli->error);
+        die("A database error occurred. <a href='index.php'>Go to Main Page</a>");
     }
 
     $stmt->bind_param(
@@ -115,8 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: personnel_list.php?message=update_success");
         exit();
     } else {
-        die("Failed to update operator: " . $stmt->error . " <a href='index.php'>Go to Main Page</a>");
+        error_log("Database execution error in personnel_save.php: " . $stmt->error);
+        die("Failed to update operator due to a database error. <a href='index.php'>Go to Main Page</a>");
     }
-} else {
-    die("Invalid request method. <a href='index.php'>Go to Main Page</a>");
 }

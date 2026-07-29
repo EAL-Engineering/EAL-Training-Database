@@ -68,7 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "SELECT exp_months FROM certifications WHERE seq_nmbr = ?";
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
-        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
+        error_log("Database prepare error (SELECT) in certification_save.php: " . $mysqli->error);
+        die("A database error occurred. <a href='index.php'>Go to Main Page</a>");
     }
     $stmt->bind_param("i", $cert_id);
     $stmt->execute();
@@ -86,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $mysqli->prepare($query);
     if (!$stmt) {
-        die("Database error: " . $mysqli->error . " <a href='index.php'>Go to Main Page</a>");
+        error_log("Database prepare error (INSERT) in certification_save.php: " . $mysqli->error);
+        die("A database error occurred. <a href='index.php'>Go to Main Page</a>");
     }
     $stmt->bind_param("iiisss", $operator_id, $cert_id, $completed_by, $status, $entered, $expires);
 
@@ -95,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: certification_add.php?id=$operator_id&success=1");
         exit;
     } else {
+        error_log("Database execution error (INSERT) in certification_save.php: " . $stmt->error);
         $stmt->close();
         header("Location: certification_add.php?id=$operator_id&error=1");
         exit;
