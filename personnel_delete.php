@@ -156,10 +156,13 @@ $result = $mysqli->query(
                 $operatorName = htmlspecialchars(addslashes($res['OperatorName']));
                 ?>
                 <form method="post" action="personnel_delete.php" style="display:inline;"
-                    onsubmit="return prompt('Type \'YES\' to confirm deletion of <?php echo $operatorName; ?>:') === 'YES';">
+                    onsubmit="return prompt(
+                        'Type \'YES\' to confirm deletion of <?php echo $operatorName; ?>:'
+                    ) === 'YES';">
                     <input type="hidden" name="id" value="<?php echo $operatorId; ?>">
                     <input type="hidden" name="confirm" value="1">
-                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+                    <input type="hidden" name="csrf_token" 
+                        value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
                     <button type="submit" class="link-button">Delete</button>
                 </form>
             </td>

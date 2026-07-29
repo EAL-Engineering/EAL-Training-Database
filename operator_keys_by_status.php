@@ -190,7 +190,10 @@ if (!empty($params)) {
                             <input type="hidden" name="redirect" value="operator_keys_by_status.php">
                             <input type="hidden" name="csrf_token"
                                 value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
-                            <button type="submit" class="link-button" onclick="return confirm('Mark this key as lost?');">
+                            <button 
+                                type="submit" 
+                                class="link-button" 
+                                onclick="return confirm('Mark this key as lost?');">
                                 Lost
                             </button>
                         </form>
