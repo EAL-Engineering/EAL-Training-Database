@@ -29,26 +29,43 @@ checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
  */
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 
-// Handle deletion request — strictly Role 1
-$delete_id = $_GET['id'] ?? null;
-$confirm   = $_GET['confirm'] ?? null;
+// Handle deletion request securely via POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && isset($_POST['confirm'])) {
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
+        die("Invalid CSRF token. <a href='personnel_delete.php'>Go back</a>");
+    }
 
-if ($delete_id !== null && $confirm == 1) {
+    // Strictly enforce Administrator Role
     if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
         header("Location: index.php");
         exit();
     }
 
-    $id = intval($delete_id);
-
+    $id = intval($_POST['id']);
     $mysqli->autocommit(false);
     $deleteSuccess = true;
 
-    $deleteSuccess &= $mysqli->query("DELETE FROM annualradsafety WHERE op_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM optraining WHERE operator = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM trainers WHERE optbl_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM can_certify WHERE trainer_ptr = $id");
-    $deleteSuccess &= $mysqli->query("DELETE FROM operators WHERE seq_nmbr = $id");
+    // Define table dependencies and foreign keys
+    $deletion_map = [
+        'annualradsafety' => 'op_ptr',
+        'optraining'      => 'operator',
+        'trainers'        => 'optbl_ptr',
+        'can_certify'     => 'trainer_ptr',
+        'operators'       => 'seq_nmbr'
+    ];
+
+    foreach ($deletion_map as $table => $column) {
+        $stmt = $mysqli->prepare("DELETE FROM $table WHERE $column = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            if (!$stmt->execute()) {
+                $deleteSuccess = false;
+            }
+            $stmt->close();
+        } else {
+            $deleteSuccess = false;
+        }
+    }
 
     if ($deleteSuccess) {
         $mysqli->commit();
@@ -97,14 +114,6 @@ $result = $mysqli->query(
             crossorigin="anonymous"></script>
     <script src="common.js" defer></script>
     <script>
-        function confirmDeletion(id, name) {
-            var userInput = prompt("Type 'YES' (all caps) to confirm deletion of " + name + ":");
-            if (userInput !== null && userInput === "YES") {
-                window.location.href = "personnel_delete.php?id=" + id + "&confirm=1";
-            } else {
-                alert("Deletion canceled.");
-            }
-        };
         // Pass the session expiration time to the JavaScript function
         document.addEventListener('DOMContentLoaded', () => {
             setCountdown(<?php echo $timeUntilSessionExpires; ?>);
@@ -143,12 +152,16 @@ $result = $mysqli->query(
             <?php if ((int)($_SESSION['role_id'] ?? 0) === 1) : ?>
             <td>
                 <?php
-                $operatorId   = $res['id'];
+                $operatorId   = htmlspecialchars((string)$res['id']);
                 $operatorName = htmlspecialchars(addslashes($res['OperatorName']));
                 ?>
-                <button onclick="confirmDeletion(<?php echo $operatorId; ?>, '<?php echo $operatorName; ?>')">
-                    Delete
-                </button>
+                <form method="post" action="personnel_delete.php" style="display:inline;"
+                    onsubmit="return prompt('Type \'YES\' to confirm deletion of <?php echo $operatorName; ?>:') === 'YES';">
+                    <input type="hidden" name="id" value="<?php echo $operatorId; ?>">
+                    <input type="hidden" name="confirm" value="1">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+                    <button type="submit" class="link-button">Delete</button>
+                </form>
             </td>
             <?php endif; ?>
         </tr>

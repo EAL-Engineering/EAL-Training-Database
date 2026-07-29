@@ -22,7 +22,10 @@ checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
 $entered_by = $_SESSION['fname'] ?? 'Unknown';
 
-$redirect = $_GET['redirect'] ?? 'operator_keys.php';
+// Open Redirect Fix: Validate redirect target
+$raw_redirect = $_GET['redirect'] ?? 'operator_keys.php';
+$redirect = isSafeRedirect($raw_redirect) ? $raw_redirect : 'operator_keys.php';
+
 $error_message = "";
 
 $raw_id = $_GET['id'] ?? null;
@@ -159,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </p>
 
         <?php
-        $return_action = 'operator_key_return.php?id=' . urlencode($key_id)
+        $return_action = 'operator_key_return.php?id=' . urlencode((string)$key_id)
             . '&redirect=' . urlencode($redirect);
         ?>
         <form method="post" action="<?php echo htmlspecialchars($return_action); ?>">
@@ -173,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ? 'selected'
                             : '';
                         ?>
-                        <option value="<?php echo htmlspecialchars($pool['seq_nmbr']); ?>"
+                        <option value="<?php echo htmlspecialchars((string)$pool['seq_nmbr']); ?>"
                             <?php echo $isPoolSelected; ?>>
                             <?php echo htmlspecialchars($pool['fname']); ?>
                         </option>

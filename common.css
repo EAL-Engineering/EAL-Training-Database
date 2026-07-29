@@ -392,7 +392,7 @@ textarea {
 }
 
 /* 1. Force unvisited links, visited links, and buttons to use the exact same blue */
-a, a:visited, .link-button {
+a, .link-button {
     color: #0056b3; 
 }
 
