@@ -16,6 +16,7 @@ require_once "auth_functions.php";
 
 // Configure secure session settings before starting session
 if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.gc_maxlifetime', 7200);
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
     ini_set('session.cookie_samesite', 'Lax');
