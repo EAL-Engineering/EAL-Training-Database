@@ -414,6 +414,17 @@ a:hover, .link-button:hover {
     cursor: pointer;
 }
 
+/* Protect navigation buttons from global visited link colors */
+.back-button-container a:visited,
+.button-container .back-button:visited,
+.add-key-link a:visited {
+    color: white;
+}
+
+.logout-button:visited {
+    color: #00694E; /* OHIO Cutler Green */
+}
+
 
 /* Operator Keys table column widths */
 #keys th:nth-child(1), #keys td:nth-child(1) { width: 20%; }  /* Operator */
