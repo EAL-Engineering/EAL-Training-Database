@@ -57,9 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $dateOfTraining = trim($_POST['date_of_training'] ?? '');
         $selectedOperators = is_array($_POST['operators'] ?? null) ? $_POST['operators'] : [];
+        $timestamp = strtotime($dateOfTraining);
 
-        if (!empty($dateOfTraining) && !empty($selectedOperators)) {
-            $date = date('Y-m-d', strtotime($dateOfTraining));
+        if (!empty($dateOfTraining) && !empty($selectedOperators) && $timestamp !== false) {
+            $date = date('Y-m-d', $timestamp);
             $successCount = 0;
 
             foreach ($selectedOperators as $operator) {

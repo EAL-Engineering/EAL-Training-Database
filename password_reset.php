@@ -61,7 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm_password = $_POST['confirm_password'] ?? '';
 
     if ($new_password !== $confirm_password) {
-        die("Passwords do not match.");
+        die("Passwords do not match. <a href='javascript:history.back()'>Go back</a>");
+    }
+    
+    if (strlen($new_password) < 8) {
+        die("Password must be at least 8 characters long. <a href='javascript:history.back()'>Go back</a>");
     }
 
     $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);

@@ -52,6 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
     $new_role_id = intval($_POST['role_id'] ?? 0);
 
+    if ($trainer_id === (int)($_SESSION['user_id'] ?? 0)) {
+        $_SESSION['message'] = [
+            'type' => 'error',
+            'text' => 'Business Rule Violation: You cannot modify your own access role.'
+        ];
+        header("Location: trainer_edit.php?id=$trainer_id");
+        exit();
+    }
+
     $update_query = "UPDATE trainers SET role_id = ? WHERE optbl_ptr = ?";
     $stmt = $mysqli->prepare($update_query);
     if ($stmt) {

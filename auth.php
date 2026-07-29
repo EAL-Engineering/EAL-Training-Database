@@ -32,3 +32,26 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
     session_start();
 }
 $_SESSION['last_activity'] = time();
+
+// Real-time privilege synchronization
+if (isset($_SESSION['user_id'])) {
+    global $mysqli;
+    $user_id = $_SESSION['user_id'];
+    $role_query = $mysqli->prepare("SELECT role_id FROM trainers WHERE seq_nmbr = ?");
+    if ($role_query) {
+        $role_query->bind_param("i", $user_id);
+        $role_query->execute();
+        $role_result = $role_query->get_result();
+        
+        if ($row = $role_result->fetch_assoc()) {
+            $_SESSION['role_id'] = (int)$row['role_id']; // Sync role
+        } else {
+            // User was deleted from the trainers table
+            session_unset();
+            session_destroy();
+            header("Location: login.php?error=account_deleted");
+            exit;
+        }
+        $role_query->close();
+    }
+}
