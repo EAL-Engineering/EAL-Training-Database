@@ -393,7 +393,7 @@ textarea {
 
 /* 1. Force unvisited links, visited links, and buttons to use the exact same blue */
 a { color: #0056b3; }
-a:visited { color: #551A8B; } /* Restores standard purple visited links */
+a:visited { color: revert; } /* Restores standard purple visited links */
 a:hover, .link-button:hover { color: #003d82; }
 
 .link-button {
