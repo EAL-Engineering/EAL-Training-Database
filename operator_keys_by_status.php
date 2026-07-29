@@ -180,12 +180,23 @@ if (!empty($params)) {
                     <?php if ($row['status'] === 'Active') : ?>
                         <?php
                         $return_url = 'operator_key_return.php?id=' . urlencode($row['seq_nmbr'])
-                            . '&redirect=operator_keys_by_type.php';
-                        $lost_url = 'operator_key_lost.php?id=' . urlencode($row['seq_nmbr'])
-                            . '&redirect=operator_keys_by_type.php';
+                            . '&redirect=operator_keys_by_status.php';
                         ?>
                         <a href="<?php echo htmlspecialchars($return_url); ?>">Return</a>
-                        <a href="<?php echo htmlspecialchars($lost_url); ?>">Lost</a>
+                        
+                        <form method="post" action="operator_key_lost.php" style="display:inline;">
+                            <input type="hidden" name="id"
+                                value="<?php echo htmlspecialchars($row['seq_nmbr']); ?>">
+                            <input type="hidden" name="redirect" value="operator_keys_by_status.php">
+                            <input type="hidden" name="csrf_token"
+                                value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
+                            <button type="submit"
+                                style="background:none; border:none; color:#0056b3; text-decoration:underline; 
+                                       cursor:pointer; padding:0; font:inherit;"
+                                onclick="return confirm('Mark this key as lost?');">
+                                Lost
+                            </button>
+                        </form>
                     <?php endif; ?>
                 </td>
                 <?php endif; ?>

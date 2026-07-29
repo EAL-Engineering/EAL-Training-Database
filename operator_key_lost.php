@@ -19,22 +19,29 @@ require_once "auth.php";
 
 checkLogin(1, $_SERVER['REQUEST_URI'] ?? '');
 
-$redirect = $_GET['redirect'] ?? 'operator_keys.php';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Invalid request method.");
+}
 
-$key_id_param = $_GET['id'] ?? null;
-if ($key_id_param === null || !is_numeric($key_id_param)) {
+if (!verifyCSRFToken($_POST['csrf_token'] ?? null)) {
+    die("Invalid CSRF token.");
+}
+
+$raw_redirect = $_POST['redirect'] ?? 'operator_keys.php';
+$redirect = isSafeRedirect($raw_redirect) ? $raw_redirect : 'operator_keys.php';
+
+$key_id = isset($_POST['id']) && is_numeric($_POST['id']) ? intval($_POST['id']) : null;
+if (!$key_id) {
     header("Location: " . $redirect);
     exit();
 }
 
-$key_id = intval($key_id_param);
-
-$stmt = $mysqli->prepare(
-    "UPDATE operator_keys SET status = 'Lost' WHERE seq_nmbr = ? AND status = 'Active'"
-);
-$stmt->bind_param("i", $key_id);
-$stmt->execute();
-$stmt->close();
+$stmt = $mysqli->prepare("UPDATE operator_keys SET status = 'Lost' WHERE seq_nmbr = ? AND status = 'Active'");
+if ($stmt) {
+    $stmt->bind_param("i", $key_id);
+    $stmt->execute();
+    $stmt->close();
+}
 
 header("Location: " . $redirect);
 exit();
