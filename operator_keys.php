@@ -257,10 +257,7 @@ if ($operators_result) {
                                 <input type="hidden" name="redirect" value="operator_keys.php">
                                 <input type="hidden" name="csrf_token"
                                     value="<?php echo htmlspecialchars(getCSRFToken()); ?>">
-                                <button type="submit"
-                                    style="background:none; border:none; color:#0056b3; text-decoration:underline; 
-                                           cursor:pointer; padding:0; font:inherit;"
-                                    onclick="return confirm('Mark this key as lost?');">
+                                <button type="submit" class="link-button" onclick="return confirm('Mark this key as lost?');">
                                     Lost
                                 </button>
                             </form>

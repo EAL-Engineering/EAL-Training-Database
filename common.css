@@ -391,6 +391,16 @@ textarea {
     font-style: italic;
 }
 
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit; /* Inherits the text color, or you can specify your exact link color here */
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 
 /* Operator Keys table column widths */
 #keys th:nth-child(1), #keys td:nth-child(1) { width: 20%; }  /* Operator */
