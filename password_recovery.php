@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username   = $trainer['login_name'];
 
         // Generate a secure reset token and expiration time
-        $reset_token = bin2hex(openssl_random_pseudo_bytes(16));
+        $reset_token = bin2hex(random_bytes(16));
         $reset_expiration = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
         // Store the reset token and expiration time in the database
