@@ -28,7 +28,7 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-$username = htmlspecialchars($_GET['login_name'] ?? '');
+$username = $_GET['login_name'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // FIX (Issue #4): Guard clause — halt execution immediately if CSRF fails

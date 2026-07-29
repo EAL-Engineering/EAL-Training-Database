@@ -17,7 +17,7 @@
 require_once "auth.php";
 require_once "config.php";
 
-// FIX (Issue #15): Require role >= 0 so any logged-in user can change their password
+// Require role >= 0 so any logged-in user can change their password
 checkLogin(0, $_SERVER['REQUEST_URI'] ?? '');
 
 $timeUntilSessionExpires = getTimeUntilSessionExpires();
@@ -37,8 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_message = "All password fields are required.";
         } elseif ($new_password !== $confirm_password) {
             $error_message = "New passwords do not match.";
-        } elseif (strlen($new_password) < 8) {
-            $error_message = "Password must be at least 8 characters long.";
+        } elseif (strlen($new_password) < 7) {
+            $error_message = "Password must be at least 7 characters long.";
         } else {
             $user_id = $_SESSION['user_id'] ?? null;
             if ($user_id === null) {

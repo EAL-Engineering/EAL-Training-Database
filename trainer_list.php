@@ -111,9 +111,9 @@ $trainer_list = $mysqli->query(
             $rowId = "email-" . $rowCounter++; // Generate a unique ID
             echo "<tr>";
             echo "<td>" . htmlspecialchars($res['TrainerName']) . "</td>\n";
-            echo "<td id='" . $rowId . "' "
-                . "data-user='" . htmlspecialchars($user) . "' "
-                . "data-domain='" . htmlspecialchars($domain) . "'></td>\n";
+            echo '<td id="' . $rowId . '" '
+                . 'data-user="' . htmlspecialchars($user) . '" '
+                . 'data-domain="' . htmlspecialchars($domain) . '"></td>' . "\n";
             echo "<td>" . htmlspecialchars($res['Certifications']) . "</td>\n";
             echo "<td><a href=\"trainer_edit.php?id=" . htmlspecialchars($res['id']) . "\">Edit</a></td>\n";
             echo "</tr>";

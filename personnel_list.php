@@ -127,9 +127,9 @@ $opertor_list = $mysqli->query(
                 $rowId = "email-" . $rowCounter++; // Generate a unique ID
                 echo "<tr>";
                 echo "<td>" . htmlspecialchars($res['OperatorName']) . "</td>\n";
-                echo "<td id='" . $rowId . "' "
-                    . "data-user='" . htmlspecialchars($user) . "' "
-                    . "data-domain='" . htmlspecialchars($domain) . "'></td>\n";
+                echo '<td id="' . $rowId . '" '
+                    . 'data-user="' . htmlspecialchars($user) . '" '
+                    . 'data-domain="' . htmlspecialchars($domain) . '"></td>' . "\n";
                 echo "<td>" . htmlspecialchars($res['HighestCertification']) . "</td>\n";
                 echo "<td>" . ($res['IsEalStaff'] ? 'Yes' : 'No') . "</td>\n";
                 echo "<td>" . ($res['IsSeniorStaff'] ? 'Yes' : 'No') . "</td>\n";

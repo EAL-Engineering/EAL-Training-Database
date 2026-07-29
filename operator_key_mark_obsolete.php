@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success_message = "Marked "
                     . $affected
                     . " key(s) of type '"
-                    . htmlspecialchars($key_type)
+                    . $key_type
                     . "' as obsolete.";
             } catch (Exception $e) {
                 $mysqli->rollback();
