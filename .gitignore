@@ -6,3 +6,4 @@ config.php
 tests/config.php
 phpcbf.phar
 phpcs.phar
+phpunit*phar
