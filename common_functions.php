@@ -64,19 +64,3 @@ function Build_Operator_Training_pulldown(string $selectName = 'selname', ?int $
     echo '</select>';
     $result->close();
 }
-
-/**
- * Validates that a redirect URL is a safe relative path on this site.
- *
- * @param string|null $url The URL to validate.
- *
- * @return boolean True if the URL is safe to redirect to, false otherwise.
- */
-function isSafeRedirect(?string $url): bool
-{
-    if ($url === null || $url === '') {
-        return false;
-    }
-
-    return (bool) preg_match('/^[a-zA-Z0-9_\-][a-zA-Z0-9_\-\/\.]*(?:\?[^#]*)?$/', $url);
-}
